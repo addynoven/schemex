@@ -61,3 +61,31 @@ class ChatSessionResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     messages: list[ChatMessageResponse] = Field(default_factory=list)
+
+
+class SyncSessionItem(BaseModel):
+    session_uid: str
+    title: str = "New Welfare Conversation"
+    language_code: str = "en"
+    created_at: str | None = None
+
+
+class SyncMessageItem(BaseModel):
+    session_uid: str
+    message_uid: str
+    sender: str
+    content: str
+    citations: list[str] = Field(default_factory=list)
+    created_at: str | None = None
+
+
+class ChatSyncRequest(BaseModel):
+    sessions: list[SyncSessionItem] = Field(default_factory=list)
+    messages: list[SyncMessageItem] = Field(default_factory=list)
+
+
+class ChatSyncResponse(BaseModel):
+    synced_session_uids: list[str] = Field(default_factory=list)
+    synced_message_uids: list[str] = Field(default_factory=list)
+    cloud_sessions: list[ChatSessionResponse] = Field(default_factory=list)
+

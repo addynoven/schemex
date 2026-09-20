@@ -11,12 +11,15 @@ from app.modules.chat.schemas import (
     ChatSessionCreate,
     ChatSessionUpdate,
     ChatSessionResponse,
+    ChatSyncRequest,
+    ChatSyncResponse,
 )
 from app.modules.chat.service import (
     check_rate_limit,
     create_chat_session,
     get_chat_session,
     list_chat_sessions,
+    sync_chat_history,
     update_chat_session_title,
     delete_chat_session,
     send_chat_message,
@@ -24,6 +27,16 @@ from app.modules.chat.service import (
 )
 
 router = APIRouter(prefix="/chat", tags=["Conversational Chat Assistant"])
+
+
+@router.post("/sync", response_model=ChatSyncResponse)
+def sync_chat_endpoint(
+    payload: ChatSyncRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Batch synchronizes local-first chat sessions and messages with PostgreSQL."""
+    return sync_chat_history(db=db, user_id=current_user.id, payload=payload)
 
 
 @router.post("/sessions", response_model=ChatSessionResponse, status_code=status.HTTP_201_CREATED)

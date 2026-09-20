@@ -4,8 +4,6 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,13 +11,10 @@ import { useRouter } from 'expo-router';
 import { useAuthStore } from '../store/useAuthStore';
 import { AuthHeroArtwork } from '../components/AuthHeroArtwork';
 import { AuthModeToggle } from '../components/AuthModeToggle';
-import { PhoneLoginView } from '../components/PhoneLoginView';
-import { OtpChannelSelector } from '../components/OtpChannelSelector';
-import { OtpPinInput } from '../components/OtpPinInput';
-import { LoginSuccessView } from '../components/LoginSuccessView';
+import { EmailLoginView } from '../components/EmailLoginView';
 import { SignUpView } from '../components/SignUpView';
-import { CompleteProfileView } from '../components/CompleteProfileView';
-import { AuthErrorBanner, AuthErrorType } from '../components/AuthErrorBanner';
+import { CheckEmailLinkView } from '../components/CheckEmailLinkView';
+import { LoginSuccessView } from '../components/LoginSuccessView';
 import { NetworkFailureModal } from '../components/NetworkFailureModal';
 import { ForgotPasswordModal } from '../components/ForgotPasswordModal';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
@@ -36,31 +31,24 @@ export const AuthScreen: React.FC = () => {
     setAuthMode,
     stage,
     setStage,
-    phoneNumber,
-    countryCode,
-    selectedChannel,
-    otpDigits,
-    fullName,
     email,
-    state,
-    countdown,
-    setPhoneNumber,
-    setSelectedChannel,
-    setOtpDigit,
-    setFullName,
+    password,
+    fullName,
     setEmail,
-    setStateLocation,
-    verifyOtp,
-    completeProfileAndLogin,
-    loginSuccessNow,
+    setPassword,
+    setFullName,
+    loginWithEmail,
+    registerWithEmail,
+    checkEmailVerification,
+    resendVerificationEmail,
     loginWithGoogle,
     isLoading,
+    errorMessage,
+    setErrorMessage,
   } = useAuthStore();
 
-  const [activeError, setActiveError] = React.useState<AuthErrorType | null>(null);
   const [showNetworkModal, setShowNetworkModal] = React.useState<boolean>(false);
   const [showForgotModal, setShowForgotModal] = React.useState<boolean>(false);
-  const [remainingAttempts, setRemainingAttempts] = React.useState<number>(2);
 
   React.useEffect(() => {
     try {
@@ -80,8 +68,6 @@ export const AuthScreen: React.FC = () => {
   const handleGoogleSignIn = async () => {
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      // Always sign out of cached account first so Google Play Services displays
-      // the native account picker dialog every single time
       try {
         await GoogleSignin.signOut();
       } catch {}
@@ -99,8 +85,6 @@ export const AuthScreen: React.FC = () => {
         );
         if (ok) {
           router.replace('/(tabs)');
-        } else {
-          setActiveError('generic_error');
         }
       }
     } catch (error: any) {
@@ -108,27 +92,32 @@ export const AuthScreen: React.FC = () => {
         return;
       }
       console.warn('Google Sign-In error:', error?.code || error);
-      setActiveError('generic_error');
+      setErrorMessage('Google Sign-In was cancelled or unavailable.');
     }
+  };
+
+  const handleLogin = async () => {
+    const ok = await loginWithEmail();
+    if (ok) {
+      router.replace('/(tabs)');
+    }
+  };
+
+  const handleSignUp = async () => {
+    await registerWithEmail();
+  };
+
+  const handleCheckVerification = async () => {
+    const verified = await checkEmailVerification();
+    if (verified) {
+      router.replace('/(tabs)');
+      return true;
+    }
+    return false;
   };
 
   const handleGoToAdvisor = () => {
     router.replace('/(tabs)');
-  };
-
-  const handleVerifyOtp = async () => {
-    if (activeError === 'wrong_otp') {
-      if (remainingAttempts > 1) {
-        setRemainingAttempts(remainingAttempts - 1);
-      } else {
-        setActiveError('too_many_attempts');
-      }
-      return;
-    }
-    const success = await verifyOtp();
-    if (!success && !activeError) {
-      setActiveError('wrong_otp');
-    }
   };
 
   return (
@@ -142,117 +131,77 @@ export const AuthScreen: React.FC = () => {
       >
         {stage === 'success' ? (
           <LoginSuccessView onGoToAdvisor={handleGoToAdvisor} />
+        ) : stage === 'check_email_link' ? (
+          <View style={styles.card}>
+            <CheckEmailLinkView
+              email={email}
+              onCheckVerification={handleCheckVerification}
+              onResendLink={resendVerificationEmail}
+              onBackToLogin={() => {
+                setAuthMode('login');
+                setStage('login');
+              }}
+            />
+          </View>
         ) : (
           <View style={styles.card}>
-            {/* Top Artwork shown on options / phone input / signup */}
-            {stage === 'options' || stage === 'phone_input' || stage === 'signup_phone' ? (
-              <AuthHeroArtwork />
-            ) : null}
+            {/* Top Artwork shown on login and signup entry */}
+            <AuthHeroArtwork />
 
-            {/* Toggle shown on main entry screens */}
-            {stage === 'options' || stage === 'phone_input' || stage === 'signup_phone' ? (
-              <AuthModeToggle
-                mode={authMode}
-                onSelectMode={(mode) => {
-                  setAuthMode(mode);
-                  setStage(mode === 'login' ? 'options' : 'signup_phone');
-                  setActiveError(null);
-                }}
-              />
-            ) : null}
+            {/* Mode Toggle: Log In / Sign Up */}
+            <AuthModeToggle
+              mode={authMode}
+              onSelectMode={(mode) => {
+                setAuthMode(mode);
+                setErrorMessage(null);
+              }}
+            />
 
-            {/* Subviews */}
-            {authMode === 'login' && (stage === 'options' || stage === 'phone_input') ? (
-              <PhoneLoginView
-                phoneNumber={phoneNumber}
-                countryCode={countryCode}
-                error={activeError}
-                onChangePhone={(val) => {
-                  setPhoneNumber(val);
-                  if (activeError === 'invalid_phone' && val.length === 10) {
-                    setActiveError(null);
-                  }
-                }}
-                onSendOtp={() => {
-                  if (activeError === 'invalid_phone') return;
-                  setStage('channel_select');
-                }}
+            {/* Email Login View */}
+            {authMode === 'login' && (
+              <EmailLoginView
+                email={email}
+                password={password}
+                isLoading={isLoading}
+                errorMessage={errorMessage}
+                onChangeEmail={setEmail}
+                onChangePassword={setPassword}
+                onLogin={handleLogin}
                 onSelectGoogle={handleGoogleSignIn}
-                onSelectEmail={() => setStage('channel_select')}
                 onSwitchToSignUp={() => {
                   setAuthMode('signup');
-                  setStage('signup_phone');
-                  setActiveError(null);
+                  setStage('signup');
+                  setErrorMessage(null);
                 }}
                 onForgotPassword={() => setShowForgotModal(true)}
               />
-            ) : null}
+            )}
 
-            {stage === 'channel_select' ? (
-              <OtpChannelSelector
-                selectedChannel={selectedChannel}
-                onSelectChannel={setSelectedChannel}
-                onConfirmChannel={() => setStage('enter_otp')}
-                onBack={() => setStage('options')}
-              />
-            ) : null}
-
-            {stage === 'enter_otp' ? (
-              <OtpPinInput
-                digits={otpDigits}
-                phoneNumber={phoneNumber}
-                channel={selectedChannel}
-                countdown={activeError === 'otp_expired' ? 0 : countdown}
-                error={activeError}
-                attemptsRemaining={remainingAttempts}
-                onChangeDigit={setOtpDigit}
-                onVerify={handleVerifyOtp}
-                onBack={() => {
-                  setStage('channel_select');
-                  setActiveError(null);
-                }}
-                onTrySms={() => setSelectedChannel('sms')}
-                onResendOtp={() => {
-                  setActiveError(null);
-                  setRemainingAttempts(2);
-                }}
-              />
-            ) : null}
-
-            {authMode === 'signup' && stage === 'signup_phone' ? (
+            {/* Email Sign Up View */}
+            {authMode === 'signup' && (
               <SignUpView
                 fullName={fullName}
-                phoneNumber={phoneNumber}
-                countryCode={countryCode}
-                error={activeError}
+                email={email}
+                password={password}
+                isLoading={isLoading}
+                errorMessage={errorMessage}
                 onChangeName={setFullName}
-                onChangePhone={setPhoneNumber}
-                onSendOtp={() => {
-                  if (activeError === 'duplicate_account') return;
-                  setStage('channel_select');
-                }}
+                onChangeEmail={setEmail}
+                onChangePassword={setPassword}
+                onSignUp={handleSignUp}
+                onSelectGoogle={handleGoogleSignIn}
                 onLoginInstead={() => {
                   setAuthMode('login');
-                  setStage('phone_input');
-                  setActiveError(null);
+                  setStage('login');
+                  setErrorMessage(null);
                 }}
               />
-            ) : null}
-
-            {stage === 'complete_profile' ? (
-              <CompleteProfileView
-                email={email}
-                state={state}
-                onChangeEmail={setEmail}
-                onChangeState={setStateLocation}
-                onComplete={completeProfileAndLogin}
-              />
-            ) : null}
+            )}
           </View>
         )}
       </ScrollView>
 
-      {/* Modals for Network Failure and Forgot Password */}
+      {/* Network Failure Modal */}
       <NetworkFailureModal
         visible={showNetworkModal}
         onClose={() => setShowNetworkModal(false)}
@@ -263,13 +212,14 @@ export const AuthScreen: React.FC = () => {
         }}
       />
 
+      {/* Forgot Password Modal */}
       <ForgotPasswordModal
         visible={showForgotModal}
         onClose={() => setShowForgotModal(false)}
         onSuccess={() => {
           setShowForgotModal(false);
           setAuthMode('login');
-          setStage('phone_input');
+          setStage('login');
         }}
       />
     </KeyboardAvoidingView>

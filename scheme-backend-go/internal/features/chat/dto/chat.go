@@ -47,3 +47,30 @@ type ChatSessionResponse struct {
 	UpdatedAt    time.Time             `json:"updated_at"`
 	Messages     []ChatMessageResponse `json:"messages"`
 }
+
+type SyncSessionItem struct {
+	SessionUID   string `json:"session_uid"`
+	Title        string `json:"title"`
+	LanguageCode string `json:"language_code"`
+	CreatedAt    string `json:"created_at"`
+}
+
+type SyncMessageItem struct {
+	SessionUID string   `json:"session_uid"`
+	MessageUID string   `json:"message_uid"`
+	Sender     string   `json:"sender"`
+	Content    string   `json:"content"`
+	Citations  []string `json:"citations"`
+	CreatedAt  string   `json:"created_at"`
+}
+
+type ChatSyncRequest struct {
+	Sessions []SyncSessionItem `json:"sessions"`
+	Messages []SyncMessageItem `json:"messages"`
+}
+
+type ChatSyncResponse struct {
+	SyncedSessionUIDs []string              `json:"synced_session_uids"`
+	SyncedMessageUIDs []string              `json:"synced_message_uids"`
+	CloudSessions     []ChatSessionResponse `json:"cloud_sessions"`
+}

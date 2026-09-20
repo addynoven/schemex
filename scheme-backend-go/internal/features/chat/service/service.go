@@ -27,6 +27,7 @@ type ChatService interface {
 	UpdateSessionTitle(ctx context.Context, sessionID int32, userID int32, title string) (*dto.ChatSessionResponse, error)
 	DeleteSession(ctx context.Context, sessionID int32, userID int32) error
 	SendMessage(ctx context.Context, sessionID int32, userID int32, content string, lang string) (*dto.ChatMessageResponse, error)
+	Sync(ctx context.Context, userID int32, req dto.ChatSyncRequest) (*dto.ChatSyncResponse, error)
 }
 
 type chatService struct {
@@ -385,4 +386,69 @@ Provide a punchy, easy-to-skim summary under 3 lines. Do NOT print a numbered li
 	}
 
 	return strings.TrimSpace(res.Candidates[0].Content.Parts[0].Text), nil
+}
+
+func (s *chatService) Sync(ctx context.Context, userID int32, req dto.ChatSyncRequest) (*dto.ChatSyncResponse, error) {
+	syncedSessionUIDs := make([]string, 0, len(req.Sessions))
+	syncedMessageUIDs := make([]string, 0, len(req.Messages))
+	sessionIDMap := make(map[string]int32)
+
+	// 1. Upsert sessions
+	for _, sess := range req.Sessions {
+		t, err := time.Parse(time.RFC3339, sess.CreatedAt)
+		if err != nil {
+			t = time.Now()
+		}
+		title := sess.Title
+		if title == "" {
+			title = "New Welfare Conversation"
+		}
+		lang := sess.LanguageCode
+		if lang == "" {
+			lang = "en"
+		}
+
+		id, err := s.repo.UpsertSession(ctx, sess.SessionUID, userID, title, lang, t)
+		if err == nil {
+			syncedSessionUIDs = append(syncedSessionUIDs, sess.SessionUID)
+			sessionIDMap[sess.SessionUID] = id
+		}
+	}
+
+	// 2. Insert messages
+	for _, msg := range req.Messages {
+		sessID, exists := sessionIDMap[msg.SessionUID]
+		if !exists {
+			dbSess, err := s.repo.GetChatSessionByUID(ctx, msg.SessionUID)
+			if err == nil && dbSess.UserID == userID {
+				sessID = dbSess.ID
+				sessionIDMap[msg.SessionUID] = sessID
+			} else {
+				continue
+			}
+		}
+
+		t, err := time.Parse(time.RFC3339, msg.CreatedAt)
+		if err != nil {
+			t = time.Now()
+		}
+
+		citationsJSON, _ := json.Marshal(msg.Citations)
+		err = s.repo.InsertMessage(ctx, sessID, msg.Sender, msg.Content, citationsJSON, t)
+		if err == nil {
+			syncedMessageUIDs = append(syncedMessageUIDs, msg.MessageUID)
+		}
+	}
+
+	// 3. Return full list of cloud sessions for this user
+	cloudSessions, err := s.ListSessions(ctx, userID)
+	if err != nil {
+		cloudSessions = []dto.ChatSessionResponse{}
+	}
+
+	return &dto.ChatSyncResponse{
+		SyncedSessionUIDs: syncedSessionUIDs,
+		SyncedMessageUIDs: syncedMessageUIDs,
+		CloudSessions:     cloudSessions,
+	}, nil
 }

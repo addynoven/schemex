@@ -68,6 +68,16 @@ func (m *MockChatRepo) ListChatMessagesBySessionID(ctx context.Context, sessionI
 	return args.Get(0).([]sqlc.ChatMessage), args.Error(1)
 }
 
+func (m *MockChatRepo) UpsertSession(ctx context.Context, sessionUID string, userID int32, title string, lang string, createdAt time.Time) (int32, error) {
+	args := m.Called(ctx, sessionUID, userID, title, lang, createdAt)
+	return args.Get(0).(int32), args.Error(1)
+}
+
+func (m *MockChatRepo) InsertMessage(ctx context.Context, sessionID int32, sender string, content string, citations []byte, createdAt time.Time) error {
+	args := m.Called(ctx, sessionID, sender, content, citations, createdAt)
+	return args.Error(0)
+}
+
 type MockSchemesRepo struct {
 	schemesRepo.SchemesRepository
 	mock.Mock

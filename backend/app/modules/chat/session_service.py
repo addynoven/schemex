@@ -139,3 +139,66 @@ def delete_chat_session(
     session = get_chat_session(db, session_id, user_id)
     db.delete(session)
     db.commit()
+
+
+def sync_chat_history(
+    db: Session,
+    user_id: int,
+    payload: Any,
+) -> dict:
+    from app.modules.chat.models import ChatMessage
+
+    synced_session_uids = []
+    synced_message_uids = []
+    session_map = {}
+
+    for sess in payload.sessions:
+        existing = db.scalar(
+            select(ChatSession).where(ChatSession.session_uid == sess.session_uid)
+        )
+        if not existing:
+            new_sess = ChatSession(
+                session_uid=sess.session_uid,
+                user_id=user_id,
+                title=sess.title or "New Welfare Conversation",
+                language_code=sess.language_code or "en",
+            )
+            db.add(new_sess)
+            db.flush()
+            session_map[sess.session_uid] = new_sess.id
+        else:
+            session_map[sess.session_uid] = existing.id
+        synced_session_uids.append(sess.session_uid)
+
+    for msg in payload.messages:
+        sess_id = session_map.get(msg.session_uid)
+        if not sess_id:
+            existing_sess = db.scalar(
+                select(ChatSession).where(ChatSession.session_uid == msg.session_uid)
+            )
+            if existing_sess and existing_sess.user_id == user_id:
+                sess_id = existing_sess.id
+                session_map[msg.session_uid] = sess_id
+            else:
+                continue
+
+        chat_msg = ChatMessage(
+            session_id=sess_id,
+            sender=msg.sender,
+            content=msg.content,
+            citations=msg.citations or [],
+        )
+        db.add(chat_msg)
+        synced_message_uids.append(msg.message_uid)
+
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+
+    cloud_sessions = list_chat_sessions(db=db, user_id=user_id)
+    return {
+        "synced_session_uids": synced_session_uids,
+        "synced_message_uids": synced_message_uids,
+        "cloud_sessions": cloud_sessions,
+    }

@@ -74,6 +74,16 @@ func (m *MockSchemesRepo) GetOfficialSourcesBySchemeID(ctx context.Context, sche
 	return args.Get(0).([]sqlc.OfficialSource), args.Error(1)
 }
 
+func (m *MockSchemesRepo) ListAllEligibilityRules(ctx context.Context) ([]sqlc.EligibilityRule, error) {
+	args := m.Called(ctx)
+	return args.Get(0).([]sqlc.EligibilityRule), args.Error(1)
+}
+
+func (m *MockSchemesRepo) ListAllBenefitsSummary(ctx context.Context) ([]sqlc.ListAllBenefitsSummaryRow, error) {
+	args := m.Called(ctx)
+	return args.Get(0).([]sqlc.ListAllBenefitsSummaryRow), args.Error(1)
+}
+
 func (m *MockSchemesRepo) CreateScheme(ctx context.Context, arg sqlc.CreateSchemeParams) (sqlc.Scheme, error) {
 	args := m.Called(ctx, arg)
 	return args.Get(0).(sqlc.Scheme), args.Error(1)

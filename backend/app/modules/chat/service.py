@@ -19,6 +19,7 @@ from app.modules.chat.session_service import (
     delete_chat_session,
     get_chat_session,
     list_chat_sessions,
+    sync_chat_history,
     update_chat_session_title,
 )
 
@@ -28,6 +29,7 @@ __all__ = [
     "create_chat_session",
     "get_chat_session",
     "list_chat_sessions",
+    "sync_chat_history",
     "update_chat_session_title",
     "delete_chat_session",
     "_build_user_context",

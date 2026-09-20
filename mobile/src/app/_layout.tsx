@@ -17,6 +17,8 @@ import { authSessionExpired } from '@/core/events/authEvents';
 import { authStorage } from '@/features/auth';
 import { secureStorage } from '@/core/storage/secureStorage';
 
+import { initializeLocalDatabase } from '@/core/database/local-db';
+
 export const unstable_settings = {
   initialRouteName: 'index',
 };
@@ -30,6 +32,10 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
   const [layoutReady, setLayoutReady] = React.useState(false);
+
+  useEffect(() => {
+    initializeLocalDatabase().catch((e) => console.warn('Local DB init notice:', e));
+  }, []);
 
   useEffect(() => {
     if (error) throw error;

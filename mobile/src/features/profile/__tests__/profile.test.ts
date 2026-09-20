@@ -19,9 +19,9 @@ describe('Profile Module Unit Tests', () => {
 
   it('updates app settings in store', () => {
     const store = useProfileStore.getState();
-    store.updateSettings({ defaultOtpChannel: 'sms', notificationsEnabled: false });
+    store.updateSettings({ authNotificationChannel: 'in_app', notificationsEnabled: false });
 
-    assert.strictEqual(useProfileStore.getState().settings.defaultOtpChannel, 'sms');
+    assert.strictEqual(useProfileStore.getState().settings.authNotificationChannel, 'in_app');
     assert.strictEqual(useProfileStore.getState().settings.notificationsEnabled, false);
   });
 

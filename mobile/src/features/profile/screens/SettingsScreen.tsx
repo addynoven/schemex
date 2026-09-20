@@ -72,27 +72,21 @@ export const SettingsScreen: React.FC = () => {
             />
           </View>
 
-          {/* Default OTP Channel */}
+          {/* Auth Verification Channel */}
           <TouchableOpacity
             style={styles.row}
             onPress={() => {
-              const next =
-                settings.defaultOtpChannel === 'whatsapp'
-                  ? 'sms'
-                  : settings.defaultOtpChannel === 'sms'
-                  ? 'telegram'
-                  : 'whatsapp';
-              updateSettings({ defaultOtpChannel: next });
-              toastService.show(`Default OTP channel set to ${next}`, 'info');
+              const next = settings.authNotificationChannel === 'email' ? 'in_app' : 'email';
+              updateSettings({ authNotificationChannel: next });
+              toastService.show(`Verification channel set to ${next === 'email' ? 'Email' : 'In-App'}`, 'info');
             }}
             activeOpacity={0.7}
           >
             <FontAwesome name="shield" size={18} color="#334155" style={styles.rowIcon} />
             <View style={styles.rowTextCol}>
-              <Text style={styles.rowTitle}>Default OTP Channel</Text>
+              <Text style={styles.rowTitle}>Security & Verification</Text>
               <Text style={styles.rowSubtitle}>
-                {settings.defaultOtpChannel.charAt(0).toUpperCase() +
-                  settings.defaultOtpChannel.slice(1)}
+                {settings.authNotificationChannel === 'email' ? 'Email Magic Link' : 'In-App Token'}
               </Text>
             </View>
             <FontAwesome name="chevron-right" size={12} color="#94A3B8" />

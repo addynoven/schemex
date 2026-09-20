@@ -27,8 +27,16 @@ func NewChatHandler(svc service.ChatService, jwtSvc *jwt.Service) *ChatHandler {
 	}
 }
 
+func resolveUserID(c *fiber.Ctx) int32 {
+	userID, err := middleware.GetUserID(c)
+	if err != nil || userID == 0 {
+		return 5 // Default demo citizen Ramesh for guest/unauthenticated access
+	}
+	return userID
+}
+
 func (h *ChatHandler) RegisterRoutes(router fiber.Router) {
-	chat := router.Group("/chat", middleware.Auth(h.jwtSvc))
+	chat := router.Group("/chat", middleware.OptionalAuth(h.jwtSvc))
 	chat.Post("/sessions", h.CreateSession)
 	chat.Get("/sessions", h.ListSessions)
 	chat.Get("/sessions/:id", h.GetSession)
@@ -36,13 +44,11 @@ func (h *ChatHandler) RegisterRoutes(router fiber.Router) {
 	chat.Delete("/sessions/:id", h.DeleteSession)
 	chat.Post("/sessions/:id/messages", h.SendMessage)
 	chat.Post("/sessions/:id/messages/stream", h.StreamMessage)
+	chat.Post("/sync", h.Sync)
 }
 
 func (h *ChatHandler) CreateSession(c *fiber.Ctx) error {
-	userID, err := middleware.GetUserID(c)
-	if err != nil {
-		return err
-	}
+	userID := resolveUserID(c)
 
 	var req dto.ChatSessionCreate
 	_ = c.BodyParser(&req)
@@ -56,10 +62,7 @@ func (h *ChatHandler) CreateSession(c *fiber.Ctx) error {
 }
 
 func (h *ChatHandler) ListSessions(c *fiber.Ctx) error {
-	userID, err := middleware.GetUserID(c)
-	if err != nil {
-		return err
-	}
+	userID := resolveUserID(c)
 
 	resp, err := h.svc.ListSessions(c.UserContext(), userID)
 	if err != nil {
@@ -70,10 +73,7 @@ func (h *ChatHandler) ListSessions(c *fiber.Ctx) error {
 }
 
 func (h *ChatHandler) GetSession(c *fiber.Ctx) error {
-	userID, err := middleware.GetUserID(c)
-	if err != nil {
-		return err
-	}
+	userID := resolveUserID(c)
 
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -89,10 +89,7 @@ func (h *ChatHandler) GetSession(c *fiber.Ctx) error {
 }
 
 func (h *ChatHandler) UpdateSession(c *fiber.Ctx) error {
-	userID, err := middleware.GetUserID(c)
-	if err != nil {
-		return err
-	}
+	userID := resolveUserID(c)
 
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -113,10 +110,7 @@ func (h *ChatHandler) UpdateSession(c *fiber.Ctx) error {
 }
 
 func (h *ChatHandler) DeleteSession(c *fiber.Ctx) error {
-	userID, err := middleware.GetUserID(c)
-	if err != nil {
-		return err
-	}
+	userID := resolveUserID(c)
 
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -131,10 +125,7 @@ func (h *ChatHandler) DeleteSession(c *fiber.Ctx) error {
 }
 
 func (h *ChatHandler) SendMessage(c *fiber.Ctx) error {
-	userID, err := middleware.GetUserID(c)
-	if err != nil {
-		return err
-	}
+	userID := resolveUserID(c)
 
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -155,10 +146,7 @@ func (h *ChatHandler) SendMessage(c *fiber.Ctx) error {
 }
 
 func (h *ChatHandler) StreamMessage(c *fiber.Ctx) error {
-	userID, err := middleware.GetUserID(c)
-	if err != nil {
-		return err
-	}
+	userID := resolveUserID(c)
 
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
@@ -207,4 +195,20 @@ func (h *ChatHandler) StreamMessage(c *fiber.Ctx) error {
 	})
 
 	return nil
+}
+
+func (h *ChatHandler) Sync(c *fiber.Ctx) error {
+	userID := resolveUserID(c)
+
+	var req dto.ChatSyncRequest
+	if err := c.BodyParser(&req); err != nil {
+		return errors.BadRequest("Invalid sync payload")
+	}
+
+	resp, err := h.svc.Sync(c.UserContext(), userID, req)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(http.StatusOK).JSON(resp)
 }

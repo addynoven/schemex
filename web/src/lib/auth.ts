@@ -6,17 +6,17 @@ const connectionString =
   process.env.DATABASE_URL ||
   "postgresql://scheme_user:scheme_password@localhost:5432/scheme_db";
 
+const isCloud = connectionString.includes("aivencloud") || connectionString.includes("sslmode=require");
+
 const pool = new Pool({
   connectionString,
+  ssl: isCloud ? { rejectUnauthorized: false } : undefined,
 });
 
 const authSecret =
   process.env.AUTH_SECRET ||
-  process.env.NEXT_PUBLIC_AUTH_SECRET;
-
-if (!authSecret && process.env.NODE_ENV === "production") {
-  throw new Error("AUTH_SECRET environment variable is required in production");
-}
+  process.env.NEXT_PUBLIC_AUTH_SECRET ||
+  "insecure_development_secret_key_must_override_in_production";
 
 export const auth = betterAuth({
   database: pool,

@@ -11,6 +11,6 @@ export type LinkedAccount = z.infer<typeof LinkedAccountSchema>;
 export const AppSettingsSchema = z.object({
   language: z.enum(['en', 'hi']).default('en'),
   notificationsEnabled: z.boolean().default(true),
-  defaultOtpChannel: z.enum(['whatsapp', 'sms', 'telegram']).default('whatsapp'),
+  authNotificationChannel: z.enum(['email', 'in_app']).default('email'),
 });
 export type AppSettings = z.infer<typeof AppSettingsSchema>;

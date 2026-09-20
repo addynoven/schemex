@@ -8,6 +8,7 @@ import type {
   ThinkingStep,
 } from '../models/advisor.model';
 import { advisorRepository } from '../repositories/advisor.repository';
+import { chatSyncService } from '../services/chat-sync.service';
 
 export const INITIAL_THINKING_STEPS: readonly ThinkingStep[] = [
   { id: '1', title: 'Understanding your query', status: 'pending' },
@@ -264,3 +265,7 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => ({
     });
   },
 }));
+
+chatSyncService.onSyncComplete(() => {
+  void useAdvisorStore.getState().loadSessions();
+});

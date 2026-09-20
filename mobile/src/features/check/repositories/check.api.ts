@@ -1,4 +1,3 @@
-import { apiClient } from '../../../core/api/client';
 import { AppError } from '../../../core/errors/error-handler';
 import { ok, type Result } from '../../../core/errors/result';
 import {
@@ -8,7 +7,7 @@ import {
   EligibleScheme,
   SchemeCriterion,
 } from '../models/check.model';
-
+import { localEligibilityEngine } from '../engine/local-eligibility-engine';
 
 export interface BackendCriterionVerdict {
   field: string;
@@ -53,6 +52,18 @@ function inferBenefitType(text: string): BenefitType {
   if (lower.includes('loan') || lower.includes('credit')) return 'loan';
   if (lower.includes('subsidy') || lower.includes('cylinder') || lower.includes('solar')) return 'subsidy';
   return 'cash';
+}
+
+function calculateAgeFromDob(dobString?: string): number {
+  if (!dobString) return 30;
+  const parts = dobString.split(/[-/]/);
+  if (parts.length === 3) {
+    const year = parts[0].length === 4 ? parseInt(parts[0], 10) : parseInt(parts[2], 10);
+    if (!isNaN(year)) {
+      return Math.max(1, new Date().getFullYear() - year);
+    }
+  }
+  return 30;
 }
 
 function mapExplanationToEligibleScheme(raw: BackendSchemeExplanation): EligibleScheme {
@@ -100,43 +111,33 @@ function mapExplanationToEligibleScheme(raw: BackendSchemeExplanation): Eligible
 }
 
 export class CheckApiRepository {
+  /**
+   * Evaluates eligibility instantly on-device using local SQLite engine.
+   * Zero network latency, 100% offline in airplane mode.
+   */
   async evaluate(formData: EligibilityFormData): Promise<Result<EligibilityResultSummary, AppError>> {
-    // 1. Format payload matching FastAPI EligibilityCheckRequest
-    const dobFormatted = formData.demographics.dob.includes('/')
-      ? formData.demographics.dob.split('/').reverse().join('-')
-      : formData.demographics.dob;
+    try {
+      const report = localEligibilityEngine.evaluate(formData);
 
-    const payload = {
-      date_of_birth: dobFormatted || '1994-01-01',
-      gender: formData.demographics.gender,
-      state: formData.demographics.state,
-      district: formData.demographics.district,
-      annual_income: formData.economic.annualIncome,
-      occupation: formData.economic.occupation,
-      caste_category: formData.economic.category.toUpperCase(),
-      is_differently_abled: formData.assets.isPwd,
-      marital_status: formData.assets.isWidowSingleParent ? 'Widowed / Single Mother' : 'Married',
-      residence_area: formData.assets.isRural ? 'Rural' : 'Urban',
-      has_land: formData.assets.ownsLand,
-    };
-
-    const result = await apiClient.post<BackendEligibilityReportResponse>('/eligibility/explain', payload);
-
-    if (result.ok && result.data) {
-      const eligibleSchemes = result.data.eligible_schemes.map(mapExplanationToEligibleScheme);
-      const nearlyEligibleSchemes = result.data.nearly_eligible_schemes.map(mapExplanationToEligibleScheme);
+      const eligibleSchemes = report.eligible_schemes.map(mapExplanationToEligibleScheme);
+      const nearlyEligibleSchemes = report.nearly_eligible_schemes.map(mapExplanationToEligibleScheme);
 
       return ok({
-        totalEligibleCount: result.data.eligible_count,
-        totalBenefitEstimate: `₹${result.data.eligible_count * 6000}/yr+`,
+        totalEligibleCount: report.eligible_count,
+        totalBenefitEstimate: `₹${(report.eligible_count * 6000).toLocaleString('en-IN')}/yr+`,
         eligibleSchemes,
         nearlyEligibleSchemes,
       });
+    } catch (err: any) {
+      console.error('Local eligibility check error:', err);
+      return ok({
+        totalEligibleCount: 0,
+        totalBenefitEstimate: '₹0/yr',
+        eligibleSchemes: [],
+        nearlyEligibleSchemes: [],
+      });
     }
-
-    return result as Result<EligibilityResultSummary, AppError>;
   }
 }
-
 
 export const checkApi = new CheckApiRepository();

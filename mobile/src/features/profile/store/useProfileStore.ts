@@ -48,7 +48,7 @@ export const useProfileStore = create<ProfileStoreState>((set, get) => ({
   settings: {
     language: 'en',
     notificationsEnabled: true,
-    defaultOtpChannel: 'whatsapp',
+    authNotificationChannel: 'email',
   },
   isMenuVisible: false,
   isLogoutConfirmVisible: false,

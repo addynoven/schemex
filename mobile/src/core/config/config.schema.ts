@@ -9,6 +9,8 @@ export const configSchema = z.object({
   environment: z.enum(['development', 'staging', 'production']).default('development'),
   requestTimeoutMs: z.number().int().positive().default(10000),
   cloudinaryCloudName: z.string().default('dzao8h1ay'),
+  cloudinaryApiKey: z.string().default('818269883432412'),
+  cloudinaryApiSecret: z.string().default('TWQzFg_c4N28mPs3g07qlC29HT8'),
   firebase: z.object({
     projectId: z.string().default('scheme-assistant-app'),
     appId: z.string().default('1:520495266533:web:6dcd8c18d810f24fdcb20c'),

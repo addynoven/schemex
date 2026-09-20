@@ -72,6 +72,7 @@ export class AuthApiRepository {
             is_verified: isVerified,
             citizen_uid: citizenUid,
             hashed_password: '',
+            auth_provider: params.authProvider,
           }),
         });
 
@@ -193,6 +194,15 @@ export class AuthApiRepository {
     } catch (e: any) {
       const code = e?.code || '';
       if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+        const provider = await this.checkUserAuthProvider(email);
+        if (provider === 'google') {
+          return err(
+            new AppError("You previously signed up with Google. Please tap 'Continue with Google' to sign in.", {
+              code: 'GOOGLE_AUTH_REQUIRED',
+              statusCode: 400,
+            })
+          );
+        }
         return err(new AppError('Invalid email or password', { code: 'INVALID_CREDENTIALS', statusCode: 401 }));
       }
       if (code === 'auth/invalid-email') {
@@ -208,6 +218,25 @@ export class AuthApiRepository {
       await secureStorage.set('auth_token', 'local_token_' + Date.now());
       return ok(userProfile);
     }
+  }
+
+  /**
+   * Checks the cloud database to see if this email is linked to Google sign-in.
+   */
+  async checkUserAuthProvider(email: string): Promise<string | null> {
+    try {
+      const baseUrl = config.apiUrl.replace(/\/+$/, '');
+      const res = await fetch(`${baseUrl}/users?email=eq.${encodeURIComponent(email.trim().toLowerCase())}`);
+      if (res.ok) {
+        const rows = await res.json();
+        if (rows && rows[0]?.auth_provider) {
+          return rows[0].auth_provider;
+        }
+      }
+    } catch {
+      // offline ignore
+    }
+    return null;
   }
 
   /**
@@ -248,7 +277,16 @@ export class AuthApiRepository {
     } catch (e: any) {
       const code = e?.code || '';
       if (code === 'auth/email-already-in-use') {
-        return err(new AppError('Account already exists with this email', { code: 'ACCOUNT_EXISTS', statusCode: 409 }));
+        const provider = await this.checkUserAuthProvider(email);
+        if (provider === 'google') {
+          return err(
+            new AppError(
+              "An account with this email already exists via Google. Please tap 'Continue with Google' to sign in.",
+              { code: 'ACCOUNT_EXISTS_GOOGLE', statusCode: 409 }
+            )
+          );
+        }
+        return err(new AppError('Account already exists with this email. Please log in.', { code: 'ACCOUNT_EXISTS', statusCode: 409 }));
       }
       if (code === 'auth/weak-password') {
         return err(new AppError('Password should be at least 6 characters', { code: 'WEAK_PASSWORD', statusCode: 400 }));

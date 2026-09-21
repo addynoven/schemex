@@ -6,6 +6,8 @@ import { useOnboardingStore } from '../store/useOnboardingStore';
 import { SplashScreenView } from '../components/SplashScreenView';
 import { LanguageSelectionView } from '../components/LanguageSelectionView';
 import { type LanguageCode } from '../models/onboarding.model';
+import { authStorage } from '@/features/auth/storage/auth.storage';
+import { useProfileStore } from '@/features/profile/store/useProfileStore';
 
 export const OnboardingScreen: React.FC = () => {
   const router = useRouter();
@@ -33,7 +35,17 @@ export const OnboardingScreen: React.FC = () => {
 
   const handleConfirmLanguage = (lang: LanguageCode) => {
     confirmAndComplete(lang, () => {
-      router.replace('/auth');
+      useProfileStore.getState().updateSettings({ language: lang });
+      const currentUser = authStorage.getCurrentUser();
+      if (currentUser) {
+        if (router.canGoBack()) {
+          router.back();
+        } else {
+          router.replace('/(tabs)');
+        }
+      } else {
+        router.replace('/auth');
+      }
     });
   };
 

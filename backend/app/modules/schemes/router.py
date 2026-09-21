@@ -238,6 +238,113 @@ def get_categories_endpoint(
 
 
 @router.get(
+    "/version",
+    summary="Get schemes catalog watermark version",
+    description="Returns aggregate watermark timestamp, version epoch, and total scheme count for cache invalidation.",
+)
+def get_schemes_version_endpoint(db: Session = Depends(get_db)):
+    from sqlalchemy import text
+    sql = text("""
+        SELECT 
+            COUNT(*)::text AS total_schemes,
+            COALESCE(MAX(updated_at), MAX(created_at), NOW())::text AS last_updated_at,
+            EXTRACT(EPOCH FROM COALESCE(MAX(updated_at), MAX(created_at), NOW()))::BIGINT AS version
+        FROM schemes;
+    """)
+    row = db.execute(sql).mappings().one()
+    return {
+        "version": int(row["version"] or 0),
+        "last_updated_at": str(row["last_updated_at"]),
+        "total_schemes": int(row["total_schemes"] or 0),
+    }
+
+
+@router.get(
+    "/sync",
+    summary="Delta sync schemes modified since watermark",
+    description="Returns schemes updated or created after the given watermark for offline SQLite upsert.",
+)
+def sync_schemes_endpoint(
+    since: int = Query(0, description="Epoch timestamp in seconds"),
+    limit: int = Query(200, ge=1, le=500, description="Max schemes to return in one delta batch"),
+    db: Session = Depends(get_db),
+):
+    from datetime import datetime, timezone
+    from sqlalchemy import text
+    import re
+
+    since_dt = datetime.fromtimestamp(since, tz=timezone.utc)
+    sql = text("""
+        SELECT 
+            s.id,
+            s.slug,
+            s.name AS title,
+            s.ministry,
+            s.state,
+            s.category,
+            CASE WHEN s.state = 'ALL_INDIA' THEN 1 ELSE 0 END AS is_central,
+            COALESCE(
+                (SELECT b.title || ': ' || b.description FROM benefits b WHERE b.scheme_id = s.id LIMIT 1),
+                s.description
+            ) AS benefit_summary,
+            (SELECT b.title FROM benefits b WHERE b.scheme_id = s.id LIMIT 1) AS benefit_title,
+            (SELECT b.description FROM benefits b WHERE b.scheme_id = s.id LIMIT 1) AS benefit_desc,
+            s.tags,
+            COALESCE((SELECT COUNT(*) FROM eligibility_rules r WHERE r.scheme_id = s.id), 0)::int AS rules_count,
+            COALESCE((SELECT COUNT(*) FROM required_documents d WHERE d.scheme_id = s.id), 0)::int AS docs_count,
+            s.application_url,
+            s.description,
+            COALESCE(s.updated_at, s.created_at)::text AS last_verified_at,
+            EXTRACT(EPOCH FROM COALESCE(s.updated_at, s.created_at))::BIGINT AS updated_epoch
+        FROM schemes s
+        WHERE (s.updated_at > :since OR s.created_at > :since)
+        ORDER BY COALESCE(s.updated_at, s.created_at) ASC
+        LIMIT :limit;
+    """)
+
+    rows = db.execute(sql, {"since": since_dt, "limit": limit}).mappings().all()
+
+    def derive_benefit_type(title, desc, tags):
+        text_str = f"{title or ''} {desc or ''} {tags or ''}".lower()
+        if re.search(r"\b(loan|loans|micro-credit|mudra|interest subvention|working capital|credit guarantee|overdraft|collateral-free|lending|borrower)\b", text_str):
+            return "loan"
+        if re.search(r"\b(subsidy|subsidized|toolkit|tablet|laptop|solar pump|e-vehicle|tractor|housing|pucca house|construction|lpg|machinery|equipment|concession|rebate|food)\b", text_str):
+            return "subsidy"
+        return "cash_grant"
+
+    schemes = []
+    max_epoch = since
+    for r in rows:
+        b_type = derive_benefit_type(r["benefit_title"], r["benefit_desc"], r["tags"])
+        epoch = int(r["updated_epoch"] or 0)
+        if epoch > max_epoch:
+            max_epoch = epoch
+        schemes.append({
+            "id": int(r["id"]),
+            "slug": r["slug"],
+            "title": r["title"],
+            "ministry": r["ministry"] or "Government of India",
+            "state": r["state"],
+            "category": r["category"] or "General",
+            "is_central": int(r["is_central"] or 0),
+            "benefit_summary": r["benefit_summary"] or "",
+            "benefit_type": b_type,
+            "rules_count": int(r["rules_count"] or 0),
+            "docs_count": int(r["docs_count"] or 0),
+            "application_url": r["application_url"],
+            "description": r["description"] or "",
+            "last_verified_at": str(r["last_verified_at"]),
+        })
+
+    return {
+        "schemes": schemes,
+        "count": len(schemes),
+        "synced_version": max_epoch,
+        "has_more": len(schemes) == limit,
+    }
+
+
+@router.get(
     "/slug/{slug}",
     response_model=SchemeDetailResponse,
     summary="Get scheme by unique slug",

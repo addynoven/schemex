@@ -82,8 +82,16 @@ export function getLocalDatabase(): LocalDatabase {
   }
 }
 
+export const LOCAL_DB_VERSION = 2;
+const STORAGE_KEY_DB_VERSION = 'app_local_sqlite_db_version';
+
 export async function initializeLocalDatabase(): Promise<void> {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { mmkvStorage } = require('../storage/mmkv');
+    const installedVersion = Number(mmkvStorage.getString(STORAGE_KEY_DB_VERSION) || '0');
+    const needsUpgrade = installedVersion < LOCAL_DB_VERSION;
+
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     let FileSystem: any = null;
     try {
@@ -104,12 +112,16 @@ export async function initializeLocalDatabase(): Promise<void> {
         sqliteDir.create();
       }
       const targetDb = new FileSystem.File(sqliteDir, 'schemes.db');
-      if (!targetDb.exists) {
+      if (!targetDb.exists || needsUpgrade) {
         const asset = Asset.fromModule(require('../../../assets/db/schemes.db'));
         await asset.downloadAsync();
         const srcPath = asset.localUri || asset.uri;
         const srcFile = new FileSystem.File(srcPath);
+        if (targetDb.exists) {
+          targetDb.delete();
+        }
         srcFile.copy(targetDb);
+        mmkvStorage.set(STORAGE_KEY_DB_VERSION, String(LOCAL_DB_VERSION));
       }
     } else if (FileSystem.copyAsync && FileSystem.getInfoAsync) {
       const dbDir = `${FileSystem.documentDirectory}SQLite`;
@@ -121,10 +133,16 @@ export async function initializeLocalDatabase(): Promise<void> {
       }
 
       const fileInfo = await FileSystem.getInfoAsync(dbPath);
-      if (!fileInfo.exists) {
+      if (!fileInfo.exists || needsUpgrade) {
         const asset = Asset.fromModule(require('../../../assets/db/schemes.db'));
         await asset.downloadAsync();
+        if (fileInfo.exists && FileSystem.deleteAsync) {
+          try {
+            await FileSystem.deleteAsync(dbPath, { idempotent: true });
+          } catch {}
+        }
         await FileSystem.copyAsync({ from: asset.localUri || asset.uri, to: dbPath });
+        mmkvStorage.set(STORAGE_KEY_DB_VERSION, String(LOCAL_DB_VERSION));
       }
     }
   } catch (e) {

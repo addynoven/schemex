@@ -1,7 +1,7 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { schemeKeys } from '../keys';
 import { PaginatedSchemes, SchemeFilter, SchemeItem } from '../models/schemes.model';
-import { schemesApi } from '../repositories/schemes.api';
+import { schemesApi, CatalogVersionInfo, DeltaSyncResult } from '../repositories/schemes.api';
 import { mmkvStorage } from '../../../core/storage/mmkv';
 
 // MMKV keys for last-synced timestamps
@@ -88,5 +88,45 @@ export function useCategoriesQuery() {
       return result.data;
     },
     staleTime: 24 * 60 * 60 * 1000, // 24 hours — categories barely ever change
+  });
+}
+
+/**
+ * Hook to check cloud catalog version watermark.
+ * Detects if the Cloud Admin has updated schemes.
+ */
+export function useCatalogVersionQuery() {
+  return useQuery<CatalogVersionInfo, Error>({
+    queryKey: ['schemes', 'catalog-version'],
+    queryFn: async () => {
+      const result = await schemesApi.checkCatalogVersion();
+      if (!result.ok) {
+        throw result.error;
+      }
+      return result.data;
+    },
+    staleTime: 60 * 1000, // Check once a minute
+    refetchOnMount: true,
+  });
+}
+
+/**
+ * Mutation hook to execute delta sync from Cloud into local SQLite.
+ */
+export function useDeltaSyncMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<DeltaSyncResult, Error, void>({
+    mutationFn: async () => {
+      const result = await schemesApi.syncDeltaFromCloud();
+      if (!result.ok) {
+        throw result.error;
+      }
+      return result.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: schemeKeys.all });
+      queryClient.invalidateQueries({ queryKey: ['schemes', 'catalog-version'] });
+    },
   });
 }

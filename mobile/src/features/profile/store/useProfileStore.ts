@@ -22,6 +22,7 @@ export interface ProfileStoreState {
 }
 
 import { authStorage } from '@/features/auth/storage/auth.storage';
+import { onboardingStorage } from '@/features/onboarding/storage/onboarding.storage';
 
 export const useProfileStore = create<ProfileStoreState>((set, get) => ({
   linkedAccounts: (() => {
@@ -46,7 +47,7 @@ export const useProfileStore = create<ProfileStoreState>((set, get) => ({
     ];
   })(),
   settings: {
-    language: 'en',
+    language: onboardingStorage.getOnboardingState().selectedLanguage,
     notificationsEnabled: true,
     authNotificationChannel: 'email',
   },
@@ -59,8 +60,12 @@ export const useProfileStore = create<ProfileStoreState>((set, get) => ({
   openLogoutConfirm: () => set({ isLogoutConfirmVisible: true, isMenuVisible: false }),
   closeLogoutConfirm: () => set({ isLogoutConfirmVisible: false }),
 
-  updateSettings: (newSettings) =>
-    set({ settings: { ...get().settings, ...newSettings } }),
+  updateSettings: (newSettings) => {
+    if (newSettings.language) {
+      onboardingStorage.saveOnboardingLanguage(newSettings.language);
+    }
+    set({ settings: { ...get().settings, ...newSettings } });
+  },
 
   verifyEmail: () => {
     const updated = get().linkedAccounts.map((acc) =>

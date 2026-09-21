@@ -54,6 +54,7 @@ export const SchemeReadinessScreen: React.FC<SchemeReadinessScreenProps> = ({ on
   const [schemePickerVisible, setSchemePickerVisible] = useState(false);
   const [schemeSearchQuery, setSchemeSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [pickerCategory, setPickerCategory] = useState<string>('all');
   const [selectedSchemeMeta, setSelectedSchemeMeta] = useState<{
     id: string;
     name: string;
@@ -74,7 +75,10 @@ export const SchemeReadinessScreen: React.FC<SchemeReadinessScreenProps> = ({ on
     hasNextPage,
     fetchNextPage,
   } = useInfiniteSchemesQuery(
-    debouncedQuery ? { query: debouncedQuery } : undefined,
+    {
+      query: debouncedQuery || undefined,
+      category: pickerCategory !== 'all' ? pickerCategory : undefined,
+    },
     50
   );
 
@@ -86,7 +90,7 @@ export const SchemeReadinessScreen: React.FC<SchemeReadinessScreenProps> = ({ on
   const totalCount = infiniteData?.pages?.[0]?.total ?? serverSchemes.length;
 
   const availableSchemes = useMemo(
-    () => serverSchemes.map((s) => ({ id: s.id, name: s.title, ministry: s.ministry })),
+    () => serverSchemes.map((s) => ({ id: s.id, name: s.title, ministry: s.ministry, category: s.category })),
     [serverSchemes]
   );
 
@@ -360,6 +364,47 @@ export const SchemeReadinessScreen: React.FC<SchemeReadinessScreenProps> = ({ on
               )}
             </View>
 
+            {/* Category Filter Chips */}
+            <View style={styles.pickerCategoryWrapper}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.pickerCategoryRow}
+              >
+                {[
+                  { id: 'all', label: 'All' },
+                  { id: 'Healthcare', label: 'Healthcare' },
+                  { id: 'Education', label: 'Education' },
+                  { id: 'Women & Child', label: 'Women & Child' },
+                  { id: 'Business & Finance', label: 'Business & Loans' },
+                  { id: 'Agriculture', label: 'Agriculture' },
+                  { id: 'Social Welfare', label: 'Social Welfare' },
+                ].map((cat) => {
+                  const isActive = pickerCategory === cat.id;
+                  return (
+                    <TouchableOpacity
+                      key={cat.id}
+                      style={[
+                        styles.pickerCategoryChip,
+                        isActive && styles.pickerCategoryChipActive,
+                      ]}
+                      onPress={() => setPickerCategory(cat.id)}
+                      activeOpacity={0.7}
+                    >
+                      <Text
+                        style={[
+                          styles.pickerCategoryText,
+                          isActive && styles.pickerCategoryTextActive,
+                        ]}
+                      >
+                        {cat.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </View>
+
             {/* Infinite Scrollable Schemes List */}
             <FlatList
               data={availableSchemes}
@@ -393,9 +438,16 @@ export const SchemeReadinessScreen: React.FC<SchemeReadinessScreenProps> = ({ on
                       <Text style={styles.schemeChoiceTitle} numberOfLines={2}>
                         {item.name}
                       </Text>
-                      <Text style={styles.schemeChoiceSub} numberOfLines={1}>
-                        {item.ministry}
-                      </Text>
+                      <View style={styles.schemeChoiceMetaRow}>
+                        <Text style={styles.schemeChoiceSub} numberOfLines={1}>
+                          {item.ministry}
+                        </Text>
+                        {item.category ? (
+                          <View style={styles.categoryBadge}>
+                            <Text style={styles.categoryBadgeText}>{item.category}</Text>
+                          </View>
+                        ) : null}
+                      </View>
                     </View>
                     {isSelected ? (
                       <View style={styles.activeCheckCircle}>
@@ -746,5 +798,51 @@ const styles = StyleSheet.create({
     backgroundColor: '#059669',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  pickerCategoryWrapper: {
+    marginBottom: spacing.xs,
+  },
+  pickerCategoryRow: {
+    flexDirection: 'row',
+    gap: 6,
+    paddingBottom: 4,
+  },
+  pickerCategoryChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 14,
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  pickerCategoryChipActive: {
+    backgroundColor: '#DCFCE7',
+    borderColor: '#86EFAC',
+  },
+  pickerCategoryText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  pickerCategoryTextActive: {
+    color: '#065F46',
+  },
+  schemeChoiceMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 2,
+  },
+  categoryBadge: {
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginLeft: 6,
+  },
+  categoryBadgeText: {
+    fontSize: 9,
+    fontWeight: '600',
+    color: '#475569',
   },
 });

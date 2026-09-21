@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheme Mobile App — E2E Test Suite</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 24px; background: #F8FCF9; color: #0F172A; }
+        h1 { font-size: 24px; font-weight: 800; color: #0A2540; margin-bottom: 8px; }
+        .meta-bar { display: flex; gap: 24px; margin-bottom: 24px; padding: 16px; background: #FFFFFF; border-radius: 12px; border: 1px solid #E2E8F0; }
+        .metric { font-size: 14px; font-weight: 600; }
+        .metric span { font-weight: 800; }
+        .text-green { color: #0D7A5F; }
+        .text-red { color: #DC2626; }
+        table { width: 100%; border-collapse: collapse; background: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1px solid #E2E8F0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid #F1F5F9; }
+        th { background: #F8FAFC; font-size: 12px; text-transform: uppercase; color: #64748B; font-weight: 700; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; }
+        .badge.pass { background: #DCFCE7; color: #0D7A5F; }
+        .badge.warn { background: #FEF3C7; color: #D97706; }
+        .badge.fail { background: #FEE2E2; color: #DC2626; }
+        .thumb { width: 60px; height: 100px; object-fit: cover; border-radius: 6px; border: 1px solid #CBD5E1; transition: transform 0.2s; }
+        .thumb:hover { transform: scale(3); z-index: 100; position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .muted { color: #94A3B8; }
+    </style>
+</head>
+<body>
+    <h1>Scheme Mobile App — E2E Test Suite</h1>
+    <div class="meta-bar">
+        <div class="metric">Total Tests: <span>4</span></div>
+        <div class="metric text-green">Passed: <span>4</span></div>
+        <div class="metric text-red">Failed: <span>0</span></div>
+        <div class="metric">Total Time: <span>48.31s</span></div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Module</th>
+                <th>Test Case</th>
+                <th>Status</th>
+                <th>Duration</th>
+                <th>Visual Capture</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr class="pass">
+                <td><strong>Eligibility Checker</strong></td>
+                <td>Eligibility Tab Entry</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>10.26s</td>
+                <td><a href="screenshots/09_eligibility_quiz_start.png" target="_blank"><img src="screenshots/09_eligibility_quiz_start.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Navigated to eligibility questionnaire</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Eligibility Checker</strong></td>
+                <td>Demographic & Economic Input</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>12.49s</td>
+                <td><a href="screenshots/11_eligibility_step2_economics.png" target="_blank"><img src="screenshots/11_eligibility_step2_economics.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Demographic & economic criteria entered</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Eligibility Checker</strong></td>
+                <td>Eligibility Scoring Engine</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>10.72s</td>
+                <td><a href="screenshots/12_eligibility_scoring_results.png" target="_blank"><img src="screenshots/12_eligibility_scoring_results.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Offline rule engine evaluated matched schemes</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Eligibility Checker</strong></td>
+                <td>View Scheme Details from Check</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>6.91s</td>
+                <td><a href="screenshots/13_check_view_details_scheme_screen.png" target="_blank"><img src="screenshots/13_check_view_details_scheme_screen.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Navigated directly to Schemes Tab Detail Screen with full tabs & benefits</small></td>
+            </tr>
+            
+        </tbody>
+    </table>
+</body>
+</html>

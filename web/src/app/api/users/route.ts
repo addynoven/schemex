@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const id = parseEqParam(searchParams.get('id'));
     const citizenUid = parseEqParam(searchParams.get('citizen_uid'));
 
-    let sql = 'SELECT id, email, phone, role, is_verified, citizen_uid, household_uid, created_at, updated_at FROM users WHERE 1=1';
+    let sql = 'SELECT id, email, phone, role, is_verified, citizen_uid, household_uid, auth_provider, created_at, updated_at FROM users WHERE 1=1';
     const params: unknown[] = [];
 
     if (email) {
@@ -50,15 +50,18 @@ export async function POST(request: NextRequest) {
     const isVerified = Boolean(body.is_verified);
     const citizenUid = body.citizen_uid || `CIT-${Date.now().toString().slice(-6)}`;
     const hashedPassword = body.hashed_password || '';
+    const authProvider = body.auth_provider || (isVerified ? 'google' : 'email');
 
     const sql = `
-      INSERT INTO users (email, phone, role, is_verified, citizen_uid, hashed_password)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      INSERT INTO users (email, phone, role, is_verified, citizen_uid, hashed_password, auth_provider)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       ON CONFLICT (email) DO UPDATE 
-        SET is_verified = EXCLUDED.is_verified, updated_at = NOW()
-      RETURNING id, email, phone, role, is_verified, citizen_uid, household_uid, created_at, updated_at
+        SET is_verified = EXCLUDED.is_verified,
+            auth_provider = COALESCE(users.auth_provider, EXCLUDED.auth_provider),
+            updated_at = NOW()
+      RETURNING id, email, phone, role, is_verified, citizen_uid, household_uid, auth_provider, created_at, updated_at
     `;
-    const res = await query(sql, [email, phone, role, isVerified, citizenUid, hashedPassword]);
+    const res = await query(sql, [email, phone, role, isVerified, citizenUid, hashedPassword, authProvider]);
 
     return NextResponse.json(res.rows, { status: 201 });
   } catch (error: any) {
@@ -89,6 +92,10 @@ export async function PATCH(request: NextRequest) {
     if (body.phone) {
       params.push(body.phone);
       setClauses.push(`phone = $${params.length}`);
+    }
+    if (body.auth_provider) {
+      params.push(body.auth_provider);
+      setClauses.push(`auth_provider = $${params.length}`);
     }
 
     setClauses.push(`updated_at = NOW()`);

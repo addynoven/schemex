@@ -985,11 +985,11 @@ export const ProcessingScreen: React.FC = () => {
 // SCREEN 6: RESULTS SUMMARY
 // =========================================================================
 export const ResultsScreen: React.FC = () => {
+  const router = useRouter();
   const {
     getEvaluation,
     resultsFilter,
     setResultsFilter,
-    selectSchemeDetails,
     setStep,
   } = useCheckStore();
 
@@ -1071,7 +1071,12 @@ export const ResultsScreen: React.FC = () => {
             onApply={(s) =>
               toastService.show(`Redirecting to official portal for ${s.name}...`, 'info')
             }
-            onViewDetails={(s) => selectSchemeDetails(s.id)}
+            onViewDetails={(s) => {
+              router.push({
+                pathname: '/schemes/[id]',
+                params: { id: s.id },
+              });
+            }}
           />
         ))}
 
@@ -1230,7 +1235,8 @@ export const SchemeDetailsScreen: React.FC = () => {
 // SCREEN 9: NEARLY ELIGIBLE
 // =========================================================================
 export const NearlyEligibleScreen: React.FC = () => {
-  const { getEvaluation, setStep, selectSchemeDetails } = useCheckStore();
+  const router = useRouter();
+  const { getEvaluation, setStep } = useCheckStore();
   const summary = getEvaluation();
   const nearlyList = summary.nearlyEligibleSchemes;
 
@@ -1248,7 +1254,12 @@ export const NearlyEligibleScreen: React.FC = () => {
           <NearlyEligibleCard
             key={scheme.id}
             scheme={scheme}
-            onLearnMore={(s) => selectSchemeDetails(s.id)}
+            onLearnMore={(s) => {
+              router.push({
+                pathname: '/schemes/[id]',
+                params: { id: s.id },
+              });
+            }}
           />
         ))}
       </ScrollView>

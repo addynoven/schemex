@@ -2,6 +2,7 @@ import { AppError } from '../../../core/errors/error-handler';
 import { ok, type Result } from '../../../core/errors/result';
 import { getLocalDatabase } from '../../../core/database/local-db';
 import { mmkvStorage } from '../../../core/storage/mmkv';
+import { apiClient } from '../../../core/api/client';
 import {
   BenefitType,
   PaginatedSchemes,
@@ -9,6 +10,22 @@ import {
   SchemeFilter,
   SchemeItem,
 } from '../models/schemes.model';
+
+export const KEY_LOCAL_CATALOG_VERSION = 'schemes_catalog_version';
+
+export interface CatalogVersionInfo {
+  version: number;
+  lastUpdatedAt: string;
+  totalSchemes: number;
+  isUpdateAvailable: boolean;
+  localVersion: number;
+}
+
+export interface DeltaSyncResult {
+  syncedCount: number;
+  newVersion: number;
+  isSuccess: boolean;
+}
 
 export interface BackendBenefit {
   id: number;
@@ -46,6 +63,7 @@ export interface RawSchemeRow {
   category: string;
   is_central: number;
   benefit_summary: string;
+  benefit_type?: string;
   rules_count: number;
   docs_count: number;
   application_url: string | null;
@@ -124,7 +142,7 @@ export function mapRowToSchemeItem(
   isBookmarked = false
 ): SchemeItem {
   const benefitAmount = extractBenefitAmount(row.benefit_summary, benefits);
-  const benefitType = normalizeBenefitType(row, benefits);
+  const benefitType = (row.benefit_type as BenefitType) || normalizeBenefitType(row, benefits);
 
   return {
     id: row.slug || String(row.id),
@@ -181,11 +199,16 @@ export class SchemesApiRepository {
 
       if (filter?.jurisdiction && filter.jurisdiction !== 'All India') {
         if (filter.jurisdiction === 'Central' || filter.jurisdiction === 'Central Only') {
-          whereClauses.push('(state = "ALL_INDIA" OR is_central = 1)');
+          whereClauses.push("(state = 'ALL_INDIA' OR is_central = 1)");
         } else {
-          whereClauses.push('(state = ? OR state = "ALL_INDIA")');
+          whereClauses.push("(state = ? OR state = 'ALL_INDIA')");
           params.push(filter.jurisdiction);
         }
+      }
+
+      if (filter?.benefitType && filter.benefitType !== 'all') {
+        whereClauses.push('benefit_type = ?');
+        params.push(filter.benefitType);
       }
 
       const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
@@ -215,6 +238,7 @@ export class SchemesApiRepository {
         hasMore: skip + items.length < total,
       });
     } catch (err: any) {
+      console.error('getSchemesPaginated SQLite query error:', err);
       return ok({
         items: [],
         total: 0,
@@ -272,7 +296,7 @@ export class SchemesApiRepository {
   async getSchemeBySlug(slug: string): Promise<Result<SchemeItem, AppError>> {
     try {
       const db = getLocalDatabase();
-      const row = db.getFirstSync<RawSchemeRow>('SELECT * FROM schemes WHERE slug = ?', [slug]);
+      const row = db.getFirstSync<RawSchemeRow>('SELECT * FROM schemes WHERE slug = ? OR id = ?', [slug, slug]);
       if (!row) {
         return ok(mapRowToSchemeItem({
           id: 0,
@@ -291,12 +315,13 @@ export class SchemesApiRepository {
         }));
       }
 
-      const benefits = db.getAllSync<BackendBenefit>('SELECT * FROM benefits WHERE scheme_slug = ?', [slug]);
-      const rules = db.getAllSync<BackendEligibilityRule>('SELECT * FROM eligibility_rules WHERE scheme_slug = ?', [slug]);
-      const docs = db.getAllSync<BackendRequiredDoc>('SELECT * FROM required_documents WHERE scheme_slug = ?', [slug]);
+      const actualSlug = row.slug;
+      const benefits = db.getAllSync<BackendBenefit>('SELECT * FROM benefits WHERE scheme_slug = ?', [actualSlug]);
+      const rules = db.getAllSync<BackendEligibilityRule>('SELECT * FROM eligibility_rules WHERE scheme_slug = ?', [actualSlug]);
+      const docs = db.getAllSync<BackendRequiredDoc>('SELECT * FROM required_documents WHERE scheme_slug = ?', [actualSlug]);
 
       const savedIds = new Set(this.getSavedSchemeIds());
-      const item = mapRowToSchemeItem(row, benefits, rules, docs, savedIds.has(slug));
+      const item = mapRowToSchemeItem(row, benefits, rules, docs, savedIds.has(actualSlug));
       return ok(item);
     } catch (err: any) {
       return ok(mapRowToSchemeItem({
@@ -354,6 +379,131 @@ export class SchemesApiRepository {
     current.delete(schemeId);
     mmkvStorage.set(CACHE_KEY_SAVED_SCHEMES, JSON.stringify(Array.from(current)));
     return ok(true);
+  }
+
+  // ─── Catalog Versioning & Delta Sync Engine ─────────────────────────────────
+
+  getLocalCatalogVersion(): number {
+    try {
+      const val = mmkvStorage.getString(KEY_LOCAL_CATALOG_VERSION);
+      return val ? Number(val) : 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  setLocalCatalogVersion(version: number): void {
+    mmkvStorage.set(KEY_LOCAL_CATALOG_VERSION, String(version));
+  }
+
+  async checkCatalogVersion(): Promise<Result<CatalogVersionInfo, AppError>> {
+    try {
+      const res = await apiClient.request<{
+        version: number;
+        last_updated_at: string;
+        total_schemes: number;
+      }>('/schemes/version', { skipAuth: true });
+
+      const localVersion = this.getLocalCatalogVersion();
+
+      if (!res.ok) {
+        return ok({
+          version: localVersion,
+          lastUpdatedAt: '',
+          totalSchemes: 4147,
+          isUpdateAvailable: false,
+          localVersion,
+        });
+      }
+
+      const cloudVersion = Number(res.data.version || 0);
+      const isUpdateAvailable = localVersion > 0 && cloudVersion > localVersion;
+
+      // If localVersion was never set, initialize it with cloudVersion on first successful check
+      if (localVersion === 0 && cloudVersion > 0) {
+        this.setLocalCatalogVersion(cloudVersion);
+      }
+
+      return ok({
+        version: cloudVersion,
+        lastUpdatedAt: res.data.last_updated_at,
+        totalSchemes: res.data.total_schemes,
+        isUpdateAvailable,
+        localVersion: localVersion || cloudVersion,
+      });
+    } catch {
+      const localVersion = this.getLocalCatalogVersion();
+      return ok({
+        version: localVersion,
+        lastUpdatedAt: '',
+        totalSchemes: 4147,
+        isUpdateAvailable: false,
+        localVersion,
+      });
+    }
+  }
+
+  async syncDeltaFromCloud(): Promise<Result<DeltaSyncResult, AppError>> {
+    try {
+      const localVersion = this.getLocalCatalogVersion();
+      const res = await apiClient.request<{
+        schemes: RawSchemeRow[];
+        count: number;
+        synced_version: number;
+        has_more: boolean;
+      }>('/schemes/sync', {
+        params: { since: localVersion, limit: 500 },
+        skipAuth: true,
+      });
+
+      if (!res.ok) {
+        return ok({ syncedCount: 0, newVersion: localVersion, isSuccess: false });
+      }
+
+      const { schemes, synced_version } = res.data;
+      if (schemes && schemes.length > 0) {
+        const db = getLocalDatabase();
+        for (const s of schemes) {
+          db.runSync(
+            `INSERT OR REPLACE INTO schemes (
+              id, slug, title, ministry, state, category, is_central,
+              benefit_summary, benefit_type, rules_count, docs_count,
+              application_url, description, last_verified_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              s.id,
+              s.slug,
+              s.title,
+              s.ministry,
+              s.state,
+              s.category,
+              s.is_central,
+              s.benefit_summary,
+              s.benefit_type || 'cash_grant',
+              s.rules_count,
+              s.docs_count,
+              s.application_url,
+              s.description,
+              s.last_verified_at,
+            ]
+          );
+        }
+      }
+
+      if (synced_version && synced_version > localVersion) {
+        this.setLocalCatalogVersion(synced_version);
+      }
+
+      mmkvStorage.set('sync_ts_schemes_list', String(Date.now()));
+
+      return ok({
+        syncedCount: schemes?.length || 0,
+        newVersion: synced_version || localVersion,
+        isSuccess: true,
+      });
+    } catch {
+      return ok({ syncedCount: 0, newVersion: this.getLocalCatalogVersion(), isSuccess: false });
+    }
   }
 }
 

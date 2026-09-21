@@ -15,8 +15,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useRouter } from 'expo-router';
 import { useSchemesStore } from '../store/useSchemesStore';
-import { useInfiniteSchemesQuery } from '../hooks/useSchemesQuery';
-import { SYNC_TS_SCHEMES } from '../hooks/useSchemesQuery';
+import {
+  useInfiniteSchemesQuery,
+  useCatalogVersionQuery,
+  useDeltaSyncMutation,
+  SYNC_TS_SCHEMES,
+} from '../hooks/useSchemesQuery';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { DiscoveryHeroBanner } from '../components/DiscoveryHeroBanner';
 import { CategoryGrid } from '../components/CategoryGrid';
@@ -127,6 +131,21 @@ export const SchemesScreen: React.FC<SchemesScreenProps> = ({ onOpenProfileMenu 
     refetch,
   } = useInfiniteSchemesQuery(queryFilter, 50);
 
+  // Cloud catalog version check & delta sync
+  const { data: versionInfo } = useCatalogVersionQuery();
+  const { mutateAsync: triggerDeltaSync, isPending: isSyncing } = useDeltaSyncMutation();
+
+  const handleRefresh = async () => {
+    try {
+      if (versionInfo?.isUpdateAvailable) {
+        await triggerDeltaSync();
+      }
+    } catch {
+      // Delta sync error shouldn't block local cache refresh
+    }
+    await refetch();
+  };
+
   const liveSchemes = useMemo(() => {
     if (!infiniteData?.pages) return [];
     return infiniteData.pages.flatMap((page) => page.items);
@@ -140,19 +159,19 @@ export const SchemesScreen: React.FC<SchemesScreenProps> = ({ onOpenProfileMenu 
     }
   }, [liveSchemes, syncServerSchemes]);
 
-  // Filter schemes to display
+  // Schemes to display
   const schemesToDisplay = useMemo(() => {
     if (activeTab === 'saved') {
-      return getSavedSchemes();
+      const saved = getSavedSchemes();
+      if (selectedBenefitType !== 'all') {
+        return saved.filter((s) => s.benefitType === selectedBenefitType);
+      }
+      return saved;
     }
-    const list = liveSchemes || [];
-    if (selectedBenefitType !== 'all') {
-      return list.filter((s) => s.benefitType === selectedBenefitType);
-    }
-    return list;
+    return liveSchemes || [];
   }, [activeTab, getSavedSchemes, liveSchemes, selectedBenefitType]);
 
-  const savedCount = bookmarkedIds.size;
+  const savedCount = activeTab === 'saved' ? schemesToDisplay.length : bookmarkedIds.size;
 
   const handleSchemePress = (schemeId: string) => {
     router.push({
@@ -214,15 +233,36 @@ export const SchemesScreen: React.FC<SchemesScreenProps> = ({ onOpenProfileMenu 
         </View>
 
         <View style={styles.headerRight}>
-          {isFetching && !isLoading ? (
-            <ActivityIndicator size="small" color={palette.emerald700} style={{ marginRight: 6 }} />
-          ) : null}
-          {!isFetching && lastSyncedLabel ? (
-            <View style={styles.syncBadge} accessibilityLabel={`Data synced ${lastSyncedLabel}`}>
-              <FontAwesome name="check-circle" size={10} color="#059669" style={{ marginRight: 3 }} />
-              <Text style={styles.syncBadgeText}>{lastSyncedLabel}</Text>
+          {isSyncing ? (
+            <View style={styles.syncBadgeSyncing} accessibilityLabel="Syncing updates from cloud">
+              <ActivityIndicator size="small" color="#475569" style={{ marginRight: 4, transform: [{ scale: 0.7 }] }} />
+              <Text style={styles.syncBadgeSyncingText}>Syncing...</Text>
             </View>
-          ) : null}
+          ) : versionInfo?.isUpdateAvailable ? (
+            <TouchableOpacity
+              style={styles.syncBadgeUpdate}
+              onPress={() => triggerDeltaSync()}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Update available. Tap to sync."
+            >
+              <FontAwesome name="cloud-download" size={10} color="#D97706" style={{ marginRight: 4 }} />
+              <Text style={styles.syncBadgeUpdateText}>Update Available</Text>
+            </TouchableOpacity>
+          ) : isFetching && !isLoading ? (
+            <ActivityIndicator size="small" color={palette.emerald700} style={{ marginRight: 6 }} />
+          ) : (
+            <TouchableOpacity
+              style={styles.syncBadge}
+              onPress={() => triggerDeltaSync()}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel={`Data up to date${lastSyncedLabel ? ` • ${lastSyncedLabel}` : ''}`}
+            >
+              <FontAwesome name="check-circle" size={10} color="#059669" style={{ marginRight: 3 }} />
+              <Text style={styles.syncBadgeText}>{lastSyncedLabel || 'Up to date'}</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={styles.avatarBtn}
             onPress={() => {
@@ -359,8 +399,8 @@ export const SchemesScreen: React.FC<SchemesScreenProps> = ({ onOpenProfileMenu 
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
-              refreshing={isLoading}
-              onRefresh={refetch}
+              refreshing={isLoading || isSyncing}
+              onRefresh={handleRefresh}
               tintColor={palette.emerald900}
               colors={[palette.emerald900]}
             />
@@ -439,8 +479,8 @@ export const SchemesScreen: React.FC<SchemesScreenProps> = ({ onOpenProfileMenu 
             onEndReachedThreshold={0.5}
             refreshControl={
               <RefreshControl
-                refreshing={isLoading}
-                onRefresh={refetch}
+                refreshing={isLoading || isSyncing}
+                onRefresh={handleRefresh}
                 tintColor={palette.emerald900}
                 colors={[palette.emerald900]}
               />
@@ -563,6 +603,36 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '600',
     color: '#065F46',
+  },
+  syncBadgeUpdate: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  syncBadgeUpdateText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#92400E',
+  },
+  syncBadgeSyncing: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  syncBadgeSyncingText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#475569',
   },
   avatarBtn: {
     width: 36,

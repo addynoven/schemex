@@ -191,6 +191,7 @@ export const UploadDocSheet: React.FC<UploadDocSheetProps> = ({
               <ScrollView
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
               >
                 {/* 1. Category Selection */}
                 <Text style={styles.sectionLabel}>1. Document Category</Text>

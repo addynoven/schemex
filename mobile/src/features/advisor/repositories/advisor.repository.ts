@@ -16,7 +16,8 @@ export interface AdvisorRepository {
   askAdvisor(
     query: string,
     sessionId?: string,
-    onProgress?: (stepIndex: number) => void
+    onProgress?: (stepIndex: number) => void,
+    history?: readonly ChatMessage[]
   ): Promise<Result<ChatMessage, AppError>>;
 }
 

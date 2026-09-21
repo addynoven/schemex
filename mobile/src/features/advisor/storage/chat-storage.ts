@@ -3,6 +3,7 @@ import type {
   BackendChatMessageResponse,
   BackendChatSessionResponse,
   ChatMessage,
+  DocumentRequirement,
   SchemeRecommendation,
 } from '../models/advisor.model';
 
@@ -15,6 +16,8 @@ export interface LocalChatMessage {
   content: string;
   timestamp: string;
   recommendations?: SchemeRecommendation[];
+  documents?: DocumentRequirement[];
+  suggestedFollowUps?: string[];
   citations?: string[];
   sources?: string[];
   synced: boolean;
@@ -121,8 +124,9 @@ export class ChatStorageService {
     let session = sessions.find((s) => s.session_uid === sessionUid);
 
     if (!session) {
-      session = this.saveSession({ session_uid: sessionUid, title: message.text.slice(0, 40) });
+      this.saveSession({ session_uid: sessionUid, title: message.text.slice(0, 40) });
       sessions = this.getRawSessions();
+      session = sessions.find((s) => s.session_uid === sessionUid)!;
     }
 
     const localMsg: LocalChatMessage = {
@@ -131,6 +135,8 @@ export class ChatStorageService {
       content: message.text,
       timestamp: message.timestamp,
       recommendations: message.recommendations,
+      documents: message.documents,
+      suggestedFollowUps: message.suggestedFollowUps,
       citations: message.sources,
       sources: message.sources,
       synced,
@@ -148,6 +154,16 @@ export class ChatStorageService {
     session.updated_at = new Date().toISOString();
     this.persist(sessions);
     return localMsg;
+  }
+
+  public updateSessionTitle(sessionUid: string, title: string): void {
+    const sessions = this.getRawSessions();
+    const session = sessions.find((s) => s.session_uid === sessionUid || String(s.id) === sessionUid);
+    if (session && title.trim()) {
+      session.title = title.trim();
+      session.updated_at = new Date().toISOString();
+      this.persist(sessions);
+    }
   }
 
   public deleteSession(sessionUid: string): void {
@@ -210,7 +226,7 @@ export class ChatStorageService {
 
     for (const cs of cloudSessions) {
       const uid = cs.session_uid || `cloud_${cs.id}`;
-      const existing = localMap.get(uid);
+      const existing = localMap.get(uid) || local.find((s) => s.id === cs.id);
 
       const cloudMessages: LocalChatMessage[] = (cs.messages || []).map((m) => ({
         id: `msg_cloud_${m.id}`,
@@ -247,9 +263,17 @@ export class ChatStorageService {
             existing.messages.push(cm);
           }
         }
+        existing.id = cs.id;
         existing.synced = true;
       }
     }
+
+    // Sort sessions by updated_at / created_at descending (newest first)
+    local.sort((a, b) => {
+      const timeA = new Date(a.updated_at || a.created_at || 0).getTime();
+      const timeB = new Date(b.updated_at || b.created_at || 0).getTime();
+      return timeB - timeA;
+    });
 
     this.persist(local);
   }
@@ -261,6 +285,13 @@ export class ChatStorageService {
       sender: m.sender,
       content: m.content,
       citations: m.citations,
+      sources: (m.sources || []).map((s) => ({
+        title: s,
+        slug: s.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      })),
+      recommendations: m.recommendations,
+      documents: m.documents,
+      suggestedFollowUps: m.suggestedFollowUps,
       created_at: m.createdAt,
     }));
 

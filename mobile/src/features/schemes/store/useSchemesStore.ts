@@ -48,7 +48,9 @@ export interface SchemesState {
   isSaveModalVisible: boolean;
   lastSavedSchemeTitle: string;
   serverSchemes: SchemeItem[];
-  
+  /** Controls whether the full filter/search list view is shown (vs. Discovery home) */
+  isSearching: boolean;
+
   // Actions
   setActiveTab: (tab: 'browse' | 'saved') => void;
   setSearchQuery: (query: string) => void;
@@ -56,9 +58,11 @@ export interface SchemesState {
   setSelectedBenefitType: (type: BenefitType) => void;
   setSelectedJurisdiction: (jurisdiction: string) => void;
   setSortBy: (sort: 'relevant' | 'benefit' | 'popular') => void;
+  setIsSearching: (value: boolean) => void;
   toggleBookmark: (schemeId: string, schemeTitle?: string) => void;
   closeSaveModal: () => void;
   resetFilters: () => void;
+  resetToDiscovery: () => void;
   syncServerSchemes: (items: SchemeItem[]) => void;
   getFilteredSchemes: () => SchemeItem[];
   getSavedSchemes: () => SchemeItem[];
@@ -113,6 +117,7 @@ export const useSchemesStore = create<SchemesState>((set, get) => {
     isSaveModalVisible: false,
     lastSavedSchemeTitle: '',
     serverSchemes: [],
+    isSearching: false,
 
     setActiveTab: (activeTab) => set({ activeTab }),
 
@@ -125,6 +130,18 @@ export const useSchemesStore = create<SchemesState>((set, get) => {
     setSelectedJurisdiction: (selectedJurisdiction) => set({ selectedJurisdiction }),
 
     setSortBy: (sortBy) => set({ sortBy }),
+
+    setIsSearching: (isSearching) => set({ isSearching }),
+
+    resetToDiscovery: () =>
+      set({
+        isSearching: false,
+        searchQuery: '',
+        selectedCategory: 'all',
+        selectedBenefitType: 'all',
+        selectedJurisdiction: 'All India',
+        activeTab: 'browse',
+      }),
 
     toggleBookmark: (schemeId, schemeTitle) => {
       const current = new Set(get().bookmarkedIds);

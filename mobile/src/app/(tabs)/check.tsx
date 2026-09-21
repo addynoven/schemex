@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
+  BackHandler,
   Image,
   StyleSheet,
   Text,
@@ -61,6 +62,20 @@ export default function CheckEligibilityScreen() {
         break;
     }
   };
+
+  // Wire Android hardware back to the step-back flow.
+  // At '0_start' we return false so the system handles it (goes to home / background).
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (activeStep !== '0_start') {
+        handleGoBack();
+        return true; // consumed
+      }
+      return false;
+    });
+    return () => sub.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeStep]);
 
   const getScreenTitle = () => {
     switch (activeStep) {

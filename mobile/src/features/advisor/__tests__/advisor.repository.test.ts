@@ -90,3 +90,42 @@ test('ChatMessageSchema validates assistant response with citations and recommen
   assert.equal(parsed.success, true);
 });
 
+import { generateMockAdvisorResponse } from '../mocks/advisor-mocks';
+
+test('generateMockAdvisorResponse - GREETING intent generates warm introduction without scheme dumps', () => {
+  const res = generateMockAdvisorResponse('Namaste, who are you?');
+  assert.equal(res.intent, 'GREETING');
+  assert.ok(res.text.includes('Scheme App AI Welfare Advisor'));
+  assert.ok(res.followUpPrompts.length > 0);
+});
+
+test('generateMockAdvisorResponse - OUT_OF_SCOPE intent politely redirects', () => {
+  const res = generateMockAdvisorResponse('What is the weather forecast today?');
+  assert.equal(res.intent, 'OUT_OF_SCOPE');
+  assert.ok(res.text.includes('solely on assisting citizens with government welfare'));
+});
+
+test('generateMockAdvisorResponse - AGRICULTURE intent returns farming benefits and land documents', () => {
+  const res = generateMockAdvisorResponse('What schemes are available for farmers and crop irrigation?');
+  assert.equal(res.intent, 'AGRICULTURE');
+  assert.ok(res.text.includes('PM-Kisan'));
+  assert.ok(res.documents && res.documents.length > 0);
+  assert.ok(res.documents.some((d) => d.id === 'doc-land-records'));
+});
+
+test('generateMockAdvisorResponse - EDUCATION intent returns scholarship advice', () => {
+  const res = generateMockAdvisorResponse('I am a student looking for college scholarships');
+  assert.equal(res.intent, 'EDUCATION');
+  assert.ok(res.text.includes('Scholarship') || res.text.includes('NSP'));
+  assert.ok(res.followUpPrompts.length > 0);
+});
+
+test('generateMockAdvisorResponse - DOCUMENTS intent returns standard welfare documents checklist', () => {
+  const res = generateMockAdvisorResponse('What documents are required to apply for schemes?');
+  assert.equal(res.intent, 'DOCUMENTS');
+  assert.ok(res.documents && res.documents.length >= 4);
+  assert.ok(res.documents.some((d) => d.id === 'doc-aadhaar'));
+  assert.ok(res.documents.some((d) => d.id === 'doc-income-cert'));
+});
+
+

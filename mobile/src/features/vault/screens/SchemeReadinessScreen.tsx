@@ -24,6 +24,7 @@ import {
   useDeleteDocumentMutation,
   useSchemeReadinessQuery,
   useUploadDocumentMutation,
+  useVaultDocumentsQuery,
 } from '../hooks/useVaultQuery';
 import { useInfiniteSchemesQuery } from '@/features/schemes/hooks/useSchemesQuery';
 import {
@@ -107,7 +108,16 @@ export const SchemeReadinessScreen: React.FC<SchemeReadinessScreenProps> = ({ on
     saveDocumentDirect,
     closeSavedModal,
     deleteDocument,
+    syncServerDocuments,
   } = useVaultStore();
+
+  // Sync cloud documents into vault store
+  const { data: serverDocs } = useVaultDocumentsQuery();
+  useEffect(() => {
+    if (serverDocs && Array.isArray(serverDocs)) {
+      syncServerDocuments(serverDocs);
+    }
+  }, [serverDocs, syncServerDocuments]);
 
   const currentScheme = useMemo(() => {
     if (selectedSchemeMeta) return selectedSchemeMeta;

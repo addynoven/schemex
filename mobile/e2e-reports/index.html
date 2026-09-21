@@ -27,10 +27,10 @@
 <body>
     <h1>Scheme Mobile App — E2E Test Suite</h1>
     <div class="meta-bar">
-        <div class="metric">Total Tests: <span>4</span></div>
-        <div class="metric text-green">Passed: <span>4</span></div>
+        <div class="metric">Total Tests: <span>22</span></div>
+        <div class="metric text-green">Passed: <span>22</span></div>
         <div class="metric text-red">Failed: <span>0</span></div>
-        <div class="metric">Total Time: <span>48.31s</span></div>
+        <div class="metric">Total Time: <span>91.15s</span></div>
     </div>
     <table>
         <thead>
@@ -46,10 +46,91 @@
         <tbody>
             
             <tr class="pass">
+                <td><strong>Onboarding</strong></td>
+                <td>Language Selection Screen Appears</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>7.1s</td>
+                <td><a href="screenshots/01_language_selection_view.png" target="_blank"><img src="screenshots/01_language_selection_view.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Detected English & Hindi options</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Onboarding</strong></td>
+                <td>Hindi Option Available</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>0.0s</td>
+                <td><span class="muted">-</span></td>
+                <td><small>Found Hindi card with Devanagari typography</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Onboarding</strong></td>
+                <td>Language Confirm & Route to Auth</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>2.91s</td>
+                <td><a href="screenshots/02_auth_screen_after_onboarding.png" target="_blank"><img src="screenshots/02_auth_screen_after_onboarding.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Transitioned to /auth seamlessly</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Authentication</strong></td>
+                <td>Auth Screen Structure</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>0.32s</td>
+                <td><a href="screenshots/03_auth_initial_view.png" target="_blank"><img src="screenshots/03_auth_initial_view.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Google Sign-In & Login tab present</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Authentication</strong></td>
+                <td>Sign Up View Toggle</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>2.63s</td>
+                <td><a href="screenshots/04_signup_view.png" target="_blank"><img src="screenshots/04_signup_view.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Full Name & registration form visible</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Authentication</strong></td>
+                <td>Email Login & Navigation to Tabs</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>9.14s</td>
+                <td><a href="screenshots/05_post_login_tabs_view.png" target="_blank"><img src="screenshots/05_post_login_tabs_view.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Authenticated citizen loaded into tabs</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Schemes Discovery</strong></td>
+                <td>Schemes Tab & Offline DB</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>2.9s</td>
+                <td><a href="screenshots/06_schemes_list_initial.png" target="_blank"><img src="screenshots/06_schemes_list_initial.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>SQLite database schemes loaded (4147+ schemes)</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Schemes Discovery</strong></td>
+                <td>Live Instant Search</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>3.36s</td>
+                <td><a href="screenshots/07_schemes_search_kisan.png" target="_blank"><img src="screenshots/07_schemes_search_kisan.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Filtered schemes by 'Kisan' instantly offline</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Schemes Discovery</strong></td>
+                <td>Scheme Detail Navigation</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>3.09s</td>
+                <td><a href="screenshots/08_scheme_detail_view.png" target="_blank"><img src="screenshots/08_scheme_detail_view.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Scheme details, criteria & benefits rendered</small></td>
+            </tr>
+            
+            <tr class="pass">
                 <td><strong>Eligibility Checker</strong></td>
                 <td>Eligibility Tab Entry</td>
                 <td><span class="badge pass">PASS</span></td>
-                <td>10.26s</td>
+                <td>5.03s</td>
                 <td><a href="screenshots/09_eligibility_quiz_start.png" target="_blank"><img src="screenshots/09_eligibility_quiz_start.png" class="thumb" alt="Screenshot" /></a></td>
                 <td><small>Navigated to eligibility questionnaire</small></td>
             </tr>
@@ -58,7 +139,7 @@
                 <td><strong>Eligibility Checker</strong></td>
                 <td>Demographic & Economic Input</td>
                 <td><span class="badge pass">PASS</span></td>
-                <td>12.49s</td>
+                <td>5.82s</td>
                 <td><a href="screenshots/11_eligibility_step2_economics.png" target="_blank"><img src="screenshots/11_eligibility_step2_economics.png" class="thumb" alt="Screenshot" /></a></td>
                 <td><small>Demographic & economic criteria entered</small></td>
             </tr>
@@ -67,7 +148,7 @@
                 <td><strong>Eligibility Checker</strong></td>
                 <td>Eligibility Scoring Engine</td>
                 <td><span class="badge pass">PASS</span></td>
-                <td>10.72s</td>
+                <td>4.68s</td>
                 <td><a href="screenshots/12_eligibility_scoring_results.png" target="_blank"><img src="screenshots/12_eligibility_scoring_results.png" class="thumb" alt="Screenshot" /></a></td>
                 <td><small>Offline rule engine evaluated matched schemes</small></td>
             </tr>
@@ -76,9 +157,90 @@
                 <td><strong>Eligibility Checker</strong></td>
                 <td>View Scheme Details from Check</td>
                 <td><span class="badge pass">PASS</span></td>
-                <td>6.91s</td>
+                <td>3.21s</td>
                 <td><a href="screenshots/13_check_view_details_scheme_screen.png" target="_blank"><img src="screenshots/13_check_view_details_scheme_screen.png" class="thumb" alt="Screenshot" /></a></td>
                 <td><small>Navigated directly to Schemes Tab Detail Screen with full tabs & benefits</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Document Vault</strong></td>
+                <td>Vault Hub Entry</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>2.93s</td>
+                <td><a href="screenshots/13_vault_hub_view.png" target="_blank"><img src="screenshots/13_vault_hub_view.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Vault dashboard rendered with encryption indicators</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Document Vault</strong></td>
+                <td>Scheme Readiness Meter</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>2.98s</td>
+                <td><a href="screenshots/14_vault_readiness_meter.png" target="_blank"><img src="screenshots/14_vault_readiness_meter.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Evaluated required documents checklist & readiness percentage</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>AI Scheme Advisor</strong></td>
+                <td>Advisor Screen Entry</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>4.92s</td>
+                <td><a href="screenshots/15_advisor_chat_view.png" target="_blank"><img src="screenshots/15_advisor_chat_view.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Navigated to AI Advisor interface</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>AI Scheme Advisor</strong></td>
+                <td>AI Recommendations & Citations</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>3.44s</td>
+                <td><a href="screenshots/16_advisor_response_recommendations.png" target="_blank"><img src="screenshots/16_advisor_response_recommendations.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Instant offline AI scheme match & citations returned</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>AI Scheme Advisor</strong></td>
+                <td>Custom Chat Query & User Bubble</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>6.4s</td>
+                <td><a href="screenshots/16b_advisor_custom_chat_reply.png" target="_blank"><img src="screenshots/16b_advisor_custom_chat_reply.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>User message sent and verified in chat stream</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>AI Scheme Advisor</strong></td>
+                <td>Consultation History Drawer</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>2.91s</td>
+                <td><a href="screenshots/16c_advisor_history_drawer.png" target="_blank"><img src="screenshots/16c_advisor_history_drawer.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Past consultation sessions listed; new session ready</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Profile & Settings</strong></td>
+                <td>Settings Screen Entry</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>5.55s</td>
+                <td><a href="screenshots/17_settings_screen_initial.png" target="_blank"><img src="screenshots/17_settings_screen_initial.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Settings screen rendered</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Profile & Settings</strong></td>
+                <td>In-App Language Switch & Return</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>1.58s</td>
+                <td><a href="screenshots/19_settings_after_language_change.png" target="_blank"><img src="screenshots/19_settings_after_language_change.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Language updated; session preserved</small></td>
+            </tr>
+            
+            <tr class="pass">
+                <td><strong>Profile & Settings</strong></td>
+                <td>Logout Flow & Session Purge</td>
+                <td><span class="badge pass">PASS</span></td>
+                <td>3.65s</td>
+                <td><a href="screenshots/21_logged_out_screen.png" target="_blank"><img src="screenshots/21_logged_out_screen.png" class="thumb" alt="Screenshot" /></a></td>
+                <td><small>Session wiped; returned to Auth</small></td>
             </tr>
             
         </tbody>

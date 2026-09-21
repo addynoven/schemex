@@ -10,6 +10,7 @@ Simulate Cloud Catalog Admin Update & Mobile Delta Sync:
 7. Revert / cleanup the test change in PostgreSQL.
 """
 
+import os
 import sys
 import time
 import json
@@ -22,7 +23,7 @@ sys.path.insert(0, str(SCRIPT_DIR / "e2e"))
 
 from core.driver import AndroidDeviceDriver
 
-DB_URL = "postgresql://avnadmin:REDACTED_AIVEN_PASSWORD@pg-2d756d14-dmcbaditya-9ffc.e.aivencloud.com:25798/defaultdb?sslmode=require"
+DB_URL = os.environ["DATABASE_URL"]
 VERSION_URL = "https://web-omega-six-40.vercel.app/api/schemes/version"
 SYNC_URL = "https://web-omega-six-40.vercel.app/api/schemes/sync"
 

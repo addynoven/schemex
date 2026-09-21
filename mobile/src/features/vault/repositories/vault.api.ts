@@ -5,9 +5,16 @@ import { mmkvStorage } from '../../../core/storage/mmkv';
 import { uploadToCloudinary, CLOUDINARY_CLOUD_NAME } from '../../../core/storage/cloudinary';
 import { config } from '../../../core/config/config';
 import { authStorage } from '../../auth/storage/auth.storage';
-import type { RequiredDocumentStatus, SchemeReadiness, VaultDocument } from '../models/vault.model';
+import {
+  getCanonicalDocumentType,
+  isSameDocumentType,
+  type RequiredDocumentStatus,
+  type SchemeReadiness,
+  type VaultDocument,
+} from '../models/vault.model';
 
 const VAULT_STORAGE_KEY = 'local_vault_documents_list';
+
 
 export function inferCategory(titleOrType: string): VaultDocument['category'] {
   const t = titleOrType.toLowerCase();
@@ -133,36 +140,82 @@ export class VaultApiRepository {
     const user = authStorage.getCurrentUser();
     const userId = user?.id && !isNaN(Number(user.id)) ? Number(user.id) : 1;
     const citizenUid = user?.citizenUid || `CIT-${userId}`;
+    const canonicalType = getCanonicalDocumentType(params.documentType);
 
     let documentId = Date.now();
 
-    // 2. Persist document metadata to PostgreSQL via PostgREST
+    // 2. Persist document metadata to PostgreSQL via PostgREST with strict UPSERT semantics
     try {
       const baseUrl = config.apiUrl.replace(/\/+$/, '');
-      const pgRes = await fetch(`${baseUrl}/user_documents`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Prefer: 'return=representation',
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          household_member_id: params.householdMemberId || null,
-          citizen_uid: citizenUid,
-          document_type: params.documentType,
-          document_number_masked: params.documentNumberMasked || null,
-          file_key: uploadResult.public_id,
-          file_name: params.fileName,
-          file_size_bytes: uploadResult.bytes || 1024 * 150,
-          mime_type: params.mimeType,
-          is_verified: true,
-        }),
-      });
+      const existingRes = await fetch(
+        `${baseUrl}/user_documents?user_id=eq.${userId}&select=*`,
+        { headers: { Accept: 'application/json' } }
+      );
 
-      if (pgRes.ok) {
-        const rows = await pgRes.json();
-        if (rows && rows[0]?.id) {
-          documentId = rows[0].id;
+      let existingDocId: number | null = null;
+      const otherDuplicateIds: number[] = [];
+
+      if (existingRes.ok) {
+        const existingRows = await existingRes.json();
+        for (const row of existingRows) {
+          if (isSameDocumentType(row.document_type, canonicalType)) {
+            if (!existingDocId) {
+              existingDocId = row.id;
+            } else {
+              otherDuplicateIds.push(row.id);
+            }
+          }
+        }
+      }
+
+      if (existingDocId) {
+        // UPSERT: Update existing document row in place
+        documentId = existingDocId;
+        await fetch(`${baseUrl}/user_documents?id=eq.${existingDocId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            document_type: canonicalType,
+            file_key: uploadResult.public_id,
+            file_name: params.fileName,
+            file_size_bytes: uploadResult.bytes || 1024 * 150,
+            mime_type: params.mimeType,
+            uploaded_at: new Date().toISOString(),
+            is_verified: true,
+          }),
+        });
+
+        // Clean up any other duplicate rows from the cloud database
+        for (const dupId of otherDuplicateIds) {
+          void fetch(`${baseUrl}/user_documents?id=eq.${dupId}`, { method: 'DELETE' });
+        }
+      } else {
+        // INSERT: create new document record
+        const pgRes = await fetch(`${baseUrl}/user_documents`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Prefer: 'return=representation',
+          },
+          body: JSON.stringify({
+            user_id: userId,
+            household_member_id: params.householdMemberId || null,
+            citizen_uid: citizenUid,
+            document_type: canonicalType,
+            document_number_masked: params.documentNumberMasked || null,
+            file_key: uploadResult.public_id,
+            file_name: params.fileName,
+            file_size_bytes: uploadResult.bytes || 1024 * 150,
+            mime_type: params.mimeType,
+            is_verified: true,
+          }),
+        });
+
+        if (pgRes.ok) {
+          const rows = await pgRes.json();
+          if (rows && rows[0]?.id) {
+            documentId = rows[0].id;
+          }
         }
       }
     } catch {
@@ -175,7 +228,7 @@ export class VaultApiRepository {
       user_id: userId,
       household_member_id: params.householdMemberId || null,
       citizen_uid: citizenUid,
-      document_type: params.documentType,
+      document_type: canonicalType,
       document_number_masked: params.documentNumberMasked || null,
       file_name: params.fileName,
       file_size_bytes: uploadResult.bytes || 1024 * 150,
@@ -184,7 +237,13 @@ export class VaultApiRepository {
       download_url: uploadResult.secure_url,
     };
 
-    docs.unshift(newDoc);
+    // Replace any existing document of the same canonical type in local storage
+    const existingIdx = docs.findIndex((d) => isSameDocumentType(d.document_type, canonicalType));
+    if (existingIdx >= 0) {
+      docs[existingIdx] = newDoc;
+    } else {
+      docs.unshift(newDoc);
+    }
     this.saveLocalDocs(docs);
     return ok(newDoc);
   }
@@ -212,7 +271,7 @@ export class VaultApiRepository {
           user_id: r.user_id,
           household_member_id: r.household_member_id || null,
           citizen_uid: r.citizen_uid || 'CIT-LOCAL',
-          document_type: r.document_type,
+          document_type: getCanonicalDocumentType(r.document_type),
           document_number_masked: r.document_number_masked || null,
           file_name: r.file_name,
           file_size_bytes: r.file_size_bytes,
@@ -223,16 +282,31 @@ export class VaultApiRepository {
             : `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload/${r.file_key}`,
         }));
 
-        const localDocs = this.getLocalDocs();
-        const mergedMap = new Map<number | string, BackendVaultDocument>();
-        cloudDocs.forEach((d) => mergedMap.set(d.id, d));
-        localDocs.forEach((d) => {
-          if (!mergedMap.has(d.id)) {
-            mergedMap.set(d.id, d);
+        // Deduplicate: strictly ONE document per canonical type!
+        const canonicalMap = new Map<string, BackendVaultDocument>();
+        for (const doc of cloudDocs) {
+          const cKey = getCanonicalDocumentType(doc.document_type).toLowerCase();
+          if (!canonicalMap.has(cKey)) {
+            canonicalMap.set(cKey, doc);
+          } else {
+            // Found duplicate row in cloud: retain the newer one and clean up the older one
+            const existingDoc = canonicalMap.get(cKey)!;
+            const olderId = doc.id < existingDoc.id ? doc.id : existingDoc.id;
+            const newerDoc = doc.id > existingDoc.id ? doc : existingDoc;
+            canonicalMap.set(cKey, newerDoc);
+            void fetch(`${baseUrl}/user_documents?id=eq.${olderId}`, { method: 'DELETE' });
           }
-        });
+        }
 
-        const combined = Array.from(mergedMap.values());
+        const localDocs = this.getLocalDocs();
+        for (const lDoc of localDocs) {
+          const cKey = getCanonicalDocumentType(lDoc.document_type).toLowerCase();
+          if (!canonicalMap.has(cKey)) {
+            canonicalMap.set(cKey, lDoc);
+          }
+        }
+
+        const combined = Array.from(canonicalMap.values());
         this.saveLocalDocs(combined);
         return combined;
       }
@@ -241,6 +315,7 @@ export class VaultApiRepository {
     }
     return this.getLocalDocs();
   }
+
 
   /**
    * Retrieves all documents stored in the local sandboxed vault.

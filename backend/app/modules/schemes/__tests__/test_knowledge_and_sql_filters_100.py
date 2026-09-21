@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.modules.schemes.models import Scheme
 from app.seeds.seed_national_schemes import NATIONAL_AND_STATE_SCHEMES_DATA, seed_national_schemes
 
-KNOWLEDGE_DIR = Path(__file__).resolve().parents[4] / "knowledge"
+KNOWLEDGE_DIR = Path(__file__).resolve().parents[5] / "knowledge"
 SCHEMES_CSV_PATH = KNOWLEDGE_DIR / "data" / "schemes.csv"
 KNOWLEDGE_SCHEMES_DIR = KNOWLEDGE_DIR / "schemes"
 

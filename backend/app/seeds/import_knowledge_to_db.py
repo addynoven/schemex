@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app.modules.schemes.models import Scheme, Benefit, EligibilityRule, RequiredDocument
 
-KNOWLEDGE_DATA_DIR = Path(__file__).resolve().parent.parent.parent / "knowledge" / "data"
+KNOWLEDGE_DATA_DIR = Path(__file__).resolve().parents[3] / "knowledge" / "data"
 
 
 def import_knowledge_catalog(db: Session) -> dict[str, int]:

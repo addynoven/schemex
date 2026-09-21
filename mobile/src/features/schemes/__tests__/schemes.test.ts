@@ -172,4 +172,17 @@ describe('Schemes Module Unit Tests', () => {
 
     assert.strictEqual(results.length, 0, 'No schemes should match non-existent query');
   });
+
+  it('syncs saved schemes with cloud database seamlessly', async () => {
+    const { schemesApi } = await import('../repositories/schemes.api');
+    await schemesApi.saveScheme('pm-kisan');
+    const local = await schemesApi.getSavedSchemes();
+    assert.ok(local.ok);
+    assert.ok(local.data.some((s) => s.id === 'pm-kisan'));
+
+    await schemesApi.removeSavedScheme('pm-kisan');
+    const afterRemove = await schemesApi.getSavedSchemes();
+    assert.ok(afterRemove.ok);
+    assert.ok(!afterRemove.data.some((s) => s.id === 'pm-kisan'));
+  });
 });

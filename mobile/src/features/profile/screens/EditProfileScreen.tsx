@@ -48,7 +48,7 @@ export const EditProfileScreen: React.FC = () => {
         <View style={{ width: 36 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* Avatar Section */}
         <View style={styles.avatarSection}>
           <View style={styles.avatarWrapper}>

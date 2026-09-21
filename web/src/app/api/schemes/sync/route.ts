@@ -84,6 +84,19 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    const canonSql = `
+      SELECT id, slug, name, category, schemes_count, overview, issuing_authorities
+      FROM canonical_documents
+      ORDER BY schemes_count DESC;
+    `;
+    let canonicalDocuments: any[] = [];
+    try {
+      const canonRes = await query(canonSql);
+      canonicalDocuments = canonRes.rows;
+    } catch (cErr) {
+      console.warn('Could not query canonical_documents during sync:', cErr);
+    }
+
     const maxEpoch = res.rows.reduce(
       (max: number, r: any) => Math.max(max, Number(r.updated_epoch || 0)),
       Math.floor(sinceDate.getTime() / 1000)
@@ -91,6 +104,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       schemes,
+      canonical_documents: canonicalDocuments,
       count: schemes.length,
       synced_version: maxEpoch,
       has_more: schemes.length === limit,

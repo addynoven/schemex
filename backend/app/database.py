@@ -24,10 +24,11 @@ def get_db():
         db.close()
 
 
-# Ensure all model entities are registered with SQLAlchemy Base
-import app.modules.auth.models as _auth_models  # noqa
-import app.modules.schemes.models as _schemes_models  # noqa
-import app.modules.vault.models as _vault_models  # noqa
-import app.modules.chat.models as _chat_models  # noqa
-import app.modules.admin.models as _admin_models  # noqa
-import app.modules.eligibility.models as _eligibility_models  # noqa
+def register_models():
+    """Ensure all model entities are registered with SQLAlchemy Base metadata."""
+    import app.modules.auth.models  # noqa
+    import app.modules.schemes.models  # noqa
+    import app.modules.vault.models  # noqa
+    import app.modules.chat.models  # noqa
+    import app.modules.admin.models  # noqa
+    import app.modules.eligibility.models  # noqa

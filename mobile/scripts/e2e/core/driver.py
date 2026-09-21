@@ -11,7 +11,7 @@ import time
 import subprocess
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Union
 
 from .fixtures import (
     APK_PATH,
@@ -29,8 +29,17 @@ class AndroidDeviceDriver:
     def __init__(self, avd_name: str = DEFAULT_AVD):
         self.avd_name = avd_name
         self.device_id: Optional[str] = None
+        self._cached_dump: Optional[ET.Element] = None
+        self._cached_dump_time: float = 0.0
+        self._dump_ttl: float = 0.8
+        self._authenticated: bool = False
         SCREENSHOTS_DIR.mkdir(parents=True, exist_ok=True)
         REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
+    def invalidate_ui_dump(self):
+        """Invalidate cached UI dump when an action mutates screen state."""
+        self._cached_dump = None
+        self._cached_dump_time = 0.0
 
     def run_cmd(self, cmd: List[str], check: bool = True, timeout: int = 60) -> subprocess.CompletedProcess:
         try:
@@ -93,6 +102,8 @@ class AndroidDeviceDriver:
         self.adb("shell", "settings", "put", "secure", "autofill_service", "null", check=False)
         self.adb("shell", "settings", "put", "secure", "credential_service", "null", check=False)
         self.adb("shell", "settings", "put", "secure", "autofill_credential_protection_policy", "0", check=False)
+        self.adb("shell", "settings", "put", "secure", "stylus_handwriting_enabled", "0", check=False)
+        self.adb("shell", "settings", "put", "secure", "show_ime_with_hard_keyboard", "1", check=False)
 
     def install_app(self, apk_path: Path = APK_PATH):
         if not apk_path.exists():
@@ -100,48 +111,59 @@ class AndroidDeviceDriver:
         self.adb("install", "-r", str(apk_path))
 
     def clear_app_data(self, package_name: str = PACKAGE_NAME):
+        self._authenticated = False
+        self.invalidate_ui_dump()
         self.adb("shell", "pm", "clear", package_name, check=False)
 
     def start_app(self, activity: str = MAIN_ACTIVITY):
+        self.invalidate_ui_dump()
         self.adb("shell", "am", "start", "-n", activity)
 
     def stop_app(self, package_name: str = PACKAGE_NAME):
+        self.invalidate_ui_dump()
         self.adb("shell", "am", "force-stop", package_name, check=False)
 
     def restart_app(self):
         self.stop_app()
-        time.sleep(0.5)
+        time.sleep(0.3)
         self.start_app()
 
     def reset_auth_state(self) -> bool:
         """Resets citizen auth session so the app is cleanly at /auth ready for login testing."""
-        # 1. Remove SecureStore JWT token so root router automatically purges MMKV session and routes to /auth
+        self._authenticated = False
+        self.invalidate_ui_dump()
+
+        # 1. Fast check if already on /auth screen (avoids heavy app restart between suites)
+        if self.find_element(text=["Log In", "Continue with Google", "Login"]):
+            return True
+
+        # 2. Remove SecureStore JWT token so root router automatically purges MMKV session and routes to /auth
         self.adb("root", check=False)
         self.adb("shell", "rm", "-f", f"/data/data/{PACKAGE_NAME}/shared_prefs/SecureStore.xml", check=False)
         self.restart_app()
-        time.sleep(2.0)
+        time.sleep(1.2)
         self.dismiss_system_dialogs()
 
-        # 2. Check if already on /auth screen
-        if self.find_element(text="Log In") or self.find_element(text="Continue with Google"):
+        # 3. Check if already on /auth screen
+        if self.find_element(text=["Log In", "Continue with Google", "Login"]):
             return True
 
-        # 3. If still in tabs (UI fallback logout)
+        # 4. If still in tabs (UI fallback logout)
         avatar = self.find_element(desc="Open Citizen Profile") or self.find_element(text="")
         if avatar:
-            self.tap(avatar[0], avatar[1], sleep_after=1.0)
+            self.tap(avatar[0], avatar[1], sleep_after=0.6)
             settings_btn = self.find_element(text="Settings")
             if settings_btn:
-                self.tap(settings_btn[0], settings_btn[1], sleep_after=1.0)
+                self.tap(settings_btn[0], settings_btn[1], sleep_after=0.6)
                 self.scroll_down()
-                logout_btn = self.find_element(text="Logout") or self.find_element(text="Log Out")
+                logout_btn = self.find_element(text=["Logout", "Log Out"])
                 if logout_btn:
-                    self.tap(logout_btn[0], logout_btn[1], sleep_after=0.8)
-                    confirm_btn = self.find_element(text="Log Out") or self.find_element(text="Yes, Log Out")
+                    self.tap(logout_btn[0], logout_btn[1], sleep_after=0.5)
+                    confirm_btn = self.find_element(text=["Log Out", "Yes, Log Out"])
                     if confirm_btn:
-                        self.tap(confirm_btn[0], confirm_btn[1], sleep_after=1.5)
+                        self.tap(confirm_btn[0], confirm_btn[1], sleep_after=0.8)
 
-        return self.wait_for_any_element(texts=["Continue with Google", "Log In", "Login"], timeout=6.0) is not None
+        return self.wait_for_any_element(texts=["Continue with Google", "Log In", "Login"], timeout=4.0) is not None
 
     def capture_screenshot(self, name: str) -> Path:
         sanitized = re.sub(r"[^\w\-_\.]", "_", name)
@@ -173,30 +195,39 @@ class AndroidDeviceDriver:
     def clear_logcat(self):
         self.adb("logcat", "-c", check=False)
 
-    def get_ui_dump(self) -> Optional[ET.Element]:
+    def get_ui_dump(self, force: bool = False) -> Optional[ET.Element]:
+        now = time.time()
+        if not force and self._cached_dump is not None and (now - self._cached_dump_time) < self._dump_ttl:
+            return self._cached_dump
+
         try:
-            self.adb("shell", "uiautomator", "dump", "/sdcard/window_dump.xml", check=False, timeout=6)
+            self.adb("shell", "uiautomator", "dump", "/sdcard/window_dump.xml", check=False, timeout=8)
         except Exception:
             self.adb("shell", "pkill", "-9", "-f", "uiautomator", check=False, timeout=3)
-            time.sleep(0.3)
+            time.sleep(0.2)
             return None
+
         res = self.adb("shell", "cat", "/sdcard/window_dump.xml", check=False, timeout=4)
         xml_str = res.stdout.strip()
         if not xml_str or not xml_str.startswith("<?xml"):
-            time.sleep(0.4)
-            res = self.adb("shell", "cat", "/sdcard/window_dump.xml", check=False, timeout=4)
+            time.sleep(0.2)
+            res = self.adb("shell", "cat", "/sdcard/window_dump.xml", check=False, timeout=3)
             xml_str = res.stdout.strip()
+
         if xml_str.startswith("<?xml"):
             try:
-                return ET.fromstring(xml_str)
+                tree = ET.fromstring(xml_str)
+                self._cached_dump = tree
+                self._cached_dump_time = time.time()
+                return tree
             except Exception:
                 pass
         return None
 
     def find_element(
         self,
-        text: Optional[str] = None,
-        desc: Optional[str] = None,
+        text: Union[str, List[str], None] = None,
+        desc: Union[str, List[str], None] = None,
         exact: bool = False,
     ) -> Optional[Tuple[int, int]]:
         """Finds center coordinates (x, y) of an element matching text or content-description."""
@@ -204,21 +235,30 @@ class AndroidDeviceDriver:
         if root is None:
             return None
 
+        texts = [text] if isinstance(text, str) else (text or [])
+        descs = [desc] if isinstance(desc, str) else (desc or [])
+
         for node in root.iter("node"):
             node_text = node.get("text", "")
             node_desc = node.get("content-desc", "")
 
             matched = False
-            if text:
-                if exact and text == node_text:
+            for t in texts:
+                if exact and t == node_text:
                     matched = True
-                elif not exact and text.lower() in node_text.lower():
+                    break
+                elif not exact and t.lower() in node_text.lower():
                     matched = True
-            if desc and not matched:
-                if exact and desc == node_desc:
-                    matched = True
-                elif not exact and desc.lower() in node_desc.lower():
-                    matched = True
+                    break
+
+            if not matched:
+                for d in descs:
+                    if exact and d == node_desc:
+                        matched = True
+                        break
+                    elif not exact and d.lower() in node_desc.lower():
+                        matched = True
+                        break
 
             if matched:
                 bounds = node.get("bounds", "")
@@ -229,13 +269,46 @@ class AndroidDeviceDriver:
 
         return None
 
+    def find_elements_batch(
+        self,
+        queries: List[Union[str, List[str]]],
+        key_type: str = "text",
+        exact: bool = False,
+    ) -> List[Optional[Tuple[int, int]]]:
+        """Resolves multiple element coordinates in a single UI dump, preventing sequential 2-second dumps."""
+        root = self.get_ui_dump()
+        if root is None:
+            return [None] * len(queries)
+
+        results: List[Optional[Tuple[int, int]]] = [None] * len(queries)
+        for node in root.iter("node"):
+            node_text = node.get("text", "")
+            node_desc = node.get("content-desc", "")
+            bounds = node.get("bounds", "")
+            m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds)
+            if not m:
+                continue
+            cx = (int(m.group(1)) + int(m.group(3))) // 2
+            cy = (int(m.group(2)) + int(m.group(4))) // 2
+
+            for idx, q in enumerate(queries):
+                if results[idx] is not None:
+                    continue
+                targets = [q] if isinstance(q, str) else q
+                for t in targets:
+                    val = node_text if key_type == "text" else node_desc
+                    if (exact and t == val) or (not exact and t.lower() in val.lower()):
+                        results[idx] = (cx, cy)
+                        break
+        return results
+
     def wait_for_element(
         self,
-        text: Optional[str] = None,
-        desc: Optional[str] = None,
+        text: Union[str, List[str], None] = None,
+        desc: Union[str, List[str], None] = None,
         timeout: float = 10.0,
         exact: bool = False,
-        interval: float = 0.8,
+        interval: float = 0.3,
     ) -> Optional[Tuple[int, int]]:
         """Polls for element until timeout."""
         start = time.time()
@@ -243,6 +316,7 @@ class AndroidDeviceDriver:
             coords = self.find_element(text=text, desc=desc, exact=exact)
             if coords:
                 return coords
+            self.invalidate_ui_dump()
             time.sleep(interval)
         return None
 
@@ -252,7 +326,7 @@ class AndroidDeviceDriver:
         descs: Optional[List[str]] = None,
         timeout: float = 10.0,
         exact: bool = False,
-        interval: float = 0.8,
+        interval: float = 0.3,
     ) -> Optional[Tuple[int, int]]:
         """Checks multiple candidate texts/descs in a single UI dump per tick to prevent UiAutomation lock collision."""
         start = time.time()
@@ -278,17 +352,20 @@ class AndroidDeviceDriver:
                             if m:
                                 x1, y1, x2, y2 = map(int, m.groups())
                                 return (x1 + x2) // 2, (y1 + y2) // 2
+            self.invalidate_ui_dump()
             time.sleep(interval)
         return None
 
-    def tap(self, x: int, y: int, sleep_after: float = 0.5):
+    def tap(self, x: int, y: int, sleep_after: float = 0.25, invalidate: bool = True):
         self.adb("shell", "input", "tap", str(x), str(y), check=False)
+        if invalidate:
+            self.invalidate_ui_dump()
         time.sleep(sleep_after)
 
     def tap_element(
         self,
-        text: Optional[str] = None,
-        desc: Optional[str] = None,
+        text: Union[str, List[str], None] = None,
+        desc: Union[str, List[str], None] = None,
         timeout: float = 5.0,
         exact: bool = False,
     ) -> bool:
@@ -299,14 +376,20 @@ class AndroidDeviceDriver:
         return False
 
     def is_logged_in(self) -> bool:
-        """Fast check if the app is currently inside authenticated tabs."""
-        return (
-            self.find_element(desc="Open Citizen Profile") is not None
-            or self.find_element(text="Namaste!") is not None
-            or self.find_element(desc=", Advisor") is not None
-            or self.find_element(desc=", Schemes") is not None
-            or self.find_element(desc=", Vault") is not None
-        )
+        """Fast check if the app is currently inside authenticated tabs (single-pass tree inspection)."""
+        root = self.get_ui_dump()
+        if root is None:
+            return False
+        for node in root.iter("node"):
+            t = node.get("text", "")
+            d = node.get("content-desc", "")
+            if (
+                d == "Open Citizen Profile"
+                or t == "Namaste!"
+                or any(tab_name in t or tab_name in d for tab_name in ("Advisor", "Schemes", "Vault", "Check"))
+            ):
+                return True
+        return False
 
     def google_sign_in(self, timeout: float = 12.0) -> bool:
         """
@@ -354,14 +437,15 @@ class AndroidDeviceDriver:
             timeout=timeout,
         ) is not None
 
-    def fast_login(self, use_google: bool = True, sleep_after: float = 1.5) -> bool:
+    def fast_login(self, use_google: bool = True, sleep_after: float = 0.3) -> bool:
         """
         Fast streamlined login for test suites and manual runner flag.
-        If already in tabs, returns True immediately (<50ms).
-        If use_google is True and on /auth, attempts Google Sign-In first;
-        falls back to instant email credentials submission if needed.
+        If already in tabs, returns True immediately (<10ms).
         """
+        if self._authenticated:
+            return True
         if self.is_logged_in():
+            self._authenticated = True
             return True
 
         self.ensure_app_foreground()
@@ -369,59 +453,49 @@ class AndroidDeviceDriver:
         # If Google sign-in requested, try it first
         if use_google:
             try:
-                if self.google_sign_in(timeout=8.0):
+                if self.google_sign_in(timeout=4.0):
+                    self._authenticated = True
                     return True
             except Exception:
                 pass
 
-        # Email credentials fast login fallback
-        root = self.get_ui_dump()
+        # Email credentials fast login fallback (direct coordinates on Pixel 9)
+        from .fixtures import TEST_USER
         email_coords = (571, 1280)
         pass_coords = (530, 1486)
         login_btn_coords = (540, 1730)
 
-        if root is not None:
-            for node in root.iter("node"):
-                if "EditText" in node.get("class", ""):
-                    bounds = node.get("bounds", "")
-                    m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds)
-                    if m:
-                        cx = (int(m.group(1)) + int(m.group(3))) // 2
-                        cy = (int(m.group(2)) + int(m.group(4))) // 2
-                        if node.get("password") == "true":
-                            pass_coords = (cx, cy)
-                        else:
-                            email_coords = (cx, cy)
-                elif node.get("text") == "Log In":
-                    bounds = node.get("bounds", "")
-                    m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds)
-                    if m:
-                        login_btn_coords = (
-                            (int(m.group(1)) + int(m.group(3))) // 2,
-                            (int(m.group(2)) + int(m.group(4))) // 2,
-                        )
-
-        from .fixtures import TEST_USER
-        self.clear_and_input(email_coords[0], email_coords[1], TEST_USER["email"])
-        self.clear_and_input(pass_coords[0], pass_coords[1], TEST_USER["password"])
+        self.clear_and_input(email_coords[0], email_coords[1], TEST_USER["email"], sleep_after=0.1)
+        self.clear_and_input(pass_coords[0], pass_coords[1], TEST_USER["password"], sleep_after=0.1)
         self.dismiss_keyboard()
-        time.sleep(0.2)
         self.tap(login_btn_coords[0], login_btn_coords[1], sleep_after=sleep_after)
 
-        return self.wait_for_any_element(
+        ok = self.wait_for_any_element(
             texts=["Advisor", "Schemes", "Vault", "Check"],
             descs=["Open Citizen Profile", "Advisor", "Schemes"],
-            timeout=8.0,
+            timeout=5.0,
         ) is not None
+        if ok:
+            self._authenticated = True
+        return ok
 
     def ensure_logged_in(self) -> bool:
+        if self._authenticated and self.is_logged_in():
+            return True
+        if self.is_logged_in():
+            self._authenticated = True
+            return True
+        # If left inside a modal / detail screen, attempt back key to pop to root tabs
+        self.press_key(KEYCODE_BACK, sleep_after=0.2)
+        if self.is_logged_in():
+            self._authenticated = True
+            return True
         return self.fast_login()
 
-    def switch_tab(self, tab: str, sleep_after: float = 1.2) -> bool:
+    def switch_tab(self, tab: str, sleep_after: float = 0.25) -> bool:
         """
         Reliably switches to one of the 4 main tabs: 'advisor', 'vault', 'check', 'schemes'.
-        Ensures authenticated session, dismisses soft-keyboard, queries tab bar bounds,
-        and taps safely above the Android system navigation gesture zone (y <= 2280).
+        Taps directly on known tab coordinates without dumping XML, running in <300ms.
         """
         self.ensure_logged_in()
         self.dismiss_keyboard()
@@ -432,82 +506,59 @@ class AndroidDeviceDriver:
             "schemes": 945,
         }
         tab_key = tab.lower().strip()
-        capitalized = tab_key.capitalize()
-
-        # Try finding by tab content-desc first (e.g. ', Schemes' or 'Schemes')
-        root = self.get_ui_dump()
-        if root is not None:
-            for node in root.iter("node"):
-                desc = node.get("content-desc", "")
-                text = node.get("text", "")
-                if (capitalized in desc or capitalized in text) and "View" in node.get("class", ""):
-                    bounds = node.get("bounds", "")
-                    m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds)
-                    if m:
-                        x1, y1, x2, y2 = map(int, m.groups())
-                        if y1 >= 2200:
-                            tap_x = (x1 + x2) // 2
-                            tap_y = min((y1 + y2) // 2, 2280)
-                            self.tap(tap_x, tap_y, sleep_after=sleep_after)
-                            return True
-
-        # Fallback to calculated coordinate at y=2280
         if tab_key in tab_x_map:
-            self.tap(tab_x_map[tab_key], 2280, sleep_after=sleep_after)
+            self.tap(tab_x_map[tab_key], 2290, sleep_after=sleep_after)
             return True
         return False
 
-    def input_text(self, text: str, sleep_after: float = 0.5):
-        # Escape spaces and shell-sensitive characters for adb shell input text
+    def input_text(self, text: str, sleep_after: float = 0.2):
         escaped = text.replace(" ", "%s").replace("&", "\\&").replace("!", "\\!")
         self.adb("shell", "input", "text", escaped, check=False)
+        self.invalidate_ui_dump()
         time.sleep(sleep_after)
 
-    def clear_and_input(self, x: int, y: int, text: str, sleep_after: float = 0.5):
-        """Taps element, selects all and clears cleanly, and inputs new text."""
-        self.tap(x, y, sleep_after=0.2)
-        # Select all (Ctrl+A) and delete
-        self.adb("shell", "input", "keyevent", "29", "--meta", "113", check=False)
-        self.adb("shell", "input", "keyevent", "67", check=False)
-        # Fallback quick backspaces
-        self.adb("shell", "input", "keyevent", *(["67"] * 8), check=False)
-        time.sleep(0.1)
-        # Input new text
-        self.input_text(text, sleep_after=sleep_after)
+    def clear_and_input(self, x: int, y: int, text: str, sleep_after: float = 0.2):
+        """Taps element, selects all, clears cleanly, and inputs new text in a single adb shell pipeline."""
+        escaped = text.replace(" ", "%s").replace("&", "\\&").replace("!", "\\!")
+        cmd = f"input tap {x} {y} && input keyevent 29 --meta 113 && input keyevent 67 && input keyevent 67 67 67 67 67 67 67 67 && input text {escaped}"
+        self.adb("shell", cmd, check=False)
+        self.invalidate_ui_dump()
+        time.sleep(sleep_after)
 
-    def press_key(self, keycode: int, sleep_after: float = 0.3):
+    def press_key(self, keycode: int, sleep_after: float = 0.15):
         self.adb("shell", "input", "keyevent", str(keycode), check=False)
+        self.invalidate_ui_dump()
         time.sleep(sleep_after)
 
     def is_keyboard_shown(self) -> bool:
-        res = self.adb("shell", "dumpsys", "input_method", check=False)
-        return "mInputShown=true" in res.stdout
+        res = self.adb("shell", "dumpsys input_method | grep 'mInputShown=true'", check=False)
+        return bool(res.stdout.strip())
 
     def dismiss_keyboard(self):
-        for _ in range(3):
-            if not self.is_keyboard_shown():
-                break
-            # KEYCODE_ESCAPE (111) dismisses soft keyboard without triggering onBackPressed
-            self.press_key(KEYCODE_ESCAPE, sleep_after=0.3)
+        if self.is_keyboard_shown():
+            self.press_key(KEYCODE_ESCAPE, sleep_after=0.15)
 
     def ensure_app_foreground(self):
-        res = self.adb("shell", "dumpsys", "activity", "activities", check=False)
-        if PACKAGE_NAME not in res.stdout:
+        res = self.adb("shell", "dumpsys window | grep 'mCurrentFocus.*MainActivity'", check=False)
+        if not res.stdout.strip():
             self.start_app()
-            time.sleep(1.5)
+            time.sleep(0.5)
 
     def scroll_down(self):
         # Swipe from center-bottom to center-top
-        self.adb("shell", "input", "swipe", "540", "1500", "540", "500", "300", check=False)
-        time.sleep(0.8)
+        self.adb("shell", "input", "swipe", "540", "1500", "540", "500", "200", check=False)
+        self.invalidate_ui_dump()
+        time.sleep(0.3)
 
     def scroll_up(self):
-        self.adb("shell", "input", "swipe", "540", "500", "540", "1500", "300", check=False)
-        time.sleep(0.8)
+        self.adb("shell", "input", "swipe", "540", "500", "540", "1500", "200", check=False)
+        self.invalidate_ui_dump()
+        time.sleep(0.3)
 
-    def swipe(self, x1: int, y1: int, x2: int, y2: int, duration_ms: int = 300):
+    def swipe(self, x1: int, y1: int, x2: int, y2: int, duration_ms: int = 200):
         self.adb("shell", "input", "swipe", str(x1), str(y1), str(x2), str(y2), str(duration_ms), check=False)
-        time.sleep(0.5)
+        self.invalidate_ui_dump()
+        time.sleep(0.25)
 
     def find_edit_text(self, password: bool = False) -> Optional[Tuple[int, int]]:
         root = self.get_ui_dump()
@@ -525,8 +576,13 @@ class AndroidDeviceDriver:
         return None
 
     def dismiss_system_dialogs(self):
-        """Dismiss Google Password Manager, Autofill, Forgot Password modal, or system dialogs in a single pass."""
-        root = self.get_ui_dump()
+        """Fast-checks if a system dialog/popup is on top before attempting an expensive UI dump."""
+        res = self.adb("shell", "dumpsys window | grep 'mCurrentFocus.*MainActivity'", check=False)
+        if res.stdout.strip():
+            # MainActivity has direct focus; no external system popup is active!
+            return
+
+        root = self.get_ui_dump(force=True)
         if root is None:
             return
 
@@ -539,5 +595,5 @@ class AndroidDeviceDriver:
                     m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds)
                     if m:
                         x1, y1, x2, y2 = map(int, m.groups())
-                        self.tap((x1 + x2) // 2, (y1 + y2) // 2, sleep_after=0.4)
+                        self.tap((x1 + x2) // 2, (y1 + y2) // 2, sleep_after=0.2)
                         return

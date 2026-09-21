@@ -3,6 +3,8 @@ import { ok, type Result } from '../../../core/errors/result';
 import { getLocalDatabase } from '../../../core/database/local-db';
 import { mmkvStorage } from '../../../core/storage/mmkv';
 import { apiClient } from '../../../core/api/client';
+import { config } from '../../../core/config/config';
+import { authStorage } from '../../auth/storage/auth.storage';
 import {
   BenefitType,
   PaginatedSchemes,
@@ -347,7 +349,7 @@ export class SchemesApiRepository {
     return this.getSchemeBySlug(slug);
   }
 
-  // Bookmarking / Saved Schemes (Stored in MMKV)
+  // Bookmarking / Saved Schemes (Stored in MMKV + Synced to Cloud PostgreSQL)
   private getSavedSchemeIds(): string[] {
     try {
       const raw = mmkvStorage.getString(CACHE_KEY_SAVED_SCHEMES);
@@ -357,8 +359,66 @@ export class SchemesApiRepository {
     }
   }
 
+  private setSavedSchemeIds(ids: string[]): void {
+    try {
+      mmkvStorage.set(CACHE_KEY_SAVED_SCHEMES, JSON.stringify(ids));
+    } catch {
+      // ignore
+    }
+  }
+
+  async syncSavedSchemesFromCloud(targetUserId?: number | string): Promise<string[]> {
+    try {
+      const user = authStorage.getCurrentUser();
+      const rawId = targetUserId || user?.id;
+      if (!rawId) return this.getSavedSchemeIds();
+      const userId = Number(rawId);
+      if (!userId || isNaN(userId)) return this.getSavedSchemeIds();
+
+      const baseUrl = config.apiUrl.replace(/\/+$/, '');
+      const res = await fetch(`${baseUrl}/user_saved_schemes?user_id=eq.${userId}`, {
+        headers: { Accept: 'application/json' },
+      });
+
+      if (res.ok) {
+        const rows: Array<{ scheme_slug: string }> = await res.json();
+        const cloudSlugs = (rows || []).map((r) => r.scheme_slug).filter(Boolean);
+        const localSlugs = this.getSavedSchemeIds();
+        const merged = Array.from(new Set([...localSlugs, ...cloudSlugs]));
+        this.setSavedSchemeIds(merged);
+
+        // Bi-directional sync: push any local-only bookmarks to the cloud account
+        const missingFromCloud = localSlugs.filter((s) => !cloudSlugs.includes(s));
+        if (missingFromCloud.length > 0) {
+          await Promise.all(
+            missingFromCloud.map((localSlug) =>
+              fetch(`${baseUrl}/user_saved_schemes`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, scheme_slug: localSlug }),
+              })
+            )
+          );
+        }
+
+        return merged;
+      }
+    } catch {
+      // offline fallback
+    }
+    return this.getSavedSchemeIds();
+  }
+
   async getSavedSchemes(): Promise<Result<SchemeItem[], AppError>> {
-    const slugs = this.getSavedSchemeIds();
+    let slugs = this.getSavedSchemeIds();
+    if (slugs.length === 0) {
+      // Pull from cloud if local cache is empty
+      slugs = await this.syncSavedSchemesFromCloud();
+    } else {
+      // Non-blocking sync in background
+      void this.syncSavedSchemesFromCloud();
+    }
+
     const items: SchemeItem[] = [];
     for (const slug of slugs) {
       const res = await this.getSchemeBySlug(slug);
@@ -370,14 +430,53 @@ export class SchemesApiRepository {
   async saveScheme(schemeId: string): Promise<Result<boolean, AppError>> {
     const current = new Set(this.getSavedSchemeIds());
     current.add(schemeId);
-    mmkvStorage.set(CACHE_KEY_SAVED_SCHEMES, JSON.stringify(Array.from(current)));
+    this.setSavedSchemeIds(Array.from(current));
+
+    // Cloud background sync
+    try {
+      const user = authStorage.getCurrentUser();
+      if (user?.id) {
+        const userId = Number(user.id);
+        if (!isNaN(userId) && userId > 0) {
+          const baseUrl = config.apiUrl.replace(/\/+$/, '');
+          void fetch(`${baseUrl}/user_saved_schemes`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, scheme_slug: schemeId }),
+          });
+        }
+      }
+    } catch {
+      // offline ignore
+    }
+
     return ok(true);
   }
 
   async removeSavedScheme(schemeId: string): Promise<Result<boolean, AppError>> {
     const current = new Set(this.getSavedSchemeIds());
     current.delete(schemeId);
-    mmkvStorage.set(CACHE_KEY_SAVED_SCHEMES, JSON.stringify(Array.from(current)));
+    this.setSavedSchemeIds(Array.from(current));
+
+    // Cloud background sync
+    try {
+      const user = authStorage.getCurrentUser();
+      if (user?.id) {
+        const userId = Number(user.id);
+        if (!isNaN(userId) && userId > 0) {
+          const baseUrl = config.apiUrl.replace(/\/+$/, '');
+          void fetch(
+            `${baseUrl}/user_saved_schemes?user_id=eq.${userId}&scheme_slug=eq.${encodeURIComponent(schemeId)}`,
+            {
+              method: 'DELETE',
+            }
+          );
+        }
+      }
+    } catch {
+      // offline ignore
+    }
+
     return ok(true);
   }
 
@@ -448,6 +547,15 @@ export class SchemesApiRepository {
       const localVersion = this.getLocalCatalogVersion();
       const res = await apiClient.request<{
         schemes: RawSchemeRow[];
+        canonical_documents?: {
+          id: string;
+          slug: string;
+          name: string;
+          category: string;
+          schemes_count: number;
+          overview?: string;
+          issuing_authorities?: string;
+        }[];
         count: number;
         synced_version: number;
         has_more: boolean;
@@ -460,9 +568,29 @@ export class SchemesApiRepository {
         return ok({ syncedCount: 0, newVersion: localVersion, isSuccess: false });
       }
 
-      const { schemes, synced_version } = res.data;
+      const { schemes, canonical_documents, synced_version } = res.data;
+      const db = getLocalDatabase();
+
+      if (canonical_documents && canonical_documents.length > 0) {
+        for (const cd of canonical_documents) {
+          db.runSync(
+            `INSERT OR REPLACE INTO canonical_documents (
+              id, slug, name, category, schemes_count, overview, issuing_authorities
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+              cd.id,
+              cd.slug,
+              cd.name,
+              cd.category,
+              cd.schemes_count || 0,
+              cd.overview || '',
+              cd.issuing_authorities || '',
+            ]
+          );
+        }
+      }
+
       if (schemes && schemes.length > 0) {
-        const db = getLocalDatabase();
         for (const s of schemes) {
           db.runSync(
             `INSERT OR REPLACE INTO schemes (

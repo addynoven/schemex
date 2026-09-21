@@ -25,6 +25,7 @@ export interface PostgrestMessageRow {
 
 export class ChatSyncService {
   private isSyncing = false;
+  private pendingUserId: number | string | null = null;
   private listeners = new Set<() => void>();
 
   public onSyncComplete(listener: () => void): () => void {
@@ -49,7 +50,12 @@ export class ChatSyncService {
    * Completely resilient and offline-first: fails silently if network is disconnected.
    */
   public async syncWithCloud(targetUserId?: number | string): Promise<void> {
-    if (this.isSyncing) return;
+    if (this.isSyncing) {
+      if (targetUserId) {
+        this.pendingUserId = targetUserId;
+      }
+      return;
+    }
     this.isSyncing = true;
 
     try {
@@ -110,10 +116,14 @@ export class ChatSyncService {
 
         for (const { sessionUid, message } of unsynced.messages) {
           const session = chatStorage.getSession(sessionUid);
-          const sessionId = session?.id || 1;
+          const rawId = session?.id;
+          // If session hasn't received a valid PostgreSQL integer ID yet, defer until session sync completes
+          if (!rawId || rawId > 2147483647) {
+            continue;
+          }
 
           messagePayload.push({
-            session_id: sessionId,
+            session_id: rawId,
             sender: message.sender,
             content: message.content,
             citations: message.citations || [],
@@ -180,6 +190,11 @@ export class ChatSyncService {
     } finally {
       this.isSyncing = false;
       this.notifyListeners();
+      if (this.pendingUserId != null) {
+        const nextId = this.pendingUserId;
+        this.pendingUserId = null;
+        void this.syncWithCloud(nextId);
+      }
     }
   }
 }

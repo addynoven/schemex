@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import {
+  BackHandler,
   FlatList,
-  KeyboardAvoidingView,
   LogBox,
   Platform,
   StyleSheet,
@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router';
 import { colors } from '@/core/theme/colors';
 import { spacing } from '@/core/theme/spacing';
 import { toastService } from '@/core/components/Toast';
+import { useKeyboard } from '@/core/hooks/useKeyboard';
 
 LogBox.ignoreAllLogs();
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -33,6 +34,7 @@ export function AdvisorScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList<ChatMessage>>(null);
+  const { keyboardHeight, isKeyboardVisible } = useKeyboard();
 
   const {
     messages,
@@ -40,11 +42,13 @@ export function AdvisorScreen() {
     isThinking,
     thinkingSteps,
     isListening,
+    isHistoryOpen,
     promptChips,
     errorMessage,
     clearError,
     retryLastQuery,
     openHistory,
+    closeHistory,
     loadSessions,
     setInputText,
     startVoiceInput,
@@ -57,6 +61,32 @@ export function AdvisorScreen() {
     void loadPromptChips();
     void loadSessions();
   }, [loadPromptChips, loadSessions]);
+
+  const hasMessages = messages.length > 0;
+
+  useEffect(() => {
+    if (isKeyboardVisible && hasMessages) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 80);
+    }
+  }, [isKeyboardVisible, hasMessages]);
+
+  // Priority: close history drawer → stop voice listening → fall through
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (isHistoryOpen) {
+        closeHistory();
+        return true;
+      }
+      if (isListening) {
+        stopVoiceInput();
+        return true;
+      }
+      return false;
+    });
+    return () => sub.remove();
+  }, [isHistoryOpen, isListening, closeHistory, stopVoiceInput]);
 
   const handleSchemePress = (schemeId: string) => {
     router.push({
@@ -93,14 +123,9 @@ export function AdvisorScreen() {
     router.push('/(tabs)/schemes');
   };
 
-  const hasMessages = messages.length > 0;
-
   return (
     <View style={[styles.safeArea, { paddingTop: insets.top }]}>
-      <KeyboardAvoidingView
-        style={styles.keyboardAvoid}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      <View style={styles.keyboardAvoid}>
         {/* Top Header */}
         <AdvisorHeader
           onProfilePress={handleProfilePress}
@@ -142,6 +167,7 @@ export function AdvisorScreen() {
             ref={flatListRef}
             data={messages}
             keyExtractor={(item) => item.id}
+            keyboardShouldPersistTaps="handled"
             contentContainerStyle={styles.listContent}
             onContentSizeChange={() => {
               if (hasMessages) {
@@ -194,7 +220,7 @@ export function AdvisorScreen() {
         <ProfileMenuModal />
         <LogoutConfirmModal />
         <ChatHistoryDrawer />
-      </KeyboardAvoidingView>
+      </View>
     </View>
   );
 }

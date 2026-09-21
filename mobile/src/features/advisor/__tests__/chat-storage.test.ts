@@ -102,3 +102,30 @@ test('Chat Sync Service - executes non-blocking sync cycle with cloud database',
   assert.strictEqual(notified, true, 'Sync service should notify listeners on cycle completion');
   unsubscribe();
 });
+
+test('Advisor Store - createNewSession with preserveMessages keeps user message on screen', async () => {
+  const { useAdvisorStore } = await import('../store/useAdvisorStore');
+
+  useAdvisorStore.setState({
+    messages: [
+      {
+        id: 'msg-user-1',
+        sender: 'user',
+        text: 'What schemes are available for women farmers in Goa?',
+        timestamp: '12:00 PM',
+      },
+    ],
+    currentSessionId: null,
+  });
+
+  // When a new chat starts, createNewSession is called with preserveMessages: true
+  const newSessionKey = await useAdvisorStore.getState().createNewSession('Goa Women Farmers', true);
+  assert.ok(newSessionKey);
+
+  const state = useAdvisorStore.getState();
+  assert.equal(state.currentSessionId, newSessionKey);
+  // User message MUST NOT be wiped out!
+  assert.equal(state.messages.length, 1);
+  assert.equal(state.messages[0].text, 'What schemes are available for women farmers in Goa?');
+  assert.equal(state.messages[0].sender, 'user');
+});

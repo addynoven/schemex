@@ -17,6 +17,7 @@ import { UserProfile } from '../models/auth.model';
 import { authStorage } from '../storage/auth.storage';
 import { vaultApi } from '../../vault/repositories/vault.api';
 import { chatSyncService } from '../../advisor/services/chat-sync.service';
+import { schemesApi } from '../../schemes/repositories/schemes.api';
 
 export class AuthApiRepository {
   /**
@@ -145,10 +146,11 @@ export class AuthApiRepository {
 
       authStorage.saveUser(userProfile);
 
-      // 4. Restore user's cloud data to this device (Vault Documents + Chat History)
+      // 4. Restore user's cloud data to this device (Vault Documents + Chat History + Saved Schemes)
       if (pgUser?.id) {
         void vaultApi.syncFromCloud(pgUser.id);
         void chatSyncService.syncWithCloud(pgUser.id);
+        void schemesApi.syncSavedSchemesFromCloud(pgUser.id);
       }
 
       return userProfile;

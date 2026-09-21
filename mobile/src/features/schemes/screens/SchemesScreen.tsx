@@ -74,7 +74,6 @@ interface SchemesScreenProps {
 export const SchemesScreen: React.FC<SchemesScreenProps> = ({ onOpenProfileMenu }) => {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [isSearching, setIsSearching] = useState(false);
   const { currentUser } = useAuthStore();
   const lastSyncedLabel = useLastSynced(SYNC_TS_SCHEMES);
 
@@ -97,6 +96,8 @@ export const SchemesScreen: React.FC<SchemesScreenProps> = ({ onOpenProfileMenu 
     syncServerSchemes,
     getSavedSchemes,
     resetFilters,
+    isSearching,
+    setIsSearching,
   } = useSchemesStore();
 
   // 300ms Debounce for live search

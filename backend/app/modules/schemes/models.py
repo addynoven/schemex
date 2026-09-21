@@ -132,3 +132,18 @@ class EligibilityRuleVersion(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     scheme_version: Mapped["SchemeVersion"] = relationship("SchemeVersion", back_populates="rule_versions")
+
+
+class CanonicalDocument(Base):
+    __tablename__ = "canonical_documents"
+
+    id: Mapped[str] = mapped_column(String(128), primary_key=True)
+    slug: Mapped[str] = mapped_column(String(128), unique=True, nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    category: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    schemes_count: Mapped[int] = mapped_column(Integer, default=0, server_default="0", nullable=False)
+    overview: Mapped[str | None] = mapped_column(Text, nullable=True)
+    issuing_authorities: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+

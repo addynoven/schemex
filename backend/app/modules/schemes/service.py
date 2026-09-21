@@ -553,7 +553,7 @@ def delete_scheme(db: Session, scheme_id: int) -> bool:
 
 from pathlib import Path
 
-KNOWLEDGE_SCHEMES_DIR = Path(__file__).resolve().parent.parent.parent.parent / "knowledge" / "schemes"
+KNOWLEDGE_SCHEMES_DIR = Path(__file__).resolve().parents[4] / "knowledge" / "schemes"
 
 
 def browse_schemes_with_filters(

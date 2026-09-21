@@ -92,3 +92,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }
+
+// DELETE /api/chat_sessions?session_uid=eq.X or ?id=eq.X
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const sessionUid = parseEqParam(searchParams.get('session_uid'));
+    const id = parseEqParam(searchParams.get('id'));
+
+    if (!sessionUid && !id) {
+      return NextResponse.json({ error: 'Missing session_uid or id parameter' }, { status: 400 });
+    }
+
+    if (sessionUid) {
+      await query(`DELETE FROM chat_sessions WHERE session_uid = $1`, [sessionUid]);
+    } else if (id) {
+      await query(`DELETE FROM chat_sessions WHERE id = $1`, [Number(id)]);
+    }
+
+    return NextResponse.json({ success: true, deleted: { session_uid: sessionUid, id } });
+  } catch (error: any) {
+    console.error('Failed to delete chat_session:', error);
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  }
+}

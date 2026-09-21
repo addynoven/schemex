@@ -11,7 +11,7 @@ from app.modules.schemes.models import Scheme
 
 logger = logging.getLogger(__name__)
 
-KNOWLEDGE_SCHEMES_DIR = Path(__file__).resolve().parent.parent.parent.parent / "knowledge" / "schemes"
+KNOWLEDGE_SCHEMES_DIR = Path(__file__).resolve().parents[4] / "knowledge" / "schemes"
 
 CHAT_TOOLS_DECLARATIONS = [
     {

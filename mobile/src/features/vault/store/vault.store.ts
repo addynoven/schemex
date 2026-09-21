@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import {
   formatFileSize,
+  getCanonicalDocumentType,
+  isSameDocumentType,
   VaultDevScreen,
   VaultDocument,
   VaultDocumentCategory,
@@ -67,11 +69,12 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   },
 
   openUploadSheet: (title?: string, category?: VaultDocumentCategory) => {
+    const finalCategory = category || (title ? inferCategory(title) : undefined);
     set({
       uploadModalVisible: true,
       targetDocTitle: title || '',
       lastSavedDocTitle: title || '',
-      targetCategory: category || (title ? inferCategory(title) : undefined),
+      targetCategory: finalCategory,
     });
   },
 
@@ -88,46 +91,43 @@ export const useVaultStore = create<VaultState>((set, get) => ({
     fileUri,
     downloadUrl,
   }) => {
-    const finalTitle = title.trim() || 'Document';
-    const finalCategory = category || inferCategory(finalTitle);
+    const rawTitle = title.trim() || 'Document';
+    const canonicalTitle = getCanonicalDocumentType(rawTitle);
+    const finalCategory = category || inferCategory(canonicalTitle);
     const finalFileName =
-      fileName || `${finalTitle.toLowerCase().replace(/[^a-z0-9]/g, '_')}.pdf`;
-
-    const newDoc: VaultDocument = {
-      id: `doc-${Date.now()}`,
-      title: finalTitle,
-      fileName: finalFileName,
-      fileSize: fileSize || '0 KB',
-      mimeType: mimeType || 'application/pdf',
-      category: finalCategory,
-      uploadDate: 'Just now',
-      isVerified: true,
-      fileUri,
-      downloadUrl,
-    };
+      fileName || `${canonicalTitle.toLowerCase().replace(/[^a-z0-9]/g, '_')}.pdf`;
 
     set((state) => {
-      const existingIdx = state.documents.findIndex(
-        (d) => d.title.trim().toLowerCase() === finalTitle.toLowerCase()
+      // Find existing document of the same canonical type
+      const existingDoc = state.documents.find((d) =>
+        isSameDocumentType(d.title, canonicalTitle)
       );
-      let updatedDocs: VaultDocument[];
-      if (existingIdx >= 0) {
-        updatedDocs = [...state.documents];
-        updatedDocs[existingIdx] = {
-          ...updatedDocs[existingIdx],
-          ...newDoc,
-          id: updatedDocs[existingIdx].id,
-        };
-      } else {
-        updatedDocs = [newDoc, ...state.documents];
-      }
+
+      const newDoc: VaultDocument = {
+        id: existingDoc ? existingDoc.id : `doc-${Date.now()}`,
+        title: canonicalTitle,
+        fileName: finalFileName,
+        fileSize: fileSize || '0 KB',
+        mimeType: mimeType || 'application/pdf',
+        category: finalCategory,
+        uploadDate: 'Just now',
+        isVerified: true,
+        fileUri,
+        downloadUrl,
+      };
+
+      // Strip out ANY prior documents that match this canonical type to prevent duplicates
+      const remainingDocs = state.documents.filter(
+        (d) => !isSameDocumentType(d.title, canonicalTitle)
+      );
+
       return {
         uploadModalVisible: false,
         savedModalVisible: true,
-        lastSavedDocTitle: finalTitle,
+        lastSavedDocTitle: canonicalTitle,
         targetDocTitle: undefined,
         targetCategory: undefined,
-        documents: updatedDocs,
+        documents: [newDoc, ...remainingDocs],
       };
     });
   },
@@ -138,19 +138,22 @@ export const useVaultStore = create<VaultState>((set, get) => ({
 
   addDocument: (doc: VaultDocument) => {
     set((state) => {
-      const existingIdx = state.documents.findIndex(
-        (d) => d.title.trim().toLowerCase() === doc.title.trim().toLowerCase()
+      const canonicalTitle = getCanonicalDocumentType(doc.title);
+      const existingDoc = state.documents.find((d) =>
+        isSameDocumentType(d.title, canonicalTitle)
       );
-      if (existingIdx >= 0) {
-        const updated = [...state.documents];
-        updated[existingIdx] = {
-          ...updated[existingIdx],
-          ...doc,
-          id: updated[existingIdx].id,
-        };
-        return { documents: updated };
-      }
-      return { documents: [doc, ...state.documents] };
+
+      const updatedDoc: VaultDocument = {
+        ...doc,
+        id: existingDoc ? existingDoc.id : doc.id,
+        title: canonicalTitle,
+      };
+
+      const remaining = state.documents.filter(
+        (d) => !isSameDocumentType(d.title, canonicalTitle)
+      );
+
+      return { documents: [updatedDoc, ...remaining] };
     });
   },
 
@@ -159,8 +162,19 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   },
 
   syncServerDocuments: (serverDocs: BackendVaultDocument[]) => {
-    if (!serverDocs) return;
-    const mapped: VaultDocument[] = serverDocs.map((doc) => ({
+    if (!serverDocs || !Array.isArray(serverDocs)) return;
+
+    // Deduplicate incoming server documents by canonical document type (keeping newest)
+    const canonicalMap = new Map<string, BackendVaultDocument>();
+    for (const doc of serverDocs) {
+      const canonical = getCanonicalDocumentType(doc.document_type);
+      const existing = canonicalMap.get(canonical);
+      if (!existing || doc.id > existing.id) {
+        canonicalMap.set(canonical, doc);
+      }
+    }
+
+    const mapped: VaultDocument[] = Array.from(canonicalMap.values()).map((doc) => ({
       id: String(doc.id),
       title: doc.document_type,
       fileName: doc.file_name,

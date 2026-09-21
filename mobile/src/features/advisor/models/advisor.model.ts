@@ -85,6 +85,9 @@ export interface BackendChatMessageResponse {
   intent?: string;
   citations?: string[];
   sources?: BackendSource[];
+  recommendations?: SchemeRecommendation[];
+  documents?: DocumentRequirement[];
+  suggestedFollowUps?: string[];
   created_at: string;
 }
 

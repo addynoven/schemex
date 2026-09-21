@@ -9,6 +9,7 @@ import type {
 } from '../models/advisor.model';
 import { advisorRepository } from '../repositories/advisor.repository';
 import { chatSyncService } from '../services/chat-sync.service';
+import { chatStorage } from '../storage/chat-storage';
 
 export const INITIAL_THINKING_STEPS: readonly ThinkingStep[] = [
   { id: '1', title: 'Understanding your query', status: 'pending' },
@@ -41,21 +42,27 @@ interface AdvisorState {
   readonly loadPromptChips: () => Promise<void>;
   readonly loadSessions: () => Promise<void>;
   readonly selectSession: (sessionId: string) => Promise<void>;
-  readonly createNewSession: (title?: string) => Promise<string | null>;
+  readonly createNewSession: (title?: string, preserveMessages?: boolean) => Promise<string | null>;
   readonly deleteSession: (sessionId: string) => Promise<void>;
-  readonly openHistory: () => void;
+  readonly openHistory: () => Promise<void>;
   readonly closeHistory: () => void;
 }
 
 function mapBackendMessageToChatMessage(bm: BackendChatMessageResponse): ChatMessage {
-  const recommendations: SchemeRecommendation[] = (bm.sources || []).map((s) => ({
-    id: s.slug,
-    title: s.title,
-    ministry: 'Government of India',
-    benefitAmount: '',
-    benefitDescription: 'Verified citizen welfare scheme',
-    tags: ['Verified', 'Government Scheme'],
-  }));
+  let recommendations: SchemeRecommendation[] | undefined = bm.recommendations;
+  if (!recommendations || recommendations.length === 0) {
+    const fromSources = (bm.sources || []).map((s) => ({
+      id: s.slug,
+      title: s.title,
+      ministry: s.jurisdiction || 'Government of India',
+      benefitAmount: '',
+      benefitDescription: s.summary || 'Verified citizen welfare scheme',
+      tags: ['Verified', s.category || 'Government Scheme'],
+    }));
+    if (fromSources.length > 0) {
+      recommendations = fromSources;
+    }
+  }
 
   const sources =
     bm.citations && bm.citations.length > 0
@@ -71,7 +78,9 @@ function mapBackendMessageToChatMessage(bm: BackendChatMessageResponse): ChatMes
       minute: 'numeric',
       hour12: true,
     }).format(new Date(bm.created_at || Date.now())),
-    recommendations: recommendations.length > 0 ? recommendations : undefined,
+    recommendations: recommendations && recommendations.length > 0 ? recommendations : undefined,
+    documents: bm.documents && bm.documents.length > 0 ? bm.documents : undefined,
+    suggestedFollowUps: bm.suggestedFollowUps && bm.suggestedFollowUps.length > 0 ? bm.suggestedFollowUps : undefined,
     sources: sources.length > 0 ? sources : undefined,
   };
 }
@@ -102,9 +111,9 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => ({
 
   clearError: () => set({ errorMessage: null }),
 
-  openHistory: () => {
+  openHistory: async () => {
     set({ isHistoryOpen: true });
-    void get().loadSessions();
+    await get().loadSessions();
   },
 
   closeHistory: () => set({ isHistoryOpen: false }),
@@ -139,17 +148,19 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => ({
     }
   },
 
-  createNewSession: async (title: string = 'New Welfare Consultation') => {
-    set({ isThinking: true, errorMessage: null });
+  createNewSession: async (title: string = 'New Welfare Consultation', preserveMessages = false) => {
+    if (!preserveMessages) {
+      set({ isThinking: true, errorMessage: null });
+    }
     const result = await advisorRepository.createSession(title);
     if (result.ok && result.data) {
       const key = result.data.session_uid || String(result.data.id);
-      set({
+      set((state) => ({
         currentSessionId: key,
-        messages: [],
-        isThinking: false,
+        messages: preserveMessages ? state.messages : [],
+        isThinking: preserveMessages ? state.isThinking : false,
         isHistoryOpen: false,
-      });
+      }));
       void get().loadSessions();
       return key;
     }
@@ -212,9 +223,10 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => ({
     // Ensure session ID exists
     let sessionId = get().currentSessionId;
     if (!sessionId) {
-      sessionId = (await get().createNewSession('New Welfare Consultation')) || null;
+      sessionId = (await get().createNewSession('New Welfare Consultation', true)) || null;
     }
 
+    const history = get().messages;
     const result = await advisorRepository.askAdvisor(
       query,
       sessionId || undefined,
@@ -230,7 +242,8 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => ({
                 : 'pending',
           })),
         }));
-      }
+      },
+      history
     );
 
     if (result.ok) {
@@ -267,5 +280,6 @@ export const useAdvisorStore = create<AdvisorState>((set, get) => ({
 }));
 
 chatSyncService.onSyncComplete(() => {
-  void useAdvisorStore.getState().loadSessions();
+  const sessions = chatStorage.getSessions();
+  useAdvisorStore.setState({ sessions });
 });

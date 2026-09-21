@@ -1,5 +1,6 @@
 from app.modules.schemes.models import (
     Benefit,
+    CanonicalDocument,
     EligibilityRule,
     OfficialSource,
     RequiredDocument,

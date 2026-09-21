@@ -82,7 +82,7 @@ export function getLocalDatabase(): LocalDatabase {
   }
 }
 
-export const LOCAL_DB_VERSION = 2;
+export const LOCAL_DB_VERSION = 3;
 const STORAGE_KEY_DB_VERSION = 'app_local_sqlite_db_version';
 
 export async function initializeLocalDatabase(): Promise<void> {

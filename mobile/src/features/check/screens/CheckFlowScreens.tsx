@@ -33,7 +33,7 @@ export const StartScreen: React.FC = () => {
 
   return (
     <View style={styles.screenContainer}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Check Eligibility</Text>
@@ -171,7 +171,7 @@ export const DemographicsScreen: React.FC = () => {
     <View style={styles.screenContainer}>
       <StepProgressHeader currentStep={1} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View style={styles.formHeader}>
           <Text style={styles.formStepTag}>STEP 1 OF 3</Text>
           <Text style={styles.formTitle}>Demographics</Text>
@@ -531,7 +531,7 @@ export const EconomicScreen: React.FC = () => {
     <View style={styles.screenContainer}>
       <StepProgressHeader currentStep={2} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View style={styles.formHeader}>
           <Text style={styles.formStepTag}>STEP 2 OF 3</Text>
           <Text style={styles.formTitle}>Economic Details</Text>
@@ -631,7 +631,7 @@ export const AssetsScreen: React.FC = () => {
     <View style={styles.screenContainer}>
       <StepProgressHeader currentStep={3} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View style={styles.formHeader}>
           <Text style={styles.formStepTag}>STEP 3 OF 3</Text>
           <Text style={styles.formTitle}>Assets & Others</Text>
@@ -744,7 +744,7 @@ export const ReviewScreen: React.FC = () => {
 
   return (
     <View style={styles.screenContainer}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* Header */}
         <View style={styles.formHeader}>
           <Text style={styles.formTitle}>Review Your Information</Text>
@@ -1020,7 +1020,7 @@ export const ResultsScreen: React.FC = () => {
 
   return (
     <View style={styles.screenContainer}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* Celebration Banner */}
         <View style={styles.celebrationBanner}>
           <View style={styles.celebrationCircle}>
@@ -1112,7 +1112,7 @@ export const SchemeDetailsScreen: React.FC = () => {
 
   return (
     <View style={styles.screenContainer}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* Scheme Header */}
         <View style={styles.schemeDetailHeader}>
           <View style={styles.schemeDetailIconCircle}>
@@ -1242,7 +1242,7 @@ export const NearlyEligibleScreen: React.FC = () => {
 
   return (
     <View style={styles.screenContainer}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View style={styles.formHeader}>
           <Text style={styles.formTitle}>Nearly Eligible ({nearlyList.length})</Text>
           <Text style={styles.formSubtitle}>

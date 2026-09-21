@@ -10,6 +10,8 @@ import {
   SchemeRecommendation,
 } from '../models/advisor.model';
 import type { AdvisorRepository } from './advisor.repository';
+import { executeAgentTurn, type CitizenProfileContext } from '../services/advisor-agent';
+import { useAuthStore } from '../../auth/store/useAuthStore';
 
 export const DEFAULT_PROMPT_CHIPS: readonly PromptChip[] = [
   {
@@ -97,9 +99,14 @@ export class ApiAdvisorRepository implements AdvisorRepository {
   }
 
   async listSessions(): Promise<Result<BackendChatSessionResponse[], AppError>> {
+    const local = chatStorage.getSessions();
+    if (local.length === 0) {
+      await chatSyncService.syncWithCloud();
+      return ok(chatStorage.getSessions());
+    }
     // Non-blocking cloud sync in background
     void chatSyncService.syncWithCloud();
-    return ok(chatStorage.getSessions());
+    return ok(local);
   }
 
   async getSession(sessionId: string): Promise<Result<BackendChatSessionResponse, AppError>> {
@@ -168,13 +175,15 @@ export class ApiAdvisorRepository implements AdvisorRepository {
   }
 
   /**
-   * Evaluates query using Local SQLite RAG + Direct Google Gemini API.
-   * If offline, returns local scheme recommendations immediately.
+   * Evaluates query using Native Tool-Augmented Citizen Welfare Advisor.
+   * Dispatches tool calls (search_schemes_directory, check_eligibility, get_scheme_details)
+   * against local SQLite database with multi-turn conversation memory.
    */
   async askAdvisor(
     query: string,
     sessionId?: string,
-    onProgress?: (stepIndex: number) => void
+    onProgress?: (stepIndex: number) => void,
+    history?: readonly ChatMessage[]
   ): Promise<Result<ChatMessage, AppError>> {
     const sessionUid = sessionId || (await this.getOrCreateSession());
 
@@ -193,114 +202,33 @@ export class ApiAdvisorRepository implements AdvisorRepository {
     };
     chatStorage.addMessage(sessionUid, userMsg, false);
 
-    // Step 1: Understanding query
+    // Step 1: Understanding query & loading conversation context
     onProgress?.(0);
-
-    // Step 2: Local RAG Search
-    onProgress?.(1);
     const db = getLocalDatabase();
 
-    // Extract search terms
-    const words = query.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter((w) => w.length > 3);
-    const likeClauses = words.map(() => '(title LIKE ? OR description LIKE ? OR category LIKE ?)').join(' OR ');
-
-    let matchingSchemes: SchemeSearchRow[] = [];
-    if (words.length > 0) {
-      const params: string[] = [];
-      for (const w of words) {
-        params.push(`%${w}%`, `%${w}%`, `%${w}%`);
-      }
-      try {
-        matchingSchemes = db.getAllSync<SchemeSearchRow>(
-          `SELECT id, slug, title, ministry, state, category, benefit_summary, description 
-           FROM schemes 
-           WHERE ${likeClauses} 
-           LIMIT 3`,
-          params
-        );
-      } catch {
-        matchingSchemes = [];
-      }
+    // Get user profile context
+    let userProfile: CitizenProfileContext | undefined;
+    try {
+      const authUser = useAuthStore.getState().currentUser;
+      const authState = useAuthStore.getState().state;
+      userProfile = {
+        fullName: authUser?.fullName,
+        state: authUser?.state || authState,
+      };
+    } catch {
+      // In non-react context
     }
 
-    // Fallback if no specific keyword matched
-    if (matchingSchemes.length === 0) {
-      try {
-        matchingSchemes = db.getAllSync<SchemeSearchRow>(
-          `SELECT id, slug, title, ministry, state, category, benefit_summary, description 
-           FROM schemes 
-           ORDER BY id ASC 
-           LIMIT 3`
-        );
-      } catch {
-        matchingSchemes = [];
-      }
-    }
+    // Step 2: Executing Agentic Tool-Calling Turn
+    onProgress?.(1);
+    const conversationHistory = history || [];
+    const agentTurn = await executeAgentTurn(query, conversationHistory, userProfile, db);
 
-    // Step 3: Checking eligibility & AI reasoning
+    // Step 3: Checking eligibility criteria & verifying guidelines
     onProgress?.(2);
 
-    const apiKey = process.env.EXPO_PUBLIC_GEMINI_API_KEY || 'AIzaSyCE3dB3FJPGWyZ0uuRZIz6YbD4bDnH9H-U';
-    let aiText = '';
-
-    if (apiKey) {
-      try {
-        const schemesContext = matchingSchemes
-          .map((s) => `• ${s.title} (${s.slug}): ${s.benefit_summary || s.description}`)
-          .join('\n');
-
-        const prompt = `You are a friendly, expert government citizen welfare advisor in India.
-User Query: "${query}"
-
-Top relevant official schemes in database:
-${schemesContext}
-
-Instructions:
-1. Explain in 2-3 clear sentences which schemes are relevant to their request and why.
-2. Keep the tone warm, empowering, and concise.`;
-
-        const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            }),
-          }
-        );
-
-        if (response.ok) {
-          const json = await response.json();
-          const candidateText = json?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (candidateText) {
-            aiText = candidateText.trim();
-          }
-        }
-      } catch {
-        // Offline / network failure
-      }
-    }
-
-    // Fallback response if offline or API failed
-    if (!aiText) {
-      aiText = `You qualify for **${matchingSchemes.length} schemes** based on your query.\n\nHere are the top official recommendations from your local offline database:`;
-    }
-
-    // Step 4: Preparing recommendations
+    // Step 4: Preparing recommendations & document checklist
     onProgress?.(3);
-
-    const recommendations: SchemeRecommendation[] = matchingSchemes.map((s) => ({
-      id: s.slug,
-      title: s.title,
-      ministry: s.ministry || 'Government of India',
-      benefitAmount: '',
-      benefitDescription: s.benefit_summary || s.description || '',
-      tags: ['✓ Verified', s.category || 'Central Scheme'].filter(Boolean),
-    }));
-
-    const citations = matchingSchemes.map((s) => s.slug);
-    const sources = matchingSchemes.map((s) => s.title);
 
     const responseTimeStr = new Intl.DateTimeFormat('en-IN', {
       hour: 'numeric',
@@ -311,14 +239,25 @@ Instructions:
     const msg: ChatMessage = {
       id: `msg_ai_${Date.now()}`,
       sender: 'assistant',
-      text: aiText,
+      text: agentTurn.text,
       timestamp: responseTimeStr,
-      recommendations: recommendations.length > 0 ? recommendations : undefined,
-      sources: citations.length > 0 ? citations : sources,
+      recommendations: agentTurn.recommendations && agentTurn.recommendations.length > 0 ? agentTurn.recommendations : undefined,
+      documents: agentTurn.documents && agentTurn.documents.length > 0 ? agentTurn.documents : undefined,
+      bullets: agentTurn.bullets && agentTurn.bullets.length > 0 ? agentTurn.bullets : undefined,
+      suggestedFollowUps: agentTurn.suggestedFollowUps,
+      sources: agentTurn.sources && agentTurn.sources.length > 0 ? agentTurn.sources : agentTurn.citations,
     };
 
     // Save assistant response locally
     chatStorage.addMessage(sessionUid, msg, false);
+
+    // Update session title to smart topic if it was default
+    if (agentTurn.detectedTopic) {
+      const session = chatStorage.getSession(sessionUid);
+      if (!session || session.title === 'New Welfare Consultation' || session.title.startsWith('local_chat_')) {
+        chatStorage.updateSessionTitle(sessionUid, agentTurn.detectedTopic);
+      }
+    }
 
     // Non-blocking background sync to cloud PostgreSQL
     void chatSyncService.syncWithCloud();

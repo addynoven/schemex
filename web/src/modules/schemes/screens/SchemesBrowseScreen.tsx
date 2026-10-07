@@ -1,46 +1,68 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Search,
-  Filter,
-  ArrowUpDown,
   Building2,
   MapPin,
-  Tag,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   ExternalLink,
   Sparkles,
   ShieldCheck,
-  RotateCcw,
   BookOpen,
+  ArrowRight,
   ArrowLeft,
+  Bookmark,
+  X,
+  CheckCircle2,
+  Leaf,
+  Compass,
+  Activity,
+  Award,
+  Layers,
+  FolderLock,
+  FileCheck,
 } from 'lucide-react'
 import {
   getSchemeCategories,
   listSchemesPaginated,
+  listSavedSchemes,
+  saveScheme,
+  deleteSavedScheme,
+  getSchemeBySlug,
+  getSchemeDocumentReadiness,
   type Scheme,
+  type SchemeDocumentReadiness,
 } from '@/lib/api'
+import { getCitizenUser } from '@/lib/session'
+import { AppLayout } from '@/components/layout/AppLayout'
 
-const INDIAN_STATES = [
-  'All',
-  'ALL_INDIA',
+const ALL_INDIAN_STATES = [
+  'All India',
+  'Central Only',
+  'Andaman and Nicobar Islands',
   'Andhra Pradesh',
   'Arunachal Pradesh',
   'Assam',
   'Bihar',
+  'Chandigarh',
   'Chhattisgarh',
+  'Dadra and Nagar Haveli and Daman and Diu',
   'Delhi',
   'Goa',
   'Gujarat',
   'Haryana',
   'Himachal Pradesh',
+  'Jammu and Kashmir',
   'Jharkhand',
   'Karnataka',
   'Kerala',
+  'Ladakh',
+  'Lakshadweep',
   'Madhya Pradesh',
   'Maharashtra',
   'Manipur',
@@ -48,6 +70,7 @@ const INDIAN_STATES = [
   'Mizoram',
   'Nagaland',
   'Odisha',
+  'Puducherry',
   'Punjab',
   'Rajasthan',
   'Sikkim',
@@ -59,34 +82,30 @@ const INDIAN_STATES = [
   'West Bengal',
 ]
 
-const DEFAULT_CATEGORIES = [
-  { category: 'Agriculture', count: 802 },
-  { category: 'Business & Finance', count: 305 },
-  { category: 'Education', count: 668 },
-  { category: 'Employment & Skills', count: 418 },
-  { category: 'Healthcare', count: 446 },
-  { category: 'Housing', count: 312 },
-  { category: 'Social Welfare', count: 429 },
-  { category: 'Women & Child', count: 545 },
-  { category: 'General', count: 220 },
+const CATEGORY_CHIPS = [
+  { id: 'All', label: 'All Categories', icon: <Layers className="h-4 w-4" /> },
+  { id: 'Agriculture', label: 'Agriculture', icon: <Leaf className="h-4 w-4" /> },
+  { id: 'Cash Grants', label: 'Cash Grants', icon: <Award className="h-4 w-4" /> },
+  { id: 'Healthcare', label: 'Healthcare', icon: <Activity className="h-4 w-4" /> },
+  { id: 'Education', label: 'Education', icon: <BookOpen className="h-4 w-4" /> },
+  { id: 'Housing', label: 'Housing', icon: <Building2 className="h-4 w-4" /> },
 ]
 
 const SORT_OPTIONS = [
-  { label: 'Relevance / Default', value: '' },
-  { label: 'Name (A to Z)', value: 'name_asc' },
-  { label: 'Name (Z to A)', value: 'name_desc' },
-  { label: 'Category', value: 'category_asc' },
-  { label: 'Recently Added', value: 'id_desc' },
+  { label: 'Sort: Relevance', value: '' },
+  { label: 'Sort: Highest Benefit', value: 'benefit_desc' },
+  { label: 'Sort: Earliest Deadline', value: 'deadline_asc' },
+  { label: 'Sort: Recently Added', value: 'id_desc' },
 ]
 
 export function SchemesBrowseScreen() {
+  const router = useRouter()
   const searchParams = useSearchParams()
   const initialCategory = searchParams?.get('category') || 'All'
-  const initialState = searchParams?.get('state') || 'All'
+  const initialState = searchParams?.get('state') || 'All India'
   const initialSearch = searchParams?.get('q') || searchParams?.get('search') || ''
 
   const [schemes, setSchemes] = useState<Scheme[]>([])
-  const [categoriesList, setCategoriesList] = useState<Array<{ category: string; count?: number }>>(DEFAULT_CATEGORIES)
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
 
@@ -94,21 +113,60 @@ export function SchemesBrowseScreen() {
   const [search, setSearch] = useState(initialSearch)
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch)
   const [category, setCategory] = useState(initialCategory)
-  const [stateFilter, setStateFilter] = useState(initialState)
+  const [jurisdiction, setJurisdiction] = useState(initialState)
   const [sortBy, setSortBy] = useState('')
   const [page, setPage] = useState(1)
-  const pageSize = 12
+  const pageSize = 15
 
-  // Load real categories from backend on mount
+  // Master-Detail State
+  const [selectedSchemeSlug, setSelectedSchemeSlug] = useState<string | null>(null)
+  const [detailedScheme, setDetailedScheme] = useState<Scheme | null>(null)
+  const [detailTab, setDetailTab] = useState<'overview' | 'eligibility' | 'documents' | 'faq'>('overview')
+  const [readiness, setReadiness] = useState<SchemeDocumentReadiness | null>(null)
+
+  // Saved Schemes & Tab state
+  const [activeTab, setActiveTab] = useState<'all' | 'saved'>('all')
+  const [savedSlugs, setSavedSlugs] = useState<Set<string>>(new Set())
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+
+  const currentUser = getCitizenUser()
+
   useEffect(() => {
-    getSchemeCategories()
-      .then((cats) => {
-        if (cats && cats.length > 0) {
-          setCategoriesList(cats)
-        }
-      })
-      .catch((err) => console.warn('Using default categories fallback:', err))
-  }, [])
+    if (currentUser?.id) {
+      listSavedSchemes(currentUser.id)
+        .then((items) => {
+          setSavedSlugs(new Set(items.map((i) => i.scheme_slug)))
+        })
+        .catch(() => {})
+    } else {
+      try {
+        const raw = localStorage.getItem('schemes_saved_slugs')
+        if (raw) setSavedSlugs(new Set(JSON.parse(raw)))
+      } catch {}
+    }
+  }, [currentUser?.id])
+
+  const toggleBookmark = async (e: React.MouseEvent, schemeSlug: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const next = new Set(savedSlugs)
+    const isSaved = next.has(schemeSlug)
+
+    if (isSaved) {
+      next.delete(schemeSlug)
+      setSavedSlugs(next)
+      if (currentUser?.id) deleteSavedScheme(currentUser.id, schemeSlug).catch(() => {})
+      else localStorage.setItem('schemes_saved_slugs', JSON.stringify(Array.from(next)))
+    } else {
+      next.add(schemeSlug)
+      setSavedSlugs(next)
+      if (currentUser?.id) saveScheme(currentUser.id, schemeSlug).catch(() => {})
+      else localStorage.setItem('schemes_saved_slugs', JSON.stringify(Array.from(next)))
+
+      setToastMessage('Saved to My Schemes')
+      setTimeout(() => setToastMessage(null), 3800)
+    }
+  }
 
   // Debounce search input
   useEffect(() => {
@@ -119,306 +177,552 @@ export function SchemesBrowseScreen() {
     return () => clearTimeout(timer)
   }, [search])
 
+  // Sync with URL query parameter changes (e.g. from topbar search or direct links)
+  const urlSearch = searchParams?.get('q') || searchParams?.get('search') || ''
+  useEffect(() => {
+    setSearch(urlSearch)
+    setDebouncedSearch(urlSearch)
+    setPage(1)
+  }, [urlSearch])
+
   const fetchSchemes = useCallback(async () => {
     setLoading(true)
     try {
       const skip = (page - 1) * pageSize
+      const effectiveState =
+        jurisdiction === 'All India'
+          ? undefined
+          : jurisdiction === 'Central Only'
+          ? 'ALL_INDIA'
+          : jurisdiction
+
+      const effectiveCategory = category !== 'All' && category !== 'Cash Grants' ? category : undefined
+
       const res = await listSchemesPaginated({
         skip,
         limit: pageSize,
         search: debouncedSearch.trim() || undefined,
-        category: category !== 'All' ? category : undefined,
-        state: stateFilter !== 'All' ? stateFilter : undefined,
+        category: effectiveCategory,
+        state: effectiveState,
         sort_by: sortBy || undefined,
       })
       setSchemes(res.items || [])
       setTotal(res.total || 0)
-    } catch (err) {
-      console.error('Failed to load schemes:', err)
+
+      // Auto-select first scheme if results exist
+      if (res.items && res.items.length > 0) {
+        setSelectedSchemeSlug((prev) => {
+          const stillPresent = res.items.some((i) => i.slug === prev)
+          return prev && stillPresent ? prev : res.items[0].slug
+        })
+      } else {
+        setSelectedSchemeSlug(null)
+        setDetailedScheme(null)
+      }
+    } catch {
       setSchemes([])
       setTotal(0)
+      setSelectedSchemeSlug(null)
+      setDetailedScheme(null)
     } finally {
       setLoading(false)
     }
-  }, [page, pageSize, debouncedSearch, category, stateFilter, sortBy])
+  }, [page, pageSize, debouncedSearch, category, jurisdiction, sortBy])
 
   useEffect(() => {
     fetchSchemes()
   }, [fetchSchemes])
 
-  const totalPages = Math.ceil(total / pageSize) || 1
+  // Fetch Detailed Data when a scheme is selected from left column
+  useEffect(() => {
+    if (selectedSchemeSlug) {
+      setDetailedScheme(null)
+      setReadiness(null)
+
+      getSchemeBySlug(selectedSchemeSlug)
+        .then((data) => {
+          setDetailedScheme(data)
+          if (currentUser?.id) {
+            getSchemeDocumentReadiness(data.id)
+              .then((readData) => setReadiness(readData))
+              .catch(() => {})
+          }
+        })
+        .catch(() => {})
+    }
+  }, [selectedSchemeSlug, currentUser?.id])
 
   const handleResetFilters = () => {
     setSearch('')
     setDebouncedSearch('')
     setCategory('All')
-    setStateFilter('All')
+    setJurisdiction('All India')
     setSortBy('')
     setPage(1)
+    router.push('/schemes')
   }
 
-  const hasActiveFilters = Boolean(search || category !== 'All' || stateFilter !== 'All' || sortBy)
+  const displayedSchemes = useMemo(() => {
+    if (activeTab === 'saved') {
+      return schemes.filter((s) => savedSlugs.has(s.slug))
+    }
+    return schemes
+  }, [activeTab, schemes, savedSlugs])
+
+  const totalPages = Math.ceil(total / pageSize) || 1
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md px-4 sm:px-8 py-3.5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            className="p-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors flex items-center gap-1 text-xs font-semibold"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Back to Chat</span>
-          </Link>
-          <div className="h-4 w-px bg-zinc-800" />
-          <h1 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-blue-400" />
-            Directory of Government Welfare Schemes
-          </h1>
-        </div>
+    <AppLayout>
+      <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans">
 
-        <div className="flex items-center gap-2">
-          <Link
-            href="/check"
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-blue-600/20 transition-all"
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Check My Eligibility</span>
-          </Link>
-        </div>
-      </header>
-
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        {/* Header Hero */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-zinc-900 via-zinc-900/90 to-blue-950/30 border border-zinc-800/90 shadow-xl space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            National & State Scheme Registry
+        {/* Toast Notification (Step 5 Simulation) */}
+        <div className={`fixed bottom-6 right-8 z-50 flex items-center gap-3 bg-[#0E6245] text-white px-5 py-4 rounded-xl shadow-xl transition-all duration-300 transform ${toastMessage ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+          <CheckCircle2 className="h-6 w-6 text-[#A4F1B2]" />
+          <div className="flex flex-col">
+            <span className="text-sm font-bold">{toastMessage}</span>
+            <span className="text-[11px] text-emerald-100 font-medium">Added to your quick vault for offline tracking</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            Browse & Discover Welfare Benefits
-          </h2>
-          <p className="text-sm text-zinc-400 max-w-2xl leading-relaxed">
-            Search across verified schemes across all Central Ministries and 28+ State Governments.
-            Filter by your target sector or state jurisdiction to find direct cash benefits, subsidies, and grants.
-          </p>
+          <button onClick={() => setToastMessage(null)} className="ml-2 text-emerald-200 hover:text-white transition-colors cursor-pointer">
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
-        {/* Filter Controls Bar */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-zinc-900/90 border border-zinc-800 shadow-md space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-            {/* Search Input */}
-            <div className="md:col-span-5 relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+        {/* Top Hero / Guided Discovery Banner */}
+        <section className="p-6 lg:p-8 bg-white shadow-sm flex flex-col gap-6 shrink-0 z-10 border-b border-slate-200">
+          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 max-w-[1400px] mx-auto w-full">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-full bg-[#E2E7FF] text-[#131B2E] text-[11px] font-bold uppercase tracking-wider">National Direct Benefit Portal</span>
+                <span className="text-slate-300">•</span>
+                <span className="font-mono text-[11px] text-slate-500 font-bold">Live DBT Synchronized</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                Schemes — Browse & Discover Hub
+              </h1>
+              <p className="text-sm text-slate-600 max-w-2xl font-medium leading-relaxed">
+                Search, filter, evaluate statutory eligibility, and bookmark citizen welfare initiatives from 4,160+ central and state government ministries.
+              </p>
+            </div>
+
+            {/* Quick Metrics Counter Group */}
+            <div className="flex items-center gap-3 self-start xl:self-auto">
+              <div className="flex flex-col px-4 py-2.5 rounded-xl bg-[#F2F3FF] border border-[#E2E7FF]">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Schemes</span>
+                <span className="text-xl font-black text-[#0E6245] font-mono">4,162</span>
+              </div>
+              <div className="flex flex-col px-4 py-2.5 rounded-xl bg-[#F2F3FF] border border-[#E2E7FF]">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Filtered Matches</span>
+                <span className="text-xl font-black text-[#1F6C3A] font-mono">{total}</span>
+              </div>
+              <div className="flex flex-col px-4 py-2.5 rounded-xl bg-[#F2F3FF] border border-[#E2E7FF]">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">My Saved</span>
+                <span className="text-xl font-black text-[#8F3E0C] font-mono">{savedSlugs.size}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Filter & Controls Toolbar */}
+        <section className="px-6 lg:px-8 py-4 bg-white shadow-sm border-b border-slate-200 flex flex-col gap-4 shrink-0 z-10">
+          <div className="max-w-[1400px] mx-auto w-full flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search scheme name, ministry, keyword, or problem..."
-                className="w-full pl-10 pr-4 py-2.5 bg-zinc-950 border border-zinc-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 rounded-xl text-xs sm:text-sm text-zinc-100 placeholder-zinc-500 outline-none transition-all"
+                placeholder="Search by scheme name, ministry, target demographic or benefit..."
+                className="w-full h-12 pl-12 pr-10 rounded-xl bg-[#F8FAFC] text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#0E6245] border border-slate-200 transition-all font-medium"
               />
+              {search && (
+                <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 flex items-center justify-center cursor-pointer">
+                  <X className="h-5 w-5" />
+                </button>
+              )}
             </div>
 
-            {/* Category Dropdown */}
-            <div className="md:col-span-3">
-              <select
-                value={category}
-                onChange={(e) => {
-                  setCategory(e.target.value)
-                  setPage(1)
-                }}
-                className="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 rounded-xl text-xs sm:text-sm text-zinc-200 outline-none transition-all"
-              >
-                <option value="All">All Categories / Sectors</option>
-                {categoriesList.map((c) => (
-                  <option key={c.category} value={c.category}>
-                    {c.category} {c.count !== undefined ? `(${c.count.toLocaleString()})` : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+              <div className="relative min-w-[190px]">
+                <select
+                  value={jurisdiction}
+                  onChange={(e) => { setJurisdiction(e.target.value); setPage(1); }}
+                  className="w-full h-12 pl-4 pr-10 rounded-xl bg-[#F8FAFC] text-[13px] font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0E6245] appearance-none cursor-pointer border border-slate-200 transition-all"
+                >
+                  {ALL_INDIAN_STATES.map((s) => (
+                    <option key={s} value={s}>
+                      {s === 'All India' ? '🇮🇳 All India (Central)' : s === 'Central Only' ? '🏛️ Central Govt Only' : `📍 ${s}`}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              </div>
 
-            {/* State Dropdown */}
-            <div className="md:col-span-2">
-              <select
-                value={stateFilter}
-                onChange={(e) => {
-                  setStateFilter(e.target.value)
-                  setPage(1)
-                }}
-                className="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 rounded-xl text-xs sm:text-sm text-zinc-200 outline-none transition-all"
-              >
-                {INDIAN_STATES.map((s) => (
-                  <option key={s} value={s}>
-                    {s === 'All' ? 'All Jurisdictions' : s === 'ALL_INDIA' ? 'National (All India)' : s}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="relative min-w-[190px]">
+                <select
+                  value={sortBy}
+                  onChange={(e) => { setSortBy(e.target.value); setPage(1); }}
+                  className="w-full h-12 pl-4 pr-10 rounded-xl bg-[#F8FAFC] text-[13px] font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0E6245] appearance-none cursor-pointer border border-slate-200 transition-all"
+                >
+                  {SORT_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              </div>
 
-            {/* Sort Dropdown */}
-            <div className="md:col-span-2">
-              <select
-                value={sortBy}
-                onChange={(e) => {
-                  setSortBy(e.target.value)
-                  setPage(1)
-                }}
-                className="w-full px-3 py-2.5 bg-zinc-950 border border-zinc-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 rounded-xl text-xs sm:text-sm text-zinc-200 outline-none transition-all"
-              >
-                {SORT_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+              <div className="flex items-center p-1 bg-[#F8FAFC] rounded-xl border border-slate-200">
+                <button
+                  onClick={() => setActiveTab('all')}
+                  className={`px-4 py-2 rounded-lg text-[13px] font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                    activeTab === 'all' ? 'bg-white text-[#0E6245] shadow-sm' : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  <span>All Schemes</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('saved')}
+                  className={`px-4 py-2 rounded-lg text-[13px] font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                    activeTab === 'saved' ? 'bg-white text-[#0E6245] shadow-sm' : 'text-slate-500 hover:text-slate-900'
+                  }`}
+                >
+                  <Bookmark className="h-4 w-4 text-amber-600" />
+                  <span>Saved</span>
+                  <span className="px-1.5 py-0.5 rounded-full bg-[#E2E7FF] text-[#0E6245] font-mono text-[10px]">{savedSlugs.size}</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Results Count & Active Filter Reset */}
-          <div className="flex items-center justify-between text-xs text-zinc-400 pt-2 border-t border-zinc-800/60">
-            <span className="font-medium">
-              Showing {schemes.length > 0 ? (page - 1) * pageSize + 1 : 0} –{' '}
-              {Math.min(page * pageSize, total)} of{' '}
-              <strong className="text-zinc-200">{total.toLocaleString()}</strong> schemes
-            </span>
+          {/* Category Chips Scroll Row */}
+          <div className="max-w-[1400px] mx-auto w-full flex items-center gap-2 overflow-x-auto py-1 scrollbar-none">
+            {CATEGORY_CHIPS.map((cat) => {
+              const isSelected = category === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => { setCategory(cat.id); setPage(1); }}
+                  className={`px-4 py-2 rounded-xl text-[13px] font-bold whitespace-nowrap flex items-center gap-2 transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#0E6245] text-white shadow-sm'
+                      : 'bg-[#F8FAFC] text-slate-700 hover:bg-[#F2F3FF] border border-slate-200'
+                  }`}
+                >
+                  {cat.icon}
+                  <span>{cat.label}</span>
+                </button>
+              )
+            })}
+          </div>
+        </section>
 
-            {hasActiveFilters && (
-              <button
-                onClick={handleResetFilters}
-                className="text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1 transition-colors cursor-pointer"
-              >
-                <RotateCcw className="h-3 w-3" />
-                Reset all filters
-              </button>
+        {/* Master-Detail 2-Column Desktop Layout */}
+        <div className="flex-1 max-w-[1400px] mx-auto w-full p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+          {/* LEFT COLUMN: Scheme Discovery & Browse List */}
+          <div className="lg:col-span-5 flex flex-col gap-4">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                Schemes Catalog
+                <span className="px-2 py-0.5 rounded-full bg-[#0E6245] text-white text-[11px] font-bold">{total}</span>
+              </h2>
+              <span className="text-[11px] text-slate-500 font-bold">Click card to preview details</span>
+            </div>
+
+            {loading ? (
+              <div className="flex flex-col gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="p-5 rounded-2xl bg-white border border-slate-200 animate-pulse h-40" />
+                ))}
+              </div>
+            ) : displayedSchemes.length === 0 ? (
+              <div className="p-12 text-center rounded-3xl bg-white border border-slate-200">
+                <BookOpen className="h-10 w-10 text-slate-300 mx-auto mb-3" />
+                <h3 className="text-base font-bold text-slate-900">No matching schemes found</h3>
+                <button onClick={handleResetFilters} className="mt-4 px-4 py-2 bg-[#0E6245] text-white rounded-xl text-xs font-bold cursor-pointer">
+                  Reset All Filters
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {displayedSchemes.map((scheme) => {
+                  const isSelected = selectedSchemeSlug === scheme.slug
+                  const isSaved = savedSlugs.has(scheme.slug)
+
+                  return (
+                    <article
+                      key={scheme.id}
+                      onClick={() => setSelectedSchemeSlug(scheme.slug)}
+                      className={`group cursor-pointer p-4 sm:p-5 rounded-2xl shadow-sm transition-all flex flex-col gap-3 relative min-w-0 overflow-hidden ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-white to-[#F2F3FF] border-2 border-[#0E6245] shadow-md'
+                          : 'bg-white border border-slate-200 hover:border-[#0E6245]/40 hover:shadow-md'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3 min-w-0">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isSelected ? 'bg-[#A4F1B2] text-[#1F6C3A]' : 'bg-[#F2F3FF] text-[#0E6245]'}`}>
+                            <Leaf className="h-5 w-5" />
+                          </div>
+                          <div className="flex flex-col min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 shrink-0">
+                                {scheme.state === 'ALL_INDIA' ? 'National Scheme' : scheme.state}
+                              </span>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F2F3FF] text-[#0E6245] border border-[#E2E7FF] shrink-0">
+                                {scheme.category || 'General'}
+                              </span>
+                            </div>
+                            <h3 className={`text-base font-black truncate transition-colors ${isSelected ? 'text-[#0E6245]' : 'text-slate-900 group-hover:text-[#0E6245]'}`}>
+                              {scheme.name}
+                            </h3>
+                            <span className="text-[11px] text-slate-500 font-bold truncate mt-0.5 block max-w-full">
+                              {scheme.ministry || 'Government of India'}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={(e) => toggleBookmark(e, scheme.slug)}
+                          className={`p-2 rounded-xl transition-colors shrink-0 z-10 ${isSaved ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-100'}`}
+                          title={isSaved ? "Saved" : "Save Scheme"}
+                        >
+                          <Bookmark className="h-5 w-5" fill={isSaved ? "currentColor" : "none"} />
+                        </button>
+                      </div>
+
+                      <div className={`p-3 rounded-xl flex items-center justify-between ${isSelected ? 'bg-white/60' : 'bg-slate-50'}`}>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Primary Benefit</span>
+                          <span className="text-sm font-black text-[#0E6245] font-mono truncate">
+                            Assistance
+                          </span>
+                        </div>
+                        <div className="text-right flex flex-col items-end shrink-0">
+                          <span className="text-[10px] font-bold text-[#1F6C3A] bg-[#DCFCE7] px-2 py-0.5 rounded border border-[#BBF7D0]">
+                            Verify Match
+                          </span>
+                        </div>
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Pagination Footer */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between pt-4 mt-2 border-t border-slate-200">
+                <button
+                  onClick={() => setPage(p => Math.max(p - 1, 1))}
+                  disabled={page <= 1 || loading}
+                  className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold disabled:opacity-50 cursor-pointer hover:bg-slate-50"
+                >
+                  Previous
+                </button>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-slate-900 bg-slate-100 px-3 py-1.5 rounded-lg">{page}</span>
+                  <span className="text-xs text-slate-500 font-bold">of {totalPages}</span>
+                </div>
+                <button
+                  onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+                  disabled={page >= totalPages || loading}
+                  className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold disabled:opacity-50 cursor-pointer hover:bg-slate-50"
+                >
+                  Next
+                </button>
+              </div>
             )}
           </div>
-        </div>
 
-        {/* Schemes Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/60 animate-pulse space-y-3 h-52 flex flex-col justify-between"
-              >
-                <div className="space-y-2">
-                  <div className="h-4 bg-zinc-800 rounded w-3/4" />
-                  <div className="h-3 bg-zinc-800/60 rounded w-1/2" />
-                  <div className="h-3 bg-zinc-800/40 rounded w-full" />
-                </div>
-                <div className="h-8 bg-zinc-800/80 rounded-xl w-full" />
+          {/* RIGHT COLUMN: Scheme Detailed Inspector */}
+          <div className="lg:col-span-7 flex flex-col gap-6 sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1 scrollbar-none pb-8">
+            {!detailedScheme ? (
+              <div className="bg-white rounded-3xl p-12 border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center min-h-[500px]">
+                <Compass className="h-16 w-16 text-slate-200 mb-4" />
+                <h3 className="text-xl font-black text-slate-900 mb-2">Select a scheme to view details</h3>
+                <p className="text-sm text-slate-500 font-medium max-w-sm">
+                  Click on any scheme card from the catalog on the left to inspect its eligibility rules, benefits, and required documents.
+                </p>
               </div>
-            ))}
-          </div>
-        ) : schemes.length === 0 ? (
-          <div className="p-12 text-center rounded-3xl bg-zinc-900/40 border border-zinc-800/80 space-y-4">
-            <BookOpen className="h-10 w-10 text-zinc-600 mx-auto" />
-            <h3 className="text-base font-bold text-zinc-200">No schemes found</h3>
-            <p className="text-xs text-zinc-400 max-w-md mx-auto">
-              We couldn&apos;t find any active welfare schemes matching your current search query or filter combination.
-            </p>
-            <button
-              onClick={handleResetFilters}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold transition-colors cursor-pointer"
-            >
-              Clear Filters & Show All
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
-            {schemes.map((scheme) => (
-              <div
-                key={scheme.id}
-                className="group p-5 rounded-2xl bg-zinc-900/80 hover:bg-zinc-900 border border-zinc-800/90 hover:border-blue-500/40 shadow-lg hover:shadow-blue-500/5 transition-all flex flex-col justify-between"
-              >
-                <div className="space-y-3">
-                  {/* Badges Row */}
-                  <div className="flex items-center justify-between gap-2 flex-wrap text-[11px]">
-                    <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 font-medium border border-blue-500/20 truncate max-w-[170px]">
-                      {scheme.category || 'General Welfare'}
+            ) : (
+              <section className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 flex flex-col gap-6 relative overflow-hidden animate-in fade-in duration-300">
+
+                {/* Header Ribbon */}
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-md bg-[#0E6245] text-white text-[10px] font-bold uppercase tracking-wider">
+                      {detailedScheme.state === 'ALL_INDIA' ? 'Central Government' : detailedScheme.state}
                     </span>
-                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 font-medium">
-                      <MapPin className="h-3 w-3 text-zinc-400" />
-                      {scheme.state === 'ALL_INDIA' ? 'National' : scheme.state || 'All India'}
+                    <span className="px-3 py-1 rounded-md bg-[#DCFCE7] text-[#166534] text-[10px] font-bold flex items-center gap-1 border border-[#BBF7D0]">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A]" /> Verified Official
                     </span>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => toggleBookmark(e, detailedScheme.slug)}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer border ${
+                        savedSlugs.has(detailedScheme.slug)
+                          ? 'bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]'
+                          : 'bg-slate-50 hover:bg-slate-100 text-[#0E6245] border-slate-200'
+                      }`}
+                    >
+                      <Bookmark className="h-4 w-4 shrink-0" fill={savedSlugs.has(detailedScheme.slug) ? "currentColor" : "none"} />
+                      <span className="hidden sm:inline">{savedSlugs.has(detailedScheme.slug) ? 'Saved in Vault' : 'Save Scheme'}</span>
+                    </button>
+                  </div>
+                </div>
 
-                  {/* Scheme Title */}
-                  <h3 className="font-bold text-sm sm:text-base text-zinc-100 group-hover:text-blue-300 transition-colors leading-snug line-clamp-2">
-                    <Link href={`/schemes/${scheme.slug}`}>
-                      {scheme.name}
-                    </Link>
-                  </h3>
+                {/* Scheme Hero Graphic Card */}
+                <div className="relative w-full rounded-2xl overflow-hidden bg-[#004831] flex flex-col justify-end p-6 min-h-[180px] border border-[#0E6245]">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-[#004831] via-[#0E6245] to-[#1F6C3A] opacity-90" />
+                  <div className="relative z-10 flex flex-col gap-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#A4F1B2] font-mono">
+                      DIRECT BENEFIT TRANSFER • DBT-ID
+                    </span>
+                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
+                      {detailedScheme.name}
+                    </h2>
+                    <p className="text-xs text-[#DCFCE7] font-medium max-w-xl">
+                      {detailedScheme.ministry || 'Government of India'}
+                    </p>
+                  </div>
+                </div>
 
-                  {/* Ministry */}
-                  {scheme.ministry && (
-                    <div className="flex items-center gap-1.5 text-[11px] text-zinc-400">
-                      <Building2 className="h-3 w-3 text-zinc-500 shrink-0" />
-                      <span className="truncate">{scheme.ministry}</span>
+                {/* Key Benefit Highlights */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-slate-200 flex flex-col justify-between">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Primary Benefit</span>
+                    <div>
+                      <span className="text-lg font-black text-[#0E6245] font-mono">Assistance</span>
+                    </div>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-slate-200 flex flex-col justify-between">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Eligibility Status</span>
+                    <div>
+                      <Link href={`/check?target_scheme=${detailedScheme.slug}`} className="text-lg font-black text-[#1F6C3A] hover:underline flex items-center gap-1.5">
+                        Check My Match <ArrowRight className="h-4 w-4 shrink-0" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Segmented Tab Navigation (Cleaned borders & track lines) */}
+                <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
+                  <button onClick={() => setDetailTab('overview')} className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${detailTab === 'overview' ? 'bg-white text-[#0E6245] shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}>Overview</button>
+                  <button onClick={() => setDetailTab('eligibility')} className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${detailTab === 'eligibility' ? 'bg-white text-[#0E6245] shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}>Eligibility Criteria</button>
+                  <button onClick={() => setDetailTab('documents')} className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center justify-center gap-1.5 ${detailTab === 'documents' ? 'bg-white text-[#0E6245] shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}>
+                    Required Docs {readiness && <span className="bg-[#DCFCE7] text-[#166534] px-1.5 rounded-sm">{readiness.readiness_percentage}%</span>}
+                  </button>
+                </div>
+
+                {/* Tab Content Panels */}
+                <div className="min-h-[220px]">
+
+                  {/* Overview Panel */}
+                  {detailTab === 'overview' && (
+                    <div className="flex flex-col gap-6 animate-in fade-in duration-200">
+                      <div className="space-y-2">
+                        <h3 className="text-base font-black text-slate-900">About the Scheme</h3>
+                        <p className="text-sm text-slate-600 leading-relaxed font-medium whitespace-pre-wrap">
+                          {detailedScheme.description || 'No detailed description available.'}
+                        </p>
+                      </div>
                     </div>
                   )}
 
-                  {/* Description Snippet */}
-                  <p className="text-xs text-zinc-400 line-clamp-3 leading-relaxed">
-                    {scheme.description || 'No detailed description available for this welfare initiative.'}
-                  </p>
+                  {/* Eligibility Panel */}
+                  {detailTab === 'eligibility' && (
+                    <div className="flex flex-col gap-4 animate-in fade-in duration-200">
+                      <h3 className="text-base font-black text-slate-900 mb-2">Eligibility Matrix & Restrictions</h3>
+                      <div className="flex flex-col gap-3">
+                        {!detailedScheme.eligibility_rules || detailedScheme.eligibility_rules.length === 0 ? (
+                          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-600 font-medium">Universal scheme with no restrictive rules.</div>
+                        ) : (
+                          detailedScheme.eligibility_rules.map((rule) => (
+                            <div key={rule.id} className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200">
+                              <CheckCircle2 className="h-5 w-5 text-[#16A34A] shrink-0 mt-0.5" />
+                              <div className="flex flex-col gap-1">
+                                <span className="text-sm font-bold text-slate-900 capitalize">
+                                  {rule.field_name || rule.field}: {rule.operator === 'eq' ? '=' : rule.operator} {rule.rule_value || rule.value}
+                                </span>
+                                {rule.description && <span className="text-xs text-slate-500 font-medium">{rule.description}</span>}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Documents Panel */}
+                  {detailTab === 'documents' && (
+                    <div className="flex flex-col gap-4 animate-in fade-in duration-200">
+                      <h3 className="text-base font-black text-slate-900 mb-2">Statutory Document Readiness</h3>
+                      <div className="flex flex-col gap-3">
+                        {!detailedScheme.required_documents || detailedScheme.required_documents.length === 0 ? (
+                          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-600 font-medium">No documents explicitly listed.</div>
+                        ) : (
+                          detailedScheme.required_documents.map((doc) => {
+                            const isAvailable = readiness?.checklist.find(c => c.document_name === doc.document_name)?.status === 'available'
+                            return (
+                              <div key={doc.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200 gap-4">
+                                <div className="flex items-center gap-3">
+                                  <FolderLock className={`h-5 w-5 ${isAvailable ? 'text-[#0E6245]' : 'text-slate-400'}`} />
+                                  <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-slate-900">{doc.document_name}</span>
+                                    {doc.description && <span className="text-xs text-slate-500 font-medium">{doc.description}</span>}
+                                  </div>
+                                </div>
+                                {isAvailable ? (
+                                  <span className="px-2.5 py-1 rounded-full bg-[#DCFCE7] text-[#166534] text-[10px] font-bold whitespace-nowrap border border-[#BBF7D0]">Ready in Vault</span>
+                                ) : (
+                                  <span className="px-2.5 py-1 rounded-full bg-slate-200 text-slate-700 text-[10px] font-bold whitespace-nowrap border border-slate-300">Action Needed</span>
+                                )}
+                              </div>
+                            )
+                          })
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                 </div>
 
-                {/* Card Actions Footer */}
-                <div className="pt-4 mt-4 border-t border-zinc-800/80 flex items-center justify-between gap-2">
-                  <Link
-                    href={`/schemes/${scheme.slug}`}
-                    className="text-xs font-semibold text-blue-400 group-hover:text-blue-300 flex items-center gap-1 transition-colors"
-                  >
-                    <span>View Details</span>
-                    <ExternalLink className="h-3 w-3" />
-                  </Link>
+                {/* Footer Action Terminal */}
+                <div className="mt-4 pt-6 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                  <span className="text-[11px] font-bold text-slate-400 font-mono">
+                    ID: {detailedScheme.slug.toUpperCase()}
+                  </span>
 
-                  <Link
-                    href={`/check?target_scheme=${encodeURIComponent(scheme.slug)}`}
-                    className="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-medium flex items-center gap-1 transition-colors"
-                  >
-                    <Sparkles className="h-3 w-3 text-amber-400" />
-                    <span>Check Match</span>
-                  </Link>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <Link
+                      href={`/tracking?scheme=${detailedScheme.slug}`}
+                      className="px-4 py-3 rounded-xl bg-[#DCFCE7] hover:bg-[#bbf7d0] text-[#166534] text-xs font-bold border border-[#BBF7D0] transition-colors flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <FileCheck className="h-4 w-4 shrink-0" />
+                      <span>Track Application Record</span>
+                    </Link>
+
+                    {detailedScheme.application_url && (
+                      <a
+                        href={detailedScheme.application_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-5 py-3 rounded-xl bg-[#0E6245] hover:bg-[#004831] text-white text-xs font-bold shadow-xs active:scale-95 transition-all flex items-center gap-2"
+                      >
+                        <span>Apply on Official Portal</span> <ExternalLink className="h-4 w-4 shrink-0" />
+                      </a>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+
+              </section>
+            )}
           </div>
-        )}
-
-        {/* Pagination Bar */}
-        {totalPages > 1 && (
-          <div className="p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800 flex items-center justify-between">
-            <button
-              onClick={() => setPage((p) => Math.max(p - 1, 1))}
-              disabled={page <= 1 || loading}
-              className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span>Previous</span>
-            </button>
-
-            <span className="text-xs text-zinc-400 font-medium">
-              Page <strong className="text-zinc-100">{page}</strong> of{' '}
-              <strong className="text-zinc-100">{totalPages}</strong>
-            </span>
-
-            <button
-              onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-              disabled={page >= totalPages || loading}
-              className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
-            >
-              <span>Next</span>
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-      </main>
-    </div>
+        </div>
+      </div>
+    </AppLayout>
   )
 }

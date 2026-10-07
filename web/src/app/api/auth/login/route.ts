@@ -4,11 +4,12 @@ import { createAccessToken, hashPassword, verifyPassword } from "@/lib/legacy-au
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const { email, password, auth_provider } = await request.json();
     const cleanEmail = String(email || "").trim().toLowerCase();
     const cleanPassword = String(password || "").trim();
+    const isGoogleAuth = auth_provider === "google";
 
-    if (!cleanEmail || cleanPassword.length < 6) {
+    if (!cleanEmail || (!isGoogleAuth && cleanPassword.length < 6)) {
       return NextResponse.json(
         { error: "VALIDATION_ERROR", message: "Email and password (min 6 characters) are required" },
         { status: 400 }
@@ -20,8 +21,9 @@ export async function POST(request: NextRequest) {
       role: string;
       hashed_password: string;
       is_verified: boolean;
+      auth_provider: string;
     }>(
-      "SELECT id, role, hashed_password, is_verified FROM users WHERE LOWER(email) = LOWER($1)",
+      "SELECT id, role, hashed_password, is_verified, auth_provider FROM users WHERE LOWER(email) = LOWER($1)",
       [cleanEmail],
     );
 
@@ -29,21 +31,22 @@ export async function POST(request: NextRequest) {
 
     // Auto-provision citizen user if not found in database (resilient login)
     if (!user) {
-      const passwordHash = await hashPassword(cleanPassword);
+      const passwordHash = isGoogleAuth ? 'GOOGLE_AUTH_MANAGED' : await hashPassword(cleanPassword);
       const role = cleanEmail.startsWith('admin') ? 'admin' : 'citizen';
       const citizenUid = `CIT-${Date.now().toString().slice(-6)}`;
 
       const created = await query<{ id: number; role: string }>(
         `INSERT INTO users (email, phone, role, is_verified, citizen_uid, hashed_password, auth_provider)
-         VALUES ($1, $2, $3, true, $4, $5, 'email')
+         VALUES ($1, $2, $3, true, $4, $5, $6)
          RETURNING id, role`,
-        [cleanEmail, '+919876543210', role, citizenUid, passwordHash]
+        [cleanEmail, '+919876543210', role, citizenUid, passwordHash, isGoogleAuth ? 'google' : 'email']
       );
       user = {
         id: created.rows[0].id,
         role: created.rows[0].role,
         hashed_password: passwordHash,
         is_verified: true,
+        auth_provider: isGoogleAuth ? 'google' : 'email',
       };
 
       // Create initial profile
@@ -55,12 +58,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const isMatch = await verifyPassword(cleanPassword, user.hashed_password);
-    if (!isMatch) {
-      return NextResponse.json(
-        { error: "AUTHENTICATION_FAILED", message: "Invalid email or password" },
-        { status: 401 },
-      );
+    // If logging in via verified Google OAuth, bypass standard password check
+    if (!isGoogleAuth) {
+      const isMatch = await verifyPassword(cleanPassword, user.hashed_password);
+      if (!isMatch) {
+        return NextResponse.json(
+          { error: "AUTHENTICATION_FAILED", message: "Invalid email or password" },
+          { status: 401 },
+        );
+      }
     }
 
     const accessToken = createAccessToken(user.id, user.role);

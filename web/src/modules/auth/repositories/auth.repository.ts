@@ -43,7 +43,7 @@ export const authRepository = {
     let loginRes = await request<AuthTokenResponse>(`/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: cleanEmail, password }),
+      body: JSON.stringify({ email: cleanEmail, password, auth_provider: params.authProvider }),
     })
 
     if (!loginRes.ok) {
@@ -61,7 +61,7 @@ export const authRepository = {
       loginRes = await request<AuthTokenResponse>(`/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: cleanEmail, password }),
+        body: JSON.stringify({ email: cleanEmail, password, auth_provider: params.authProvider }),
       })
     }
 

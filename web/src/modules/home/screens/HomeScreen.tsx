@@ -1,23 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import {
-  MessageSquare,
-  Plus,
-  Mic,
-  ShieldCheck,
-  FolderLock,
-  Sparkles,
-  ChevronLeft,
-  ChevronRight,
-  Menu,
-  LogOut,
-  User as UserIcon,
-  Users,
-  Compass,
-  Brain,
-} from 'lucide-react'
+import { Brain, Sparkles, Languages, Share2 } from 'lucide-react'
 import {
   ChatWelcomeHero,
   ChatMessageList,
@@ -28,6 +12,7 @@ import { useChatStore } from '../store'
 import { useAuth } from '@/modules/auth'
 import { DevErrorModal } from '@/core/components/DevErrorModal'
 import { MemoryEnginePanel } from '@/components/MemoryEnginePanel'
+import { AppLayout } from '@/components/layout/AppLayout'
 
 export function HomeScreen({ initialSessionId }: { initialSessionId?: number | string } = {}) {
   const {
@@ -45,7 +30,7 @@ export function HomeScreen({ initialSessionId }: { initialSessionId?: number | s
     resetServiceBlock,
   } = useChat(initialSessionId)
 
-  const { logout, user } = useAuth()
+  const { user } = useAuth()
   const {
     isMemoryInspectorOpen,
     activeMemoryTrace,
@@ -53,9 +38,7 @@ export function HomeScreen({ initialSessionId }: { initialSessionId?: number | s
     openMemoryInspector,
     closeMemoryInspector,
   } = useChatStore()
-  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [input, setInput] = useState('')
-  const [isDictating, setIsDictating] = useState(false)
 
   function handleSend(text?: string) {
     const query = text || input
@@ -66,142 +49,64 @@ export function HomeScreen({ initialSessionId }: { initialSessionId?: number | s
   }
 
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-100 overflow-hidden">
-      {/* Sessions Sidebar */}
-      <aside
-        className={`bg-zinc-950 border-r border-zinc-800 transition-all duration-300 flex flex-col justify-between shrink-0 ${
-          sidebarOpen ? 'w-64' : 'w-0 -translate-x-full md:w-16 md:translate-x-0'
-        }`}
-      >
-        <div className="p-3 border-b border-zinc-800 flex items-center justify-between">
-          {sidebarOpen ? (
-            <>
-              <h2 className="text-xs font-bold uppercase text-zinc-400">Consultations</h2>
-              <button
-                onClick={() => selectSession(0)}
-                className="p-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1 transition-colors"
-                title="New Chat"
-              >
-                <Plus className="h-3.5 w-3.5" />
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 mx-auto text-zinc-400 hover:text-white"
-            >
-              <Menu className="h-4 w-4" />
-            </button>
-          )}
-        </div>
+    <AppLayout
+      currentSessionId={currentSessionId}
+      onSelectSession={(id) => selectSession(id)}
+      onNewSession={() => selectSession(0)}
+    >
+      <div className="flex flex-col h-full overflow-hidden bg-transparent font-sans">
 
-        {/* Sessions List */}
-        <div className="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-none">
-          {sidebarOpen &&
-            sessions.map((s) => (
-              <button
-                key={s.id}
-                onClick={() => selectSession(s.session_uid || s.id)}
-                className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium truncate transition-all flex items-center gap-2 ${
-                  currentSessionId === s.id || currentSessionId === s.session_uid
-                    ? 'bg-zinc-800 text-white shadow-md'
-                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
-                }`}
-              >
-                <MessageSquare className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{s.title || `Consultation #${s.id}`}</span>
-              </button>
-            ))}
-        </div>
-
-        {/* Quick Nav Bottom */}
-        {sidebarOpen && (
-          <div className="p-3 border-t border-zinc-800 space-y-1 text-xs text-zinc-400">
-            <Link
-              href="/schemes"
-              className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-zinc-900 hover:text-white transition-colors"
-            >
-              <Compass className="h-4 w-4 text-amber-400" /> Browse Schemes
-            </Link>
-            <Link
-              href="/profile"
-              className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-zinc-900 hover:text-white transition-colors"
-            >
-              <UserIcon className="h-4 w-4 text-zinc-400" /> Citizen Profile
-            </Link>
-            <Link
-              href="/check"
-              className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-zinc-900 hover:text-white transition-colors"
-            >
-              <Sparkles className="h-4 w-4 text-blue-400" /> Eligibility Check
-            </Link>
-            <Link
-              href="/vault"
-              className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-zinc-900 hover:text-white transition-colors"
-            >
-              <FolderLock className="h-4 w-4 text-emerald-400" /> Citizen Vault
-            </Link>
-            <Link
-              href="/household"
-              className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-zinc-900 hover:text-white transition-colors"
-            >
-              <Users className="h-4 w-4 text-indigo-400" /> Household Mesh
-            </Link>
-            <button
-              onClick={logout}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-zinc-400 hover:bg-red-950/30 hover:text-red-400 transition-colors text-left cursor-pointer"
-            >
-              <LogOut className="h-4 w-4" /> Logout
-            </button>
-          </div>
-        )}
-      </aside>
-
-      {/* Main Chat Area */}
-      <main className="flex-1 flex flex-col h-full overflow-hidden bg-slate-950">
-        {/* Top Header */}
-        <header className="h-14 border-b border-zinc-800 px-4 sm:px-6 flex items-center justify-between shrink-0">
+        {/* Chat-specific Header Bar (replaces the old full-screen header) */}
+        <div className="bg-white px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/70 shadow-sm shrink-0">
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 hover:bg-zinc-900 text-zinc-400 rounded-lg"
-            >
-              <Menu className="h-4 w-4" />
-            </button>
-            <h1 className="text-sm font-bold text-white">Multilingual AI Welfare Consultant</h1>
+            <div className="h-10 w-10 rounded-xl bg-[#0E6245] flex items-center justify-center text-white shrink-0">
+              <Brain className="h-5 w-5" />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <h1 className="text-sm font-black text-slate-900">AI Scheme Advisor</h1>
+                <span className="px-2 py-0.5 rounded-full bg-[#A4F1B2] text-[#24703E] text-[11px] font-bold flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#1F6C3A] animate-pulse" />
+                  Live Assistant
+                </span>
+              </div>
+              <span className="text-[11px] text-slate-500 font-bold">Multilingual Civic Synthesis • Sovereign Gov-Cloud Node</span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2">
+            {/* Language Toggle Mock */}
+            <div className="bg-[#F2F3FF] p-1 rounded-xl flex items-center gap-1 border border-[#E2E7FF]">
+              <Languages className="h-3 w-3 text-slate-500 ml-1" />
+              <button className="px-2.5 py-1 rounded-lg bg-white shadow-xs text-slate-900 font-bold text-[11px] cursor-pointer">
+                English
+              </button>
+              <button className="px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-900 font-bold text-[11px] cursor-pointer">
+                हिंदी
+              </button>
+              <button className="px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-900 font-bold text-[11px] cursor-pointer">
+                ಕನ್ನಡ
+              </button>
+            </div>
+
             <button
               onClick={() => openMemoryInspector(null)}
-              className="px-2.5 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Memory Engine Inspector"
+              className="bg-[#F2F3FF] hover:bg-[#E2E7FF] text-slate-700 font-bold text-[11px] px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border border-[#E2E7FF]"
             >
-              <Brain className="h-3.5 w-3.5 text-purple-400" />
-              <span className="hidden sm:inline">Memory Engine</span>
+              <Brain className="h-3.5 w-3.5 text-[#0E6245]" />
+              <span className="hidden sm:inline">Memory</span>
             </button>
-            <Link
-              href="/profile"
-              className="p-1.5 sm:px-3 sm:py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs font-medium rounded-xl border border-zinc-800 flex items-center gap-1.5 transition-colors"
-              title="Citizen Profile"
-            >
-              <UserIcon className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">{userName || user?.profile?.full_name || 'Profile'}</span>
-            </Link>
-            <button
-              onClick={logout}
-              className="p-1.5 sm:px-3 sm:py-1.5 bg-zinc-900 hover:bg-red-950/40 text-zinc-400 hover:text-red-400 text-xs font-medium rounded-xl border border-zinc-800 hover:border-red-900/50 flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="Logout"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Logout</span>
+
+            <button className="bg-[#F2F3FF] hover:bg-[#E2E7FF] text-slate-700 font-bold text-[11px] px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border border-[#E2E7FF]">
+              <Share2 className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Share</span>
             </button>
           </div>
-        </header>
+        </div>
 
         {/* Chat Timeline / Welcome */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-none">
-          <div className="max-w-3xl mx-auto">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-none bg-slate-50/50">
+          <div className="max-w-4xl mx-auto">
             {messages.length === 0 && !streamBuffer ? (
               <ChatWelcomeHero userName={userName} onSelectSuggestion={sendQuery} />
             ) : (
@@ -216,8 +121,8 @@ export function HomeScreen({ initialSessionId }: { initialSessionId?: number | s
         </div>
 
         {/* Bottom Composer */}
-        <footer className="p-4 border-t border-zinc-800 bg-zinc-950/80 shrink-0">
-          <div className="max-w-3xl mx-auto">
+        <footer className="p-4 border-t border-slate-200 bg-white shrink-0">
+          <div className="max-w-4xl mx-auto">
             <ChatComposer
               input={input}
               setInput={setInput}
@@ -229,65 +134,65 @@ export function HomeScreen({ initialSessionId }: { initialSessionId?: number | s
             />
           </div>
         </footer>
-      </main>
 
-      {/* Memory Engine Inspector Drawer */}
-      <MemoryEnginePanel
-        isOpen={isMemoryInspectorOpen}
-        onClose={closeMemoryInspector}
-        memoryTrace={
-          activeMemoryTrace ||
-          [...messages].reverse().find((m) => m.memory_trace)?.memory_trace || {
-            working_memory: {
-              model_name: 'gemini-3.8-flash',
-              provider: 'gemini',
-              system_instruction_summary: 'Sovereign Citizen Welfare AI Advisor (India)...',
-              prompt_tokens: 380,
-              completion_tokens: 140,
-              total_tokens: 520,
-            },
-            semantic_memory: {
-              recalled_facts_count: user?.profile ? 4 : 2,
-              recalled_facts: user?.profile
-                ? [
-                    { key: 'full_name', value: user.profile.full_name || userName || 'Citizen', status: 'IN_PROMPT' },
-                    { key: 'state', value: user.profile.state || 'Gujarat', status: 'IN_PROMPT' },
-                    { key: 'annual_income', value: `₹${(user.profile.annual_income || 100000).toLocaleString()}`, status: 'IN_PROMPT' },
-                    { key: 'occupation', value: user.profile.occupation || 'farmer', status: 'IN_PROMPT' },
-                  ]
-                : [
-                    { key: 'state', value: 'Gujarat', status: 'IN_PROMPT' },
-                    { key: 'occupation', value: 'farmer', status: 'IN_PROMPT' },
-                  ],
-            },
-            episodic_memory: {
-              session_turns_count: messages.length,
-              history_events: messages.slice(-4).map((m) => ({
-                sender: m.role,
-                snippet: m.content.slice(0, 80),
-                timestamp: m.created_at || new Date().toISOString(),
-              })),
-            },
-            procedural_memory: {
-              available_tools_count: 4,
-              tools_executed_count: 1,
-              tools_executed: [
-                {
-                  name: 'check_eligibility',
-                  args: { state: user?.profile?.state || 'Gujarat', occupation: 'farmer', annual_income: 100000 },
-                  duration_ms: 85,
-                  status: 'success',
-                  matched_count: 4,
-                },
-              ],
-            },
+        {/* Memory Engine Inspector Drawer */}
+        <MemoryEnginePanel
+          isOpen={isMemoryInspectorOpen}
+          onClose={closeMemoryInspector}
+          memoryTrace={
+            activeMemoryTrace ||
+            [...messages].reverse().find((m) => m.memory_trace)?.memory_trace || {
+              working_memory: {
+                model_name: 'gemini-3.8-flash',
+                provider: 'gemini',
+                system_instruction_summary: 'Sovereign Citizen Welfare AI Advisor (India)...',
+                prompt_tokens: 380,
+                completion_tokens: 140,
+                total_tokens: 520,
+              },
+              semantic_memory: {
+                recalled_facts_count: user?.profile ? 4 : 2,
+                recalled_facts: user?.profile
+                  ? [
+                      { key: 'full_name', value: user.profile.full_name || userName || 'Citizen', status: 'IN_PROMPT' },
+                      { key: 'state', value: user.profile.state || 'Maharashtra', status: 'IN_PROMPT' },
+                      { key: 'annual_income', value: `₹${(user.profile.annual_income || 120000).toLocaleString()}`, status: 'IN_PROMPT' },
+                      { key: 'occupation', value: user.profile.occupation || 'farmer', status: 'IN_PROMPT' },
+                    ]
+                  : [
+                      { key: 'state', value: 'Maharashtra', status: 'IN_PROMPT' },
+                      { key: 'occupation', value: 'farmer', status: 'IN_PROMPT' },
+                    ],
+              },
+              episodic_memory: {
+                session_turns_count: messages.length,
+                history_events: messages.slice(-4).map((m) => ({
+                  sender: m.role,
+                  snippet: m.content.slice(0, 80),
+                  timestamp: m.created_at || new Date().toISOString(),
+                })),
+              },
+              procedural_memory: {
+                available_tools_count: 4,
+                tools_executed_count: 1,
+                tools_executed: [
+                  {
+                    name: 'check_eligibility',
+                    args: { state: user?.profile?.state || 'Maharashtra', occupation: 'farmer', annual_income: 120000 },
+                    duration_ms: 85,
+                    status: 'success',
+                    matched_count: 4,
+                  },
+                ],
+              },
+            }
           }
-        }
-        activeMessageSnippet={activePromptSnippet || undefined}
-      />
+          activeMessageSnippet={activePromptSnippet || undefined}
+        />
 
-      {/* Centralized Dev Mode Error & Stack Trace Inspector Modal */}
-      <DevErrorModal />
-    </div>
+        {/* Centralized Dev Mode Error Inspector Modal */}
+        <DevErrorModal />
+      </div>
+    </AppLayout>
   )
 }

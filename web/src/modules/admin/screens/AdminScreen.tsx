@@ -375,7 +375,7 @@ export function AdminScreen() {
 
   if (checkingAuth) {
     return (
-      <div className="flex justify-center items-center py-24">
+      <div className="civic-admin flex justify-center items-center py-24">
         <div className="h-8 w-8 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
       </div>
     )
@@ -386,7 +386,7 @@ export function AdminScreen() {
   // ==========================================================================
   if (!isAdmin) {
     return (
-      <div className="max-w-md mx-auto py-12 flex flex-col gap-6">
+      <div className="civic-admin min-h-screen flex flex-col justify-center px-4 py-12">
         <div className="rounded-3xl border border-zinc-800/90 bg-zinc-900/60 p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
           <div className="flex flex-col gap-2 mb-6 text-center items-center">
             <div className="h-12 w-12 rounded-2xl bg-blue-950/80 border border-blue-800/60 flex items-center justify-center text-blue-400 mb-2">
@@ -465,7 +465,7 @@ export function AdminScreen() {
   const draftCount = schemes.length - activeCount
 
   return (
-    <div className="flex flex-col gap-6 pb-16">
+    <div className="civic-admin min-h-screen flex flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 pb-16">
       {/* Top Admin Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl border border-zinc-800/90 bg-gradient-to-r from-zinc-900/90 via-zinc-900/60 to-zinc-950/90 shadow-xl">
         <div className="flex flex-col gap-1">

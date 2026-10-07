@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { Lock, Mail, Phone, AlertCircle, ArrowRight, Sparkles } from 'lucide-react'
 import { setCitizenToken } from '@/core'
 import { authRepository } from '../repositories'
-import { authClient } from '@/lib/auth-client'
 
 export function RegisterForm() {
   const router = useRouter()
@@ -21,16 +20,20 @@ export function RegisterForm() {
     setLoading(true)
 
     try {
-      try {
-        await authClient.signUp.email({ email, password, name: email.split('@')[0] })
-      } catch (err) {
-        console.warn('Better Auth signup fallback:', err)
+      const regRes = await authRepository.register({ email, phone, password })
+      if (!regRes.ok) {
+        setError(regRes.error.message || 'Registration failed')
+        setLoading(false)
+        return
       }
 
-      await authRepository.register({ email, phone, password })
       const loginRes = await authRepository.login({ email, password })
       if (loginRes.ok && loginRes.data.access_token) {
         setCitizenToken(loginRes.data.access_token)
+        if (loginRes.data.refresh_token) {
+          localStorage.setItem('scheme_citizen_refresh', loginRes.data.refresh_token)
+        }
+        window.dispatchEvent(new Event('scheme:auth-changed'))
         router.push('/profile')
       } else {
         router.push('/login')
@@ -104,7 +107,7 @@ export function RegisterForm() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••••••"
+              placeholder="Minimum 6 characters"
               className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
             />
           </div>

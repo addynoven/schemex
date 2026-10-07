@@ -2,17 +2,23 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Lock, Mail, AlertCircle, ArrowRight, Sparkles } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 import { setCitizenToken } from '@/core'
 import { authRepository } from '../repositories'
-import { authClient } from '@/lib/auth-client'
 
-export function LoginForm() {
+interface LoginFormProps {
+  activeTab?: 'login' | 'signup'
+}
+
+export function LoginForm({ activeTab = 'login' }: LoginFormProps) {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [resetSent, setResetSent] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,117 +26,161 @@ export function LoginForm() {
     setLoading(true)
 
     try {
-      // 1. Try Better Auth first
-      const authRes = await authClient.signIn.email({ email, password })
-      const token = (authRes.data as any)?.token || (authRes.data as any)?.session?.token
-      if (token) {
-        setCitizenToken(token)
-        router.push('/')
-        return
+      if (activeTab === 'signup') {
+        const res = await authRepository.register({ email, password, phone: '+919876543210' })
+        if (res.ok) {
+          window.dispatchEvent(new Event('scheme:auth-changed'))
+          router.push('/')
+          return
+        }
       }
 
-      // 2. Direct FastAPI fallback
       const res = await authRepository.login({ email, password })
       if (res.ok && res.data.access_token) {
         setCitizenToken(res.data.access_token)
         if (res.data.refresh_token) {
           localStorage.setItem('scheme_citizen_refresh', res.data.refresh_token)
         }
+        window.dispatchEvent(new Event('scheme:auth-changed'))
         router.push('/')
       } else {
-        setError(!res.ok ? res.error.message : 'Invalid credentials')
+        setError(!res.ok ? res.error.message : 'Invalid email or password')
       }
     } catch (err: any) {
-      setError(err.message || 'Login failed')
+      setError(err.message || 'Authentication failed')
     } finally {
       setLoading(false)
     }
   }
 
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      setError('Please enter your email address to receive a password reset link.')
+      return
+    }
+    setError(null)
+    setLoading(true)
+    const success = await authRepository.sendPasswordReset(email.trim())
+    setLoading(false)
+    if (success) {
+      setResetSent(true)
+    } else {
+      setError('Could not send password reset email. Please verify the email address.')
+    }
+  }
+
   return (
-    <div>
+    <div className="font-sans">
       {error && (
-        <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-300 text-sm flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
+        <div className="mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-start gap-2.5 shadow-2xs">
+          <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
       )}
 
+      {resetSent && (
+        <div className="mb-4 p-3.5 rounded-xl bg-[#DCFCE7] border border-[#BBF7D0] text-[#166534] text-xs font-bold flex items-center gap-2.5 shadow-2xs">
+          <CheckCircle2 className="h-4 w-4 text-[#16A34A] shrink-0" />
+          <span>Password reset email sent! Check your inbox.</span>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-            Email Address
-          </label>
-          <div className="relative">
-            <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-            />
+
+        {/* Stacked Input Container Card */}
+        <div className="rounded-xl border border-slate-200 overflow-hidden shadow-2xs divide-y divide-slate-100 bg-white">
+
+          {/* Input 1: Email Address */}
+          <div className="relative px-4 pt-2.5 pb-2 border-l-4 border-l-[#ff2d55] bg-white transition-colors focus-within:bg-emerald-50/20">
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider" htmlFor="email-input">
+              Email Address
+            </label>
+            <div className="mt-0.5 flex items-center justify-between">
+              <input
+                id="email-input"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@example.com"
+                className="w-full p-0 border-0 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus:ring-0 bg-transparent focus:outline-none"
+              />
+              {email && (
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#DCFCE7] text-[#166534] shrink-0" title="Valid email format">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#16A34A]" />
+                </span>
+              )}
+            </div>
           </div>
+
+          {/* Input 2: Password */}
+          <div className="relative px-4 pt-2.5 pb-2.5 bg-white transition-colors focus-within:bg-emerald-50/20">
+            <div className="flex items-center justify-between">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider" htmlFor="password-input">
+                Password
+              </label>
+            </div>
+            <div className="mt-0.5 flex items-center justify-between gap-2">
+              <input
+                id="password-input"
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                className="w-full p-0 border-0 text-sm font-bold text-slate-900 placeholder:text-slate-300 focus:ring-0 bg-transparent focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-slate-400 hover:text-slate-600 transition-colors cursor-pointer shrink-0"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
         </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-            Password
-          </label>
-          <div className="relative">
-            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+        {/* Remember Me & Forgot Password Links */}
+        <div className="flex items-center justify-between text-xs pt-0.5">
+          <label className="flex items-center gap-2 cursor-pointer select-none text-slate-600 font-medium">
             <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••••••"
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-3.5 h-3.5 rounded border-slate-300 text-[#0e6245] focus:ring-[#0e6245]"
             />
-          </div>
+            <span>Remember this device</span>
+          </label>
+          <button
+            type="button"
+            onClick={handleForgotPassword}
+            className="font-bold text-slate-500 hover:text-[#0e6245] transition-colors cursor-pointer"
+          >
+            Forgot password?
+          </button>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:via-indigo-500 hover:to-violet-500 text-white font-semibold text-sm shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-        >
-          {loading ? (
-            <div className="h-5 w-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-          ) : (
-            <>
-              <span>Sign In to Dashboard</span>
-              <ArrowRight className="h-4 w-4" />
-            </>
-          )}
-        </button>
+        {/* Action Buttons */}
+        <div className="pt-2 flex items-center gap-3">
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 py-3 px-6 bg-black hover:bg-slate-900 active:scale-[0.99] text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            {loading ? (
+              <div className="h-4 w-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+            ) : (
+              <>
+                <span>{activeTab === 'signup' ? 'Sign Up' : 'Login'}</span>
+                <span className="text-[#A6F4B5]">→</span>
+              </>
+            )}
+          </button>
+        </div>
+
       </form>
-
-      <div className="mt-6 pt-6 border-t border-zinc-800/80 space-y-2">
-        <button
-          type="button"
-          onClick={() => {
-            setEmail('admin@gov.in')
-            setPassword('AdminPass123!')
-          }}
-          className="w-full py-2.5 px-3 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 text-xs font-semibold text-purple-300 transition-colors flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <Sparkles className="h-3.5 w-3.5 text-purple-400" />
-          <span>Use Admin Account (admin@gov.in)</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setEmail('citizen.ramesh@example.com')
-            setPassword('SecurePass123!')
-          }}
-          className="w-full py-2.5 px-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 text-xs font-semibold text-blue-300 transition-colors flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <Sparkles className="h-3.5 w-3.5 text-blue-400" />
-          <span>Use Demo Citizen Profile (Ramesh Patel)</span>
-        </button>
-      </div>
     </div>
   )
 }

@@ -8,17 +8,21 @@ interface MarkdownMessageProps {
   content: string
 }
 
+type ContentBlock =
+  | { type: 'line'; text: string; idx: number }
+  | { type: 'table'; headers: string[]; rows: string[][]; idx: number }
+
 export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => {
   if (!content) return null
 
   const lines = content.split('\n')
 
   function renderInline(text: string): React.ReactNode[] {
+    if (!text) return []
     const parts: React.ReactNode[] = []
     let lastIndex = 0
 
     // Match Markdown Links: [label](url), Bold: **text**, Code: `text`, Italic: *text*
-    // Handles links with parentheses inside the label: [Name (Acronym)](/url)
     const regex = /(\[((?:\[[^\]]*\]|[^\]])+)\]\(([^)]+)\)|\*\*([^*]+)\*\*|`([^`]+)`|\*([^*]+)\*)/g
     let match: RegExpExecArray | null
 
@@ -26,6 +30,8 @@ export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => 
       if (match.index > lastIndex) {
         parts.push(text.substring(lastIndex, match.index))
       }
+
+      const inlineKey = `inline-${match.index}-${lastIndex}`
 
       if (match[0].startsWith('[')) {
         const label = match[2]
@@ -42,11 +48,11 @@ export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => 
           const cleanUrl = url.startsWith('http') ? url : url.startsWith('/') ? url : `/${url}`
           parts.push(
             <Link
-              key={match.index}
+              key={inlineKey}
               to={cleanUrl as any}
-              className="inline-flex items-center gap-1.5 px-2.5 py-0.5 my-0.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-300 hover:text-blue-200 font-semibold text-xs transition-all shadow-sm group"
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 my-0.5 rounded-lg bg-[#DCFCE7] hover:bg-[#BBF7D0] border border-[#BBF7D0] text-[#166534] font-bold text-xs transition-all shadow-2xs group"
             >
-              <BookOpen className="h-3 w-3 text-blue-400 shrink-0 group-hover:scale-110 transition-transform" />
+              <BookOpen className="h-3 w-3 text-[#0E6245] shrink-0 group-hover:scale-110 transition-transform" />
               <span>{label}</span>
               <ChevronRight className="h-2.5 w-2.5 opacity-60 group-hover:translate-x-0.5 transition-transform" />
             </Link>
@@ -54,35 +60,35 @@ export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => 
         } else {
           parts.push(
             <a
-              key={match.index}
+              key={inlineKey}
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 px-2 py-0.5 my-0.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 hover:text-emerald-200 font-medium text-xs transition-all shadow-sm group"
+              className="inline-flex items-center gap-1 px-2 py-0.5 my-0.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-[#0E6245] font-semibold text-xs transition-all shadow-2xs group"
             >
               <span>{label}</span>
-              <ExternalLink className="h-2.5 w-2.5 text-emerald-400 shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <ExternalLink className="h-2.5 w-2.5 text-[#0E6245] shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </a>
           )
         }
       } else if (match[0].startsWith('**')) {
         parts.push(
-          <strong key={match.index} className="font-semibold text-zinc-100">
+          <strong key={inlineKey} className="font-bold text-slate-900">
             {match[4]}
           </strong>
         )
       } else if (match[0].startsWith('`')) {
         parts.push(
           <code
-            key={match.index}
-            className="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 font-mono text-xs"
+            key={inlineKey}
+            className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-800 font-mono text-xs"
           >
             {match[5]}
           </code>
         )
       } else if (match[0].startsWith('*')) {
         parts.push(
-          <em key={match.index} className="italic text-zinc-300">
+          <em key={inlineKey} className="italic text-slate-700">
             {match[6]}
           </em>
         )
@@ -98,44 +104,157 @@ export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => 
     return parts
   }
 
+  function renderCellContent(text: string): React.ReactNode {
+    if (!text) return null
+    const subLines = text.split(/<br\s*\/?>/gi)
+    if (subLines.length <= 1) return renderInline(text)
+    return (
+      <span className="inline-block space-y-1">
+        {subLines.map((sub, sIdx) => {
+          const trimmedSub = sub.trim()
+          if (!trimmedSub) return null
+          return (
+            <span key={sIdx} className="block leading-relaxed">
+              {renderInline(trimmedSub)}
+            </span>
+          )
+        })}
+      </span>
+    )
+  }
+
+  // Parse lines into structured Blocks (Lines vs Tables)
+  const blocks: ContentBlock[] = []
+  let i = 0
+
+  while (i < lines.length) {
+    const line = lines[i]
+    const trimmed = line.trim()
+
+    // Check if line starts a markdown table (| ... |)
+    if (trimmed.startsWith('|') && trimmed.endsWith('|') && trimmed.includes('|')) {
+      const tableLines: string[] = []
+      while (
+        i < lines.length &&
+        lines[i].trim().startsWith('|') &&
+        lines[i].trim().endsWith('|')
+      ) {
+        tableLines.push(lines[i].trim())
+        i++
+      }
+
+      // Parse table headers & data rows
+      if (tableLines.length >= 2) {
+        const parseRow = (r: string) =>
+          r
+            .split('|')
+            .slice(1, -1)
+            .map((cell) => cell.trim())
+
+        const headers = parseRow(tableLines[0])
+        const isDelimiter = (r: string) => /^[\s|-]+$/.test(r)
+
+        // Filter out delimiter row (|---|---|)
+        const dataRows = tableLines
+          .slice(1)
+          .filter((r) => !isDelimiter(r))
+          .map(parseRow)
+
+        blocks.push({
+          type: 'table',
+          headers,
+          rows: dataRows,
+          idx: i,
+        })
+        continue
+      }
+    }
+
+    blocks.push({ type: 'line', text: line, idx: i })
+    i++
+  }
+
   return (
-    <div className="space-y-2.5 text-sm leading-relaxed text-zinc-200">
-      {lines.map((line, idx) => {
-        const trimmed = line.trim()
+    <div className="space-y-2.5 text-sm leading-relaxed text-slate-800 font-normal">
+      {blocks.map((block, blockIndex) => {
+        const blockKey = `blk-${blockIndex}-${block.idx}`
+
+        if (block.type === 'table') {
+          return (
+            <div
+              key={blockKey}
+              className="overflow-x-auto my-3 rounded-2xl border border-slate-200 bg-white shadow-2xs"
+            >
+              <table className="w-full text-xs text-left border-collapse">
+                <thead className="bg-slate-100/90 text-slate-900 border-b border-slate-200 font-bold">
+                  <tr>
+                    {block.headers.map((cell, cIdx) => (
+                      <th
+                        key={`th-${cIdx}`}
+                        className="px-3.5 py-2.5 border-r border-slate-200/80 last:border-r-0 uppercase tracking-wider text-[11px] text-slate-700"
+                      >
+                        {renderCellContent(cell)}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {block.rows.map((rowCells, rIdx) => (
+                    <tr
+                      key={`tr-${rIdx}`}
+                      className="hover:bg-slate-50/80 transition-colors odd:bg-white even:bg-slate-50/40"
+                    >
+                      {rowCells.map((cell, cIdx) => (
+                        <td
+                          key={`td-${rIdx}-${cIdx}`}
+                          className="px-3.5 py-2.5 border-r border-slate-100 last:border-r-0 text-slate-800 leading-relaxed align-top"
+                        >
+                          {renderCellContent(cell)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        }
+
+        const trimmed = block.text.trim()
 
         if (!trimmed) {
-          return <div key={idx} className="h-2" />
+          return <div key={blockKey} className="h-1.5" />
         }
 
         // Horizontal Divider
         if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
-          return <hr key={idx} className="border-zinc-800 my-3" />
+          return <hr key={blockKey} className="border-slate-200 my-3" />
         }
 
         // Headings: H1, H2, H3, H4
         if (trimmed.startsWith('# ')) {
           return (
-            <h2 key={idx} className="text-base sm:text-lg font-bold text-white mt-4 mb-2 flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-blue-400 shrink-0" />
-              <span>{renderInline(trimmed.replace('# ', ''))}</span>
+            <h2 key={blockKey} className="text-base sm:text-lg font-black text-slate-900 mt-4 mb-2 flex items-center gap-2 tracking-tight">
+              <Sparkles className="h-4 w-4 text-[#0E6245] shrink-0" />
+              <span>{renderCellContent(trimmed.replace('# ', ''))}</span>
             </h2>
           )
         }
         if (trimmed.startsWith('## ')) {
           return (
-            <h3 key={idx} className="text-sm sm:text-base font-bold text-white mt-3.5 mb-1.5 flex items-center gap-2">
-              <Sparkles className="h-3.5 w-3.5 text-indigo-400 shrink-0" />
-              <span>{renderInline(trimmed.replace('## ', ''))}</span>
+            <h3 key={blockKey} className="text-sm sm:text-base font-extrabold text-slate-900 mt-3.5 mb-1.5 flex items-center gap-2 tracking-tight">
+              <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+              <span>{renderCellContent(trimmed.replace('## ', ''))}</span>
             </h3>
           )
         }
         if (trimmed.startsWith('### ')) {
           return (
             <h4
-              key={idx}
-              className="text-xs sm:text-sm font-semibold text-zinc-100 mt-3 mb-1.5 flex items-center gap-2 pb-1 border-b border-zinc-800/60"
+              key={blockKey}
+              className="text-xs sm:text-sm font-bold text-slate-900 mt-3 mb-1.5 flex items-center gap-2 pb-1 border-b border-slate-100"
             >
-              <span>{renderInline(trimmed.replace('### ', ''))}</span>
+              <span>{renderCellContent(trimmed.replace('### ', ''))}</span>
             </h4>
           )
         }
@@ -144,56 +263,56 @@ export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => 
         if (trimmed.startsWith('> ')) {
           return (
             <blockquote
-              key={idx}
-              className="border-l-2 border-blue-500/80 bg-blue-950/20 pl-3 py-1.5 my-2 rounded-r-lg text-xs sm:text-sm text-zinc-300 italic"
+              key={blockKey}
+              className="border-l-3 border-[#0E6245] bg-emerald-50/60 pl-3 py-2 my-2 rounded-r-xl text-xs sm:text-sm text-slate-800 italic"
             >
-              {renderInline(trimmed.replace('> ', ''))}
+              {renderCellContent(trimmed.replace('> ', ''))}
             </blockquote>
           )
         }
 
         // Numbered Lists: 1. , 2. , 3.
-        const numMatch = line.match(/^(\s*)(\d+)\.\s+(.*)$/)
+        const numMatch = block.text.match(/^(\s*)(\d+)\.\s+(.*)$/)
         if (numMatch) {
           const indent = numMatch[1].length
           const num = numMatch[2]
           const rest = numMatch[3]
           return (
             <div
-              key={idx}
+              key={blockKey}
               className="flex items-start gap-2.5 my-1"
               style={{ marginLeft: `${Math.max(0, indent * 12)}px` }}
             >
-              <span className="flex items-center justify-center h-5 w-5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-[11px] font-bold shrink-0 mt-0.5">
+              <span className="flex items-center justify-center h-5 w-5 rounded-full bg-[#DCFCE7] border border-[#BBF7D0] text-[#166534] text-[11px] font-black shrink-0 mt-0.5">
                 {num}
               </span>
-              <div className="flex-1 leading-relaxed text-zinc-200">{renderInline(rest)}</div>
+              <div className="flex-1 leading-relaxed text-slate-800">{renderCellContent(rest)}</div>
             </div>
           )
         }
 
         // Bullet Lists: * or -
-        const bulletMatch = line.match(/^(\s*)([-*•])\s+(.*)$/)
+        const bulletMatch = block.text.match(/^(\s*)([-*•])\s+(.*)$/)
         if (bulletMatch) {
           const indent = bulletMatch[1].length
           const rest = bulletMatch[3]
           return (
             <div
-              key={idx}
+              key={blockKey}
               className="flex items-start gap-2.5 my-1"
               style={{ marginLeft: `${Math.max(4, indent * 12)}px` }}
             >
-              <span className="text-blue-400 font-bold shrink-0 text-sm mt-0.5">•</span>
-              <div className="flex-1 leading-relaxed text-zinc-200">{renderInline(rest)}</div>
+              <span className="text-[#0E6245] font-black shrink-0 text-base leading-none mt-0.5">•</span>
+              <div className="flex-1 leading-relaxed text-slate-800">{renderCellContent(rest)}</div>
             </div>
           )
         }
 
         // Regular Paragraph
         return (
-          <p key={idx} className="leading-relaxed text-zinc-200">
-            {renderInline(trimmed)}
-          </p>
+          <div key={blockKey} className="leading-relaxed text-slate-800">
+            {renderCellContent(trimmed)}
+          </div>
         )
       })}
     </div>

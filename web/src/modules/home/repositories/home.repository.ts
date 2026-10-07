@@ -23,11 +23,11 @@ export const homeRepository = {
   },
 
   async getSession(id: number | string): Promise<ChatSession> {
-    return apiGetChatSession(Number(id))
+    return apiGetChatSession(id)
   },
 
   async sendMessage(sessionId: number | string, content: string): Promise<ChatMessage> {
-    return apiSendChatMessage(Number(sessionId), content)
+    return apiSendChatMessage(sessionId, content)
   },
 
   async streamMessage(
@@ -37,6 +37,6 @@ export const homeRepository = {
     onDone: (messageId: number) => void,
     onError: (err: any) => void
   ): Promise<void> {
-    return apiStreamChatMessage(Number(sessionId), content, onToken, onDone, onError)
+    return apiStreamChatMessage(sessionId, content, onToken, onDone, onError)
   },
 }

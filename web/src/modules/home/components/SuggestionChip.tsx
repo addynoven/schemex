@@ -20,9 +20,9 @@ export const SuggestionChip: React.FC<SuggestionChipProps> = ({
     <button
       type="button"
       onClick={() => onClick(prompt)}
-      className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/80 hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-zinc-100 text-xs transition-all active:scale-[0.98] cursor-pointer text-left"
+      className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-slate-700 hover:text-[#0E6245] text-xs font-semibold shadow-xs transition-all active:scale-[0.98] cursor-pointer text-left"
     >
-      {Icon && <Icon className="h-3.5 w-3.5 text-zinc-400 shrink-0" />}
+      {Icon && <Icon className="h-3.5 w-3.5 text-[#0E6245] shrink-0" />}
       <span className="truncate">{label}</span>
     </button>
   )

@@ -8,7 +8,14 @@ export const metadata = {
 
 export default function SchemesPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-zinc-950 flex items-center justify-center text-zinc-400">Loading schemes catalog...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center text-slate-500 font-sans font-semibold text-xs gap-3">
+          <div className="h-5 w-5 border-2 border-[#0E6245]/20 border-t-[#0E6245] rounded-full animate-spin" />
+          <span>Loading schemes directory...</span>
+        </div>
+      }
+    >
       <SchemesBrowseScreen />
     </Suspense>
   )

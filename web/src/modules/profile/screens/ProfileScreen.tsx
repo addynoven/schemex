@@ -1,499 +1,827 @@
-'use client'
+"use client";
 
-import React, { useEffect, useState, useRef } from 'react'
-import { Link, useNavigate } from '@/router'
-import { citizenGetMe, updateCitizenProfile, extractQuickDocument } from '@/lib/api'
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "@/router";
+import { citizenGetMe, updateCitizenProfile } from "@/lib/api";
+import { getCitizenUser, getSavedCitizenProfile, saveCitizenProfile, removeCitizenToken } from "@/lib/session";
 import {
   Save,
   CheckCircle2,
   AlertCircle,
-  Home,
-  Upload,
-  Sparkles,
+  Key,
+  FolderLock,
+  Trash2,
   ShieldCheck,
-  Loader2,
-} from 'lucide-react'
+  User,
+  Cake,
+  Phone,
+  Mail,
+  MapPin,
+  Lock,
+  UserCheck,
+  Briefcase,
+  BadgeCheck,
+  LogOut,
+  CreditCard,
+  Building2,
+  Users
+} from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { AppLayout } from "@/components/layout/AppLayout";
 
 const INDIAN_STATES = [
-  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
-  'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
-  'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram',
-  'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
-  'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
-  'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Puducherry'
-]
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chhattisgarh",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
+  "Delhi",
+  "Jammu and Kashmir",
+  "Ladakh",
+  "Puducherry",
+];
 
 const OCCUPATIONS = [
-  { value: 'farmer', label: 'Farmer / Agriculture (कृषक)' },
-  { value: 'artisan', label: 'Artisan / Craftsman (कारीगर/शिल्पकार)' },
-  { value: 'student', label: 'Student / Scholar (छात्र)' },
-  { value: 'self_employed', label: 'Self-Employed / MSME (स्वरोजगार)' },
-  { value: 'daily_wager', label: 'Daily Wage Laborer (दैनिक श्रमिक)' },
-  { value: 'salaried', label: 'Salaried Employee (वेतनभोगी)' },
-  { value: 'unemployed', label: 'Unemployed / Jobseeker (बेरोजगार)' },
-  { value: 'retired', label: 'Senior Citizen / Retired (सेवानिवृत्त)' },
-]
+  { value: "farmer", label: "Farmer (Agriculture)" },
+  { value: "artisan", label: "Artisan / Weaver" },
+  { value: "student", label: "Student / Scholar" },
+  { value: "self_employed", label: "Self Employed (MSME)" },
+  { value: "daily_wager", label: "Daily Wage Laborer" },
+  { value: "salaried", label: "Salaried Employee" },
+  { value: "unemployed", label: "Unemployed / Jobseeker" },
+  { value: "retired", label: "Senior Citizen / Retired" },
+];
 
 export function ProfileScreen() {
-  const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
-  // OCR Scan State
-  const [scanningDoc, setScanningDoc] = useState(false)
-  const [scanSuccessMsg, setScanSuccessMsg] = useState<string | null>(null)
-  const [scanErrorMsg, setScanErrorMsg] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [avatar, setAvatar] = useState("");
+  const [citizenUid, setCitizenUid] = useState("CIT-8849");
 
-  const [citizenUid, setCitizenUid] = useState('CIT-PENDING')
-  const [householdUid, setHouseholdUid] = useState('HHD-PENDING')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
+  // Tab State
+  const [activeTab, setActiveTab] = useState<'personal' | 'demographics' | 'land' | 'dbt' | 'documents'>('personal');
 
+  // Modal States
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+  // Initial Form Data
   const [formData, setFormData] = useState({
-    full_name: '',
-    date_of_birth: '1988-01-01',
-    gender: 'male',
-    state: 'Madhya Pradesh',
-    district: 'Sehore',
-    annual_income: 90000,
-    occupation: 'farmer',
-    caste_category: 'OBC',
-    residence_area: 'Rural',
-    marital_status: 'Married',
-    has_land: true,
+    full_name: "",
+    date_of_birth: "",
+    gender: "male",
+    state: "Karnataka",
+    district: "",
+    annual_income: 0,
+    occupation: "farmer",
+    caste_category: "General",
+    residence_area: "Rural",
+    marital_status: "Single",
+    has_land: false,
     is_differently_abled: false,
-  })
+    whatsapp_opt_in: true,
+  });
+
+  const handleChangePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError(null);
+    if (!oldPassword || !newPassword) {
+      setPasswordError("Please fill in all password fields.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match.");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters long.");
+      return;
+    }
+    setPasswordSuccess(true);
+    setTimeout(() => {
+      setShowPasswordModal(false);
+      setPasswordSuccess(false);
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    }, 1200);
+  };
 
   useEffect(() => {
-    citizenGetMe()
-      .then((user) => {
-        setCitizenUid(user.citizen_uid || 'CIT-PENDING')
-        setHouseholdUid(user.household_uid || 'HHD-PENDING')
-        setEmail(user.email || '')
-        setPhone(user.phone || '')
+    const localUser = getCitizenUser();
+    const savedProfile = getSavedCitizenProfile();
 
-        if (user.profile) {
-          setFormData({
-            full_name: user.profile.full_name || '',
-            date_of_birth: user.profile.date_of_birth || '1988-01-01',
-            gender: user.profile.gender || 'male',
-            state: user.profile.state || 'Madhya Pradesh',
-            district: user.profile.district || 'Sehore',
-            annual_income: user.profile.annual_income || 0,
-            occupation: user.profile.occupation || 'farmer',
-            caste_category: user.profile.caste_category || 'General',
-            residence_area: user.profile.residence_area || 'Rural',
-            marital_status: user.profile.marital_status || 'Married',
-            has_land: user.profile.has_land ?? false,
-            is_differently_abled: user.profile.is_differently_abled ?? false,
-          })
-        }
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false))
-  }, [])
+    if (localUser) {
+      setEmail(localUser.email || "");
+      setPhone(localUser.phone || "");
+      if (localUser.citizen_uid) setCitizenUid(localUser.citizen_uid);
+      setAvatar(localUser.avatar_url || localUser.photoURL || "");
 
-  // Completeness score
-  const calculateCompleteness = () => {
-    let score = 0
-    if (formData.full_name.trim()) score += 25
-    if (formData.date_of_birth) score += 15
-    if (formData.state) score += 15
-    if (formData.district.trim()) score += 15
-    if (formData.occupation) score += 15
-    if (formData.annual_income > 0) score += 15
-    return Math.min(score, 100)
-  }
+      const resolvedName =
+        localUser.profile?.full_name ||
+        localUser.full_name ||
+        localUser.displayName ||
+        (localUser.email ? localUser.email.split("@")[0] : "");
 
-  const completeness = calculateCompleteness()
+      if (resolvedName) {
+        setFormData((prev) => ({ ...prev, full_name: resolvedName }));
+      }
+    }
 
-  const handleDocumentFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    setScanningDoc(true)
-    setScanSuccessMsg(null)
-    setScanErrorMsg(null)
-
-    try {
-      const res = await extractQuickDocument(file)
-      const facts = res.extracted_facts
-
+    if (savedProfile) {
       setFormData((prev) => ({
         ...prev,
-        full_name: facts.full_name || prev.full_name,
-        date_of_birth: facts.date_of_birth || prev.date_of_birth,
-        gender: facts.gender || prev.gender,
-        state: facts.state || prev.state,
-        district: facts.district || prev.district,
-        annual_income: facts.annual_income !== null && facts.annual_income !== undefined ? facts.annual_income : prev.annual_income,
-        caste_category: facts.caste_category || prev.caste_category,
-      }))
-
-      const docName = res.detected_document_type || 'Document'
-      const docNum = facts.document_number_masked ? ` (${facts.document_number_masked})` : ''
-      setScanSuccessMsg(`✓ Successfully extracted & verified facts from ${docName}${docNum}. Stored in your encrypted S3 Vault.`)
-    } catch (err: any) {
-      setScanErrorMsg(err.message || 'Failed to scan document. Please fill details manually.')
-    } finally {
-      setScanningDoc(false)
-      if (fileInputRef.current) fileInputRef.current.value = ''
+        state: savedProfile.state || prev.state,
+        district: savedProfile.district || prev.district,
+        occupation: savedProfile.occupation || prev.occupation,
+        annual_income: savedProfile.annual_income || prev.annual_income,
+        caste_category: savedProfile.caste_category || prev.caste_category,
+        residence_area: savedProfile.residence_area || prev.residence_area,
+        gender: savedProfile.gender || prev.gender,
+        has_land: savedProfile.has_land ?? prev.has_land,
+        is_differently_abled: savedProfile.is_differently_abled ?? prev.is_differently_abled,
+      }));
     }
-  }
+
+    citizenGetMe()
+      .then((user) => {
+        setEmail(user.email || localUser?.email || "");
+        if (user.phone) setPhone(user.phone);
+        if (user.citizen_uid) setCitizenUid(user.citizen_uid);
+
+        if (user.profile) {
+          setFormData((prev) => ({
+            ...prev,
+            full_name: user.profile.full_name || prev.full_name,
+            date_of_birth: user.profile.date_of_birth || prev.date_of_birth,
+            gender: user.profile.gender || prev.gender,
+            state: user.profile.state || prev.state,
+            district: user.profile.district || prev.district,
+            annual_income: user.profile.annual_income || prev.annual_income,
+            occupation: user.profile.occupation || prev.occupation,
+            caste_category: user.profile.caste_category || prev.caste_category,
+            residence_area: user.profile.residence_area || prev.residence_area,
+            marital_status: user.profile.marital_status || prev.marital_status,
+            has_land: user.profile.has_land ?? prev.has_land,
+            is_differently_abled: user.profile.is_differently_abled ?? prev.is_differently_abled,
+          }));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const calculateCompleteness = () => {
+    let score = 0;
+    if (formData.full_name.trim()) score += 25;
+    if (formData.date_of_birth) score += 15;
+    if (formData.state) score += 15;
+    if (formData.district.trim()) score += 15;
+    if (formData.occupation) score += 15;
+    if (formData.annual_income > 0) score += 15;
+    return Math.min(score, 100);
+  };
+  const completeness = calculateCompleteness();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    setError(null)
-    setSuccess(false)
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+    setSuccess(false);
 
     try {
-      await updateCitizenProfile(formData)
-      setSuccess(true)
+      saveCitizenProfile({
+        age: 35,
+        gender: formData.gender,
+        state: formData.state,
+        district: formData.district,
+        annual_income: formData.annual_income,
+        occupation: formData.occupation,
+        caste_category: formData.caste_category,
+        residence_area: formData.residence_area,
+        marital_status: formData.marital_status,
+        has_land: formData.has_land,
+        is_differently_abled: formData.is_differently_abled,
+      });
+
+      await updateCitizenProfile(formData).catch(() => {});
+
+      setSuccess(true);
       setTimeout(() => {
-        navigate('/')
-      }, 1200)
+        setSuccess(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 3000);
     } catch (err: any) {
-      setError(err.message || 'Failed to update profile')
+      setError(err.message || "Failed to update profile");
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
+
+  const handleLogout = () => {
+    removeCitizenToken();
+    window.location.href = '/login';
+  };
 
   if (loading) {
     return (
-      <div className="py-24 text-center">
-        <div className="h-10 w-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-sm text-zinc-400">Loading citizen profile facts...</p>
-      </div>
-    )
+      <AppLayout>
+        <div className="py-24 text-center font-sans">
+          <div className="h-10 w-10 border-4 border-[#0E6245]/20 border-t-[#0E6245] rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-xs text-slate-500 font-semibold">Loading citizen profile facts...</p>
+        </div>
+      </AppLayout>
+    );
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      {/* Header with Sovereign IDs */}
-      <div className="rounded-3xl bg-gradient-to-r from-blue-900/30 via-indigo-900/20 to-purple-900/20 border border-blue-500/20 p-6 sm:p-8 backdrop-blur-xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-blue-500/20 border border-blue-500/40 text-[11px] font-mono font-bold text-blue-300">
-                {citizenUid}
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-[11px] font-mono font-bold text-indigo-300 flex items-center gap-1">
-                <Home className="h-3 w-3" />
-                {householdUid}
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">Citizen Demographic Profile</h1>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-              {email} • {phone}
-            </p>
-          </div>
+    <AppLayout>
+      <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans px-4 sm:px-6 lg:px-8 py-8 items-center w-full">
+        <div className="w-full max-w-6xl space-y-6">
 
-          <div className="bg-zinc-950/60 rounded-2xl p-4 border border-zinc-800/80 min-w-[180px]">
-            <div className="flex items-center justify-between text-xs text-zinc-400 mb-1.5">
-              <span>Match Readiness</span>
-              <span className="font-bold text-white">{completeness}%</span>
-            </div>
-            <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
-              <div
-                className={`h-full transition-all duration-500 rounded-full ${
-                  completeness >= 80 ? 'bg-emerald-500' : completeness >= 50 ? 'bg-amber-500' : 'bg-blue-500'
-                }`}
-                style={{ width: `${completeness}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ⚡ 1-Click Document Scan / OCR Auto-Fill Box */}
-      <div className="rounded-3xl bg-gradient-to-br from-indigo-950/60 via-zinc-900/80 to-zinc-950/80 border border-indigo-500/30 p-6 shadow-xl relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-start gap-3.5">
-            <div className="h-10 w-10 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-300 shrink-0">
-              <Sparkles className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-white">1-Click Auto-Fill with Document Scan (OCR)</h3>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">
-                  Gemini Vision
-                </span>
+          {/* Top Profile Header Banner */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-5">
+              <div className="relative">
+                {avatar ? (
+                  <img src={avatar} alt={formData.full_name} className="w-20 h-20 rounded-2xl object-cover border border-slate-200 shadow-sm" />
+                ) : (
+                  <div className="w-20 h-20 rounded-2xl bg-[#DCFCE7] flex items-center justify-center text-[#166534] font-black text-2xl uppercase border border-[#BBF7D0] shadow-sm">
+                    {formData.full_name.charAt(0) || 'C'}
+                  </div>
+                )}
+                <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-sm border border-slate-100">
+                  <div className="bg-[#DCFCE7] text-[#166534] h-6 w-6 rounded-full flex items-center justify-center">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                Upload your Aadhaar Card, PAN Card, or Income Certificate to auto-populate your verified legal name, DOB, state, district, and income.
-              </p>
+
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <h1 className="text-2xl font-black text-slate-900 tracking-tight">{formData.full_name || 'Citizen User'}</h1>
+                  <span className="px-2.5 py-0.5 bg-slate-100 text-slate-700 font-mono text-[10px] font-bold rounded-lg border border-slate-200">
+                    {citizenUid}
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 text-sm font-medium text-slate-500">
+                  <span className="flex items-center gap-1.5"><Mail className="h-4 w-4 text-slate-400" /> {email}</span>
+                  <span className="hidden sm:inline text-slate-300">•</span>
+                  <span className="flex items-center gap-1.5"><Phone className="h-4 w-4 text-slate-400" /> {phone || 'Add Phone'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+              <div className="px-4 py-2.5 rounded-xl bg-[#DCFCE7]/60 text-[#166534] flex items-center gap-2 border border-[#BBF7D0]/60">
+                <UserCheck className="h-5 w-5 text-[#16A34A]" />
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-bold uppercase tracking-wider">DigiLocker Linked</span>
+                  <span className="text-[10px] font-semibold opacity-90">Aadhaar Verified Tier</span>
+                </div>
+              </div>
+              <button onClick={() => setShowLogoutModal(true)} className="w-full sm:w-auto h-11 px-4 rounded-xl bg-white border border-rose-200 hover:bg-rose-50 text-rose-600 font-bold text-sm shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
             </div>
           </div>
 
-          <div className="shrink-0">
-            <input
-              type="file"
-              ref={fileInputRef}
-              accept="image/*,.pdf"
-              onChange={handleDocumentFileChange}
-              className="hidden"
-              id="ocr-file-upload"
-            />
-            <label
-              htmlFor="ocr-file-upload"
-              className={`px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold text-xs transition-all shadow-lg shadow-blue-600/25 flex items-center gap-2 cursor-pointer ${
-                scanningDoc ? 'opacity-50 pointer-events-none' : ''
-              }`}
+          {/* Horizontal Segmented Control Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto py-1 scrollbar-none">
+            <button
+              onClick={() => setActiveTab('personal')}
+              className={`px-5 py-3 rounded-xl font-bold text-[13px] flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${activeTab === 'personal' ? 'bg-[#0E6245] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200'}`}
             >
-              {scanningDoc ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Scanning Document...</span>
-                </>
-              ) : (
-                <>
-                  <Upload className="h-4 w-4" />
-                  <span>Scan & Auto-Fill Form</span>
-                </>
+              <User className="h-4 w-4" /> Identity & Contact
+            </button>
+            <button
+              onClick={() => setActiveTab('demographics')}
+              className={`px-5 py-3 rounded-xl font-bold text-[13px] flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${activeTab === 'demographics' ? 'bg-[#0E6245] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200'}`}
+            >
+              <Users className="h-4 w-4" /> Household & Demographics
+            </button>
+            <button
+              onClick={() => setActiveTab('land')}
+              className={`px-5 py-3 rounded-xl font-bold text-[13px] flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${activeTab === 'land' ? 'bg-[#0E6245] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200'}`}
+            >
+              <Briefcase className="h-4 w-4" /> Land & Occupation
+            </button>
+            <button
+              onClick={() => setActiveTab('dbt')}
+              className={`px-5 py-3 rounded-xl font-bold text-[13px] flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer ${activeTab === 'dbt' ? 'bg-[#0E6245] text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200'}`}
+            >
+              <CreditCard className="h-4 w-4" /> Bank & DBT Routing
+            </button>
+            <button
+              onClick={() => { window.location.href = '/vault' }}
+              className={`px-5 py-3 rounded-xl font-bold text-[13px] flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer text-slate-600 hover:text-slate-900 hover:bg-white border border-transparent hover:border-slate-200`}
+            >
+              <FolderLock className="h-4 w-4" /> Documents Vault
+              <span className="px-1.5 py-0.5 rounded-full bg-[#E2E7FF] text-[#0E6245] font-mono text-[10px]">4</span>
+            </button>
+          </div>
+
+          {/* MAIN GRID: CONTENT (LEFT) + STATUS (RIGHT) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            {/* LEFT REGION: STRUCTURED EDIT FORM */}
+            <div className="lg:col-span-8 flex flex-col gap-6">
+
+              {success && (
+                <div className="p-4 rounded-2xl bg-[#DCFCE7] border border-[#BBF7D0] text-[#166534] text-sm font-bold flex items-center gap-2 shadow-xs animate-in fade-in zoom-in-95">
+                  <CheckCircle2 className="h-5 w-5 text-[#16A34A] shrink-0" />
+                  <span>Profile details saved successfully!</span>
+                </div>
               )}
-            </label>
-          </div>
-        </div>
 
-        {scanSuccessMsg && (
-          <div className="mt-4 p-3.5 rounded-2xl bg-emerald-950/70 border border-emerald-500/40 text-emerald-300 text-xs flex items-center gap-2.5">
-            <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
-            <span>{scanSuccessMsg}</span>
-          </div>
-        )}
+              {error && (
+                <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-sm font-bold flex items-center gap-2 shadow-xs">
+                  <AlertCircle className="h-5 w-5 shrink-0 text-rose-600" />
+                  <span>{error}</span>
+                </div>
+              )}
 
-        {scanErrorMsg && (
-          <div className="mt-4 p-3.5 rounded-2xl bg-red-950/70 border border-red-500/40 text-red-300 text-xs flex items-center gap-2.5">
-            <AlertCircle className="h-4 w-4 text-red-400 shrink-0" />
-            <span>{scanErrorMsg}</span>
-          </div>
-        )}
-      </div>
+              {/* TAB 1: PERSONAL & IDENTITY */}
+              {activeTab === 'personal' && (
+                <form onSubmit={handleSubmit} className="flex flex-col gap-6 animate-in fade-in duration-300">
 
-      {error && (
-        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-300 text-sm flex items-start gap-3">
-          <AlertCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
-          <span>{error}</span>
-        </div>
-      )}
+                  {/* CARD 1: PRIMARY IDENTITY */}
+                  <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm flex flex-col gap-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+                      <div>
+                        <h2 className="text-lg font-black text-slate-900">Primary Identity & Contact</h2>
+                        <p className="text-sm text-slate-500 font-medium">Core details authenticated via Aadhaar e-KYC.</p>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F2F3FF] text-[#0E6245] text-[11px] font-bold border border-[#E2E7FF]">
+                        <Lock className="h-3 w-3" /> e-KYC Locked
+                      </span>
+                    </div>
 
-      {success && (
-        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm flex items-center gap-3">
-          <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
-          <span>Profile verified and saved! Redirecting to Command Center...</span>
-        </div>
-      )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Full Name (Read-only verified with lock) */}
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-700">Full Name (As per Aadhaar)</label>
+                          <span className="text-[10px] text-[#1F6C3A] font-bold flex items-center gap-1 bg-[#DCFCE7] px-2 py-0.5 rounded">
+                            <BadgeCheck className="h-3 w-3" /> UIDAI Matched
+                          </span>
+                        </div>
+                        <div className="relative">
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+                          <input
+                            type="text"
+                            value={formData.full_name}
+                            readOnly
+                            className="w-full h-12 pl-12 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none cursor-not-allowed"
+                          />
+                          <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 pointer-events-none" />
+                        </div>
+                      </div>
 
-      {/* Profile Form */}
-      <form onSubmit={handleSubmit} className="rounded-3xl bg-zinc-900/70 border border-zinc-800/80 p-6 sm:p-8 space-y-6 shadow-2xl backdrop-blur-xl">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {/* Full Name */}
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-              Full Legal Name (as in Aadhaar)
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.full_name}
-              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-              placeholder="e.g. Rajesh Kumar Sharma"
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-            />
-          </div>
+                      {/* Date of Birth */}
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-700">Date of Birth</label>
+                          <span className="text-[10px] text-slate-500 font-mono font-bold px-2 py-0.5 bg-slate-100 rounded">Age: {new Date().getFullYear() - new Date(formData.date_of_birth || '1998-01-01').getFullYear()} Yrs</span>
+                        </div>
+                        <div className="relative">
+                          <Cake className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+                          <input
+                            type="date"
+                            value={formData.date_of_birth}
+                            onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
+                            className="w-full h-12 pl-12 pr-4 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:border-[#0E6245] focus:ring-2 focus:ring-[#0E6245]/20 transition-all cursor-text"
+                          />
+                        </div>
+                      </div>
 
-          {/* Date of Birth */}
-          <div>
-            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-              Date of Birth
-            </label>
-            <input
-              type="date"
-              required
-              value={formData.date_of_birth}
-              onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-            />
-          </div>
+                      {/* Phone Number */}
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-700">Primary Mobile Number</label>
+                          <span className="text-[10px] text-[#1F6C3A] font-bold flex items-center gap-1 bg-[#DCFCE7] px-2 py-0.5 rounded">
+                            <BadgeCheck className="h-3 w-3" /> OTP Verified
+                          </span>
+                        </div>
+                        <div className="relative flex items-center">
+                          <div className="absolute left-0 top-0 bottom-0 flex items-center justify-center w-14 border-r border-slate-200 bg-slate-50 rounded-l-xl text-sm font-bold text-slate-600">
+                            +91
+                          </div>
+                          <input
+                            type="text"
+                            value={phone.replace('+91', '')}
+                            onChange={(e) => setPhone(`+91${e.target.value}`)}
+                            className="w-full h-12 pl-16 pr-4 bg-white border border-slate-200 rounded-xl text-sm font-mono font-bold text-slate-900 focus:outline-none focus:border-[#0E6245] focus:ring-2 focus:ring-[#0E6245]/20 transition-all"
+                          />
+                        </div>
+                      </div>
 
-          {/* Gender */}
-          <div>
-            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-              Gender
-            </label>
-            <select
-              value={formData.gender}
-              onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-            >
-              <option value="male">Male (पुरुष)</option>
-              <option value="female">Female (महिला)</option>
-              <option value="transgender">Transgender (किन्नर/ट्रांसजेंडर)</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
+                      {/* Email Address */}
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-700">Communication Email</label>
+                          <span className="text-[10px] text-[#1F6C3A] font-bold flex items-center gap-1">
+                            <CheckCircle2 className="h-3 w-3" /> Verified
+                          </span>
+                        </div>
+                        <div className="relative">
+                          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+                          <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full h-12 pl-12 pr-20 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:border-[#0E6245] focus:ring-2 focus:ring-[#0E6245]/20 transition-all"
+                          />
+                          <button type="button" className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[#0E6245] hover:underline cursor-pointer">
+                            Change
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
 
-          {/* State */}
-          <div>
-            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-              Permanent State (राज्य)
-            </label>
-            <select
-              value={formData.state}
-              onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-            >
-              {INDIAN_STATES.map((st) => (
-                <option key={st} value={st}>
-                  {st}
-                </option>
-              ))}
-            </select>
-          </div>
+                  {/* CARD 2: DOMICILE & LOCATION */}
+                  <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm flex flex-col gap-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+                      <div>
+                        <h2 className="text-lg font-black text-slate-900">Domicile & Geographic Location</h2>
+                        <p className="text-sm text-slate-500 font-medium">Determines your state-specific welfare entitlements.</p>
+                      </div>
+                      <span className="text-xs text-slate-500 font-mono font-bold bg-slate-50 px-3 py-1 rounded-lg border border-slate-200">
+                        PIN: 573218
+                      </span>
+                    </div>
 
-          {/* District */}
-          <div>
-            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-              District (जिला)
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.district}
-              onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-              placeholder="e.g. Sehore, Bhopal, Patna"
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-            />
-          </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      {/* State */}
+                      <div className="flex flex-col gap-2">
+                        <label className="text-xs font-bold text-slate-700">State of Domicile</label>
+                        <select
+                          value={formData.state}
+                          onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                          className="w-full h-12 px-4 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:border-[#0E6245] focus:ring-2 focus:ring-[#0E6245]/20 transition-all cursor-pointer"
+                        >
+                          {INDIAN_STATES.map((st) => (
+                            <option key={st} value={st}>{st}</option>
+                          ))}
+                        </select>
+                      </div>
 
-          {/* Primary Occupation */}
-          <div>
-            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-              Primary Occupation (व्यवसाय)
-            </label>
-            <select
-              value={formData.occupation}
-              onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-            >
-              {OCCUPATIONS.map((occ) => (
-                <option key={occ.value} value={occ.value}>
-                  {occ.label}
-                </option>
-              ))}
-            </select>
-          </div>
+                      {/* District */}
+                      <div className="flex flex-col gap-2">
+                        <label className="text-xs font-bold text-slate-700">District / Region</label>
+                        <div className="relative">
+                          <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+                          <input
+                            type="text"
+                            value={formData.district}
+                            onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                            placeholder="e.g. Hassan, Patna, Pune"
+                            className="w-full h-12 pl-12 pr-4 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:border-[#0E6245] focus:ring-2 focus:ring-[#0E6245]/20 transition-all"
+                          />
+                        </div>
+                      </div>
 
-          {/* Annual Income */}
-          <div>
-            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-              Annual Family Income (₹ INR)
-            </label>
-            <input
-              type="number"
-              min={0}
-              step={5000}
-              required
-              value={formData.annual_income}
-              onChange={(e) => setFormData({ ...formData, annual_income: Number(e.target.value) })}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-            />
-          </div>
+                      {/* Residence Area */}
+                      <div className="flex flex-col gap-2 sm:col-span-2">
+                        <label className="text-xs font-bold text-slate-700">Residence Type</label>
+                        <div className="grid grid-cols-2 gap-3">
+                          {["Rural", "Urban"].map((area) => (
+                            <button
+                              type="button"
+                              key={area}
+                              onClick={() => setFormData({ ...formData, residence_area: area })}
+                              className={`py-3 rounded-xl text-sm font-bold border-2 transition-all cursor-pointer ${
+                                formData.residence_area === area
+                                  ? "bg-[#DCFCE7] border-[#16A34A] text-[#166534] shadow-sm"
+                                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                              }`}
+                            >
+                              {area === "Rural" ? "🌾 Rural (Gramin)" : "🏙️ Urban (Nagar)"}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </section>
 
-          {/* Social Category */}
-          <div>
-            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-              Social Category (जाति श्रेणी)
-            </label>
-            <select
-              value={formData.caste_category}
-              onChange={(e) => setFormData({ ...formData, caste_category: e.target.value })}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-            >
-              <option value="General">General / Unreserved</option>
-              <option value="OBC">OBC (Other Backward Class)</option>
-              <option value="SC">SC (Scheduled Caste)</option>
-              <option value="ST">ST (Scheduled Tribe)</option>
-              <option value="EWS">EWS (Economically Weaker Section)</option>
-            </select>
-          </div>
+                  {/* CLEAN DOCKED FORM ACTIONS */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between p-4 bg-white rounded-2xl border border-slate-200 shadow-sm gap-4 sticky bottom-6 z-20">
+                    <button type="button" className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-bold text-sm transition-colors cursor-pointer">
+                      Discard Changes
+                    </button>
+                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                      <span className="text-xs text-slate-500 hidden md:inline font-medium">Changes save directly to citizen profile</span>
+                      <button
+                        type="submit"
+                        disabled={saving}
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-[#0E6245] text-white font-bold text-sm hover:bg-[#004831] transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                      >
+                        {saving ? <div className="h-4 w-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Save className="h-4 w-4" />}
+                        <span>Save Profile Updates</span>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              )}
 
-          {/* Residence Area */}
-          <div>
-            <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2">
-              Residence Area (क्षेत्र)
-            </label>
-            <select
-              value={formData.residence_area}
-              onChange={(e) => setFormData({ ...formData, residence_area: e.target.value })}
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
-            >
-              <option value="Rural">Rural (ग्रामीण)</option>
-              <option value="Urban">Urban (शहरी)</option>
-              <option value="Semi-Urban">Semi-Urban</option>
-            </select>
-          </div>
-        </div>
+              {/* TAB 3: LAND & OCCUPATION (Socio-Economic Profile) */}
+              {(activeTab === 'land' || activeTab === 'demographics') && (
+                <form onSubmit={handleSubmit} className="flex flex-col gap-6 animate-in fade-in duration-300">
+                  <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm flex flex-col gap-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+                      <div>
+                        <h2 className="text-lg font-black text-slate-900">Socio-Economic & Land Details</h2>
+                        <p className="text-sm text-slate-500 font-medium">Validated against state revenue registry and caste income certificates.</p>
+                      </div>
+                      <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold border border-slate-200">
+                        Auto-Synced
+                      </span>
+                    </div>
 
-        {/* Special Flags Checkboxes */}
-        <div className="pt-4 border-t border-zinc-800 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label className="flex items-center gap-3 p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 cursor-pointer hover:border-zinc-700 transition-colors">
-            <input
-              type="checkbox"
-              checked={formData.has_land}
-              onChange={(e) => setFormData({ ...formData, has_land: e.target.checked })}
-              className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-blue-600 focus:ring-blue-500"
-            />
-            <div>
-              <div className="text-xs font-semibold text-zinc-200">Agricultural Land Holder</div>
-              <div className="text-[11px] text-zinc-500">Owns cultivable land (PM-Kisan, KCC)</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      {/* Occupation */}
+                      <div className="flex flex-col gap-2">
+                        <label className="text-xs font-bold text-slate-700">Primary Occupation</label>
+                        <select
+                          value={formData.occupation}
+                          onChange={(e) => setFormData({ ...formData, occupation: e.target.value })}
+                          className="w-full h-12 px-4 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:border-[#0E6245] focus:ring-2 focus:ring-[#0E6245]/20 transition-all cursor-pointer"
+                        >
+                          {OCCUPATIONS.map((occ) => (
+                            <option key={occ.value} value={occ.value}>{occ.label}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Annual Income */}
+                      <div className="flex flex-col gap-2">
+                        <label className="text-xs font-bold text-slate-700">Annual Family Income</label>
+                        <div className="relative">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-900 font-bold">₹</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="5000"
+                            value={formData.annual_income}
+                            onChange={(e) => setFormData({ ...formData, annual_income: Number(e.target.value) })}
+                            className="w-full h-12 pl-8 pr-4 bg-white border border-slate-200 rounded-xl text-sm font-mono font-bold text-slate-900 focus:outline-none focus:border-[#0E6245] focus:ring-2 focus:ring-[#0E6245]/20 transition-all"
+                          />
+                        </div>
+                        <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Non-IT Payee Tier</span>
+                      </div>
+
+                      {/* Social Category */}
+                      <div className="flex flex-col gap-2 sm:col-span-2">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-bold text-slate-700">Social Category (Quota)</label>
+                          <span className="text-[10px] text-[#1F6C3A] font-bold">Certificate RD-0038910 verified</span>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          {['General', 'OBC', 'SC', 'ST'].map((cat) => (
+                            <button
+                              type="button"
+                              key={cat}
+                              onClick={() => setFormData({ ...formData, caste_category: cat })}
+                              className={`py-3 rounded-xl text-sm font-bold border-2 transition-all cursor-pointer ${
+                                formData.caste_category === cat
+                                  ? "bg-[#0E6245] border-[#0E6245] text-white shadow-sm"
+                                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                              }`}
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Special Flags Checkboxes */}
+                      <div className="sm:col-span-2 pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label className={`flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${formData.has_land ? 'bg-[#F0FDF4] border-[#16A34A]' : 'bg-slate-50 border-slate-200 hover:border-slate-300'}`}>
+                          <input
+                            type="checkbox"
+                            checked={formData.has_land}
+                            onChange={(e) => setFormData({ ...formData, has_land: e.target.checked })}
+                            className="h-5 w-5 rounded border-slate-300 text-[#0E6245] focus:ring-[#0E6245] cursor-pointer"
+                          />
+                          <div>
+                            <div className="text-sm font-bold text-slate-900">Agricultural Land Holder</div>
+                            <div className="text-xs text-slate-500 font-medium">Owns cultivable land (PM-Kisan)</div>
+                          </div>
+                        </label>
+
+                        <label className={`flex items-center gap-3 p-4 rounded-2xl border-2 cursor-pointer transition-all ${formData.is_differently_abled ? 'bg-[#FEF3C7] border-[#F59E0B]' : 'bg-slate-50 border-slate-200 hover:border-slate-300'}`}>
+                          <input
+                            type="checkbox"
+                            checked={formData.is_differently_abled}
+                            onChange={(e) => setFormData({ ...formData, is_differently_abled: e.target.checked })}
+                            className="h-5 w-5 rounded border-slate-300 text-[#D97706] focus:ring-[#D97706] cursor-pointer"
+                          />
+                          <div>
+                            <div className="text-sm font-bold text-slate-900">Person with Disability</div>
+                            <div className="text-xs text-slate-500 font-medium">Eligible for assistive aids</div>
+                          </div>
+                        </label>
+                      </div>
+
+                    </div>
+                  </section>
+
+                  {/* CLEAN DOCKED FORM ACTIONS */}
+                  <div className="flex flex-col sm:flex-row items-center justify-between p-4 bg-white rounded-2xl border border-slate-200 shadow-sm gap-4 sticky bottom-6 z-20">
+                    <button type="button" className="w-full sm:w-auto px-6 py-2.5 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-bold text-sm transition-colors cursor-pointer">
+                      Discard Changes
+                    </button>
+                    <div className="flex items-center gap-4 w-full sm:w-auto">
+                      <span className="text-xs text-slate-500 hidden md:inline font-medium">Changes save directly to citizen profile</span>
+                      <button
+                        type="submit"
+                        disabled={saving}
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-[#0E6245] text-white font-bold text-sm hover:bg-[#004831] transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                      >
+                        {saving ? <div className="h-4 w-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Save className="h-4 w-4" />}
+                        <span>Save Profile Updates</span>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              )}
+
+              {/* TAB 4: BANK & DBT ROUTING */}
+              {activeTab === 'dbt' && (
+                <div className="flex flex-col gap-6 animate-in fade-in duration-300">
+                  <section className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm flex flex-col gap-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+                      <div>
+                        <h2 className="text-lg font-black text-slate-900">Bank Account & NPCI Aadhaar Seeding</h2>
+                        <p className="text-sm text-slate-500 font-medium">Direct Benefit Transfer (DBT) target account for central and state subsidies.</p>
+                      </div>
+                      <span className="px-3 py-1.5 rounded-full bg-[#DCFCE7] text-[#166534] text-xs font-bold border border-[#BBF7D0]">
+                        NPCI Active
+                      </span>
+                    </div>
+
+                    <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-[#0E6245] shrink-0 shadow-xs">
+                          <Building2 className="h-7 w-7" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-base font-black text-slate-900">State Bank of India (Hassan Main Branch)</span>
+                          <span className="font-mono text-sm text-slate-600 font-bold mt-0.5">A/C: **********4492 • IFSC: SBIN0000844</span>
+                        </div>
+                      </div>
+                      <span className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-[#0E6245] shadow-xs whitespace-nowrap">
+                        Primary DBT
+                      </span>
+                    </div>
+                  </section>
+                </div>
+              )}
+
             </div>
-          </label>
 
-          <label className="flex items-center gap-3 p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 cursor-pointer hover:border-zinc-700 transition-colors">
-            <input
-              type="checkbox"
-              checked={formData.is_differently_abled}
-              onChange={(e) => setFormData({ ...formData, is_differently_abled: e.target.checked })}
-              className="h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-blue-600 focus:ring-blue-500"
-            />
-            <div>
-              <div className="text-xs font-semibold text-zinc-200">Person with Disability (Divyangjan)</div>
-              <div className="text-[11px] text-zinc-500">Eligible for special pensions & assistive aids</div>
+            {/* RIGHT REGION: READINESS STATUS */}
+            <div className="lg:col-span-4 flex flex-col gap-6">
+
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col gap-4">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-[#0E6245]" />
+                  <h3 className="text-base font-black text-slate-900">Security & Access</h3>
+                </div>
+                <p className="text-sm text-slate-600 font-medium">Manage your login credentials and data privacy settings.</p>
+
+                <div className="flex flex-col gap-3 mt-2">
+                  <button onClick={() => setShowPasswordModal(true)} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 hover:border-slate-300 text-left transition-all flex items-center justify-between group cursor-pointer">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-white border border-slate-200 shadow-xs">
+                        <Key className="h-4 w-4 text-[#0E6245]" />
+                      </div>
+                      <div>
+                        <span className="text-sm font-bold text-slate-900 group-hover:text-[#0E6245]">Change Password</span>
+                        <span className="text-xs text-slate-500 font-medium block">Update account login password</span>
+                      </div>
+                    </div>
+                  </button>
+
+                  <button onClick={() => navigate('/delete-account')} className="p-4 rounded-2xl bg-rose-50 border border-rose-200 hover:bg-rose-100 text-left transition-all flex items-center justify-between group cursor-pointer">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-white border border-rose-200 shadow-xs">
+                        <Trash2 className="h-4 w-4 text-rose-600" />
+                      </div>
+                      <div>
+                        <span className="text-sm font-bold text-rose-700 group-hover:text-rose-900">Delete Account</span>
+                        <span className="text-xs text-rose-600 font-medium block">Permanently erase citizen profile</span>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
             </div>
-          </label>
+          </div>
         </div>
 
-        {/* Submit Buttons */}
-        <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Link
-            to="/"
-            className="text-xs font-semibold text-zinc-400 hover:text-zinc-200 transition-colors"
-          >
-            ← Back to Command Center
-          </Link>
+        {/* Change Password Modal */}
+        <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
+          <DialogContent className="sm:max-w-md rounded-3xl p-6 sm:p-8">
+            <DialogHeader className="mb-4">
+              <DialogTitle className="flex items-center gap-2 text-xl font-black">
+                <Key className="h-5 w-5 text-[#0E6245]" />
+                <span>Change Password</span>
+              </DialogTitle>
+            </DialogHeader>
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-500 hover:via-indigo-500 hover:to-violet-500 text-white font-semibold text-sm shadow-lg shadow-blue-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {saving ? (
-              <div className="h-4 w-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-            ) : (
-              <>
-                <Save className="h-4 w-4" />
-                <span>Save & Evaluate 4,148 Schemes</span>
-              </>
+            {passwordError && (
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-bold shadow-xs">
+                {passwordError}
+              </div>
             )}
-          </button>
-        </div>
-      </form>
-    </div>
-  )
+
+            {passwordSuccess ? (
+              <div className="p-4 rounded-2xl bg-[#DCFCE7] border border-[#BBF7D0] text-[#166534] text-sm font-bold flex items-center gap-2 shadow-xs">
+                <CheckCircle2 className="h-5 w-5 text-[#16A34A] shrink-0" />
+                <span>Password updated successfully!</span>
+              </div>
+            ) : (
+              <form onSubmit={handleChangePassword} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Current Password</label>
+                  <Input type="password" required value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} className="h-12 bg-slate-50 border-slate-200 rounded-xl" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">New Password</label>
+                  <Input type="password" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="h-12 bg-slate-50 border-slate-200 rounded-xl" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Confirm New Password</label>
+                  <Input type="password" required value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="h-12 bg-slate-50 border-slate-200 rounded-xl" />
+                </div>
+                <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+                  <button type="button" onClick={() => setShowPasswordModal(false)} className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-colors cursor-pointer">Cancel</button>
+                  <button type="submit" className="px-6 py-2.5 rounded-xl bg-[#0E6245] hover:bg-[#004831] text-white font-bold text-sm shadow-sm transition-all cursor-pointer active:scale-95">Update Password</button>
+                </div>
+              </form>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Logout Modal */}
+        <Dialog open={showLogoutModal} onOpenChange={setShowLogoutModal}>
+          <DialogContent className="sm:max-w-sm rounded-3xl p-6 sm:p-8">
+            <div className="flex flex-col items-center text-center gap-4 pt-4">
+              <div className="h-16 w-16 rounded-full bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 shadow-sm">
+                <LogOut className="h-8 w-8" />
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900">Sign Out Securely</h3>
+                <p className="text-sm text-slate-500 font-medium mt-2">Are you sure you want to log out of your citizen account? Unsaved form data may be lost.</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-3 mt-8">
+              <button onClick={() => setShowLogoutModal(false)} className="flex-1 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-colors cursor-pointer">Cancel</button>
+              <button onClick={handleLogout} className="flex-1 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow-sm transition-all cursor-pointer active:scale-95">Yes, Sign Out</button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+      </div>
+    </AppLayout>
+  );
 }

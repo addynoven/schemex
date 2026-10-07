@@ -17,8 +17,9 @@ export default async function ChatSessionPage({
   return (
     <Suspense
       fallback={
-        <div className="flex h-screen bg-slate-950 text-slate-400 items-center justify-center">
-          Loading consultation...
+        <div className="flex h-screen bg-[#F8FAFC] text-slate-500 items-center justify-center font-sans font-semibold text-xs gap-3">
+          <div className="h-5 w-5 border-2 border-[#0E6245]/20 border-t-[#0E6245] rounded-full animate-spin" />
+          <span>Loading consultation session...</span>
         </div>
       }
     >

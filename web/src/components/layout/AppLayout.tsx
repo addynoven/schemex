@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Menu, X, Leaf, Search, Bell, User as UserIcon } from 'lucide-react'
@@ -14,21 +14,10 @@ interface AppLayoutProps {
   onNewSession?: () => void
 }
 
-export function AppLayout({
-  children,
-  currentSessionId,
-  onSelectSession,
-  onNewSession,
-}: AppLayoutProps) {
+function TopbarSearchBar() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
 
   useEffect(() => {
     const q = searchParams?.get('q') || searchParams?.get('search') || ''
@@ -37,9 +26,42 @@ export function AppLayout({
     }
   }, [searchParams])
 
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/schemes?q=${encodeURIComponent(searchQuery.trim())}`)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSearchSubmit} className="relative w-full flex items-center">
+      <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Search schemes by ministry, state, or benefit keywords..."
+        className="w-full h-10 pl-10 pr-4 bg-[#F2F3FF] rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#0E6245]"
+      />
+    </form>
+  )
+}
+
+export function AppLayout({
+  children,
+  currentSessionId,
+  onSelectSession,
+  onNewSession,
+}: AppLayoutProps) {
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const activeUser = mounted ? getCitizenUser() : null
 
-  const userEmail = mounted && activeUser?.email ? activeUser.email : 'citizen.user@example.com'
   const userName =
     mounted && activeUser
       ? activeUser?.profile?.full_name ||
@@ -55,13 +77,6 @@ export function AppLayout({
     : undefined
 
   const citizenUid = mounted && activeUser?.citizen_uid ? activeUser.citizen_uid : 'IN-8849-KA'
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      router.push(`/schemes?q=${encodeURIComponent(searchQuery.trim())}`)
-    }
-  }
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] text-slate-900 overflow-hidden font-sans">
@@ -120,16 +135,11 @@ export function AppLayout({
             </button>
 
             {/* Global Search Bar */}
-            <form onSubmit={handleSearchSubmit} className="relative w-full flex items-center">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search schemes by ministry, state, or benefit keywords..."
-                className="w-full h-10 pl-10 pr-4 bg-[#F2F3FF] rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#0E6245]"
-              />
-            </form>
+            <Suspense fallback={
+              <div className="w-full h-10 bg-[#F2F3FF] rounded-xl animate-pulse" />
+            }>
+              <TopbarSearchBar />
+            </Suspense>
           </div>
 
           {/* Right Header Actions */}

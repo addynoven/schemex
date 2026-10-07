@@ -84,7 +84,9 @@ export function useChat(initialSessionIdentifier?: number | string) {
 
 
   const ensureSession = useCallback(async () => {
-    if (currentSessionId) return currentSessionId
+    if (currentSessionId && currentSessionId !== '0' && currentSessionId !== 0) {
+      return currentSessionId
+    }
     const newSession = await homeRepository.createSession('New Welfare Consultation')
     const key = newSession.session_uid || newSession.id
     setCurrentSessionId(key)
@@ -97,6 +99,7 @@ export function useChat(initialSessionIdentifier?: number | string) {
 
   const sendQuery = useCallback(async (text: string) => {
     if (!text.trim() || isStreaming) return
+    if (isServiceBlocked) resetServiceBlock()
 
     console.log('💬 [useChat] User query initiated:', text)
     const userMessage: ChatMessage = {

@@ -11,10 +11,11 @@ import {
   User as UserIcon,
   HelpCircle,
   PlusCircle,
+  LogOut,
 } from 'lucide-react'
 import { useAuth } from '@/modules/auth'
 import { homeRepository } from '@/modules/home/repositories'
-import { type ChatSession, getCitizenUser } from '@/core'
+import { type ChatSession, getCitizenUser, clearCitizenToken } from '@/core'
 
 interface AppSidebarProps {
   currentSessionId?: number | string | null
@@ -43,20 +44,12 @@ export function AppSidebar({
   const storedUser = mounted ? getCitizenUser() : null
   const activeUser = user || storedUser
 
-  const userEmail = mounted && activeUser?.email ? activeUser.email : 'citizen.user@example.com'
-  const userName =
-    mounted && activeUser
-      ? activeUser?.profile?.full_name ||
-        activeUser?.full_name ||
-        activeUser?.displayName ||
-        (activeUser?.email ? activeUser.email.split('@')[0] : 'Citizen User')
-      : 'Citizen User'
-
-  const userAvatar = mounted
-    ? activeUser?.avatar_url ||
-      activeUser?.photoURL ||
-      activeUser?.profile?.avatar_url
-    : undefined
+  const handleLogout = () => {
+    clearCitizenToken()
+    if (typeof window !== 'undefined') {
+      window.location.href = '/login'
+    }
+  }
 
   useEffect(() => {
     homeRepository
@@ -197,6 +190,14 @@ export function AppSidebar({
                   <span className="text-[13px]">{item.label}</span>
                 </Link>
               ))}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-3 px-4 py-2 rounded-xl text-rose-600 hover:bg-rose-50 font-semibold transition-all text-left w-full cursor-pointer"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="text-[13px]">Sign Out</span>
+              </button>
             </nav>
           </div>
 

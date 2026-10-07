@@ -86,20 +86,7 @@ export const authRepository = {
       return mergedUser
     }
 
-    const fallbackUser: UserMeResponse = {
-      id: Date.now(),
-      email: cleanEmail,
-      role: 'citizen',
-      avatar_url: params.avatarUrl,
-      citizen_uid: `CIT-${Date.now().toString().slice(-6)}`,
-      household_uid: `HHD-${Date.now().toString().slice(-6)}`,
-      profile: {
-        full_name: params.fullName || cleanEmail.split('@')[0] || 'Citizen',
-        state: 'Maharashtra',
-      },
-    }
-    saveCitizenUser(fallbackUser)
-    return fallbackUser
+    throw new Error('Failed to synchronize user session with server')
   },
 
   // Firebase Email & Password Login

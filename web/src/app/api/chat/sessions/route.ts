@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { getAuthenticatedUser } from "@/lib/legacy-auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const userId =
-      Number(new URL(request.url).searchParams.get("user_id")) || 1;
+    const user = await getAuthenticatedUser(request);
+    const paramUserId = Number(new URL(request.url).searchParams.get("user_id"));
+    const userId = user?.id || (paramUserId && paramUserId > 0 ? paramUserId : null);
+
+    if (!userId) {
+      return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+    }
+
     const sessions = await query(
       `
       SELECT id, user_id, title, language_code, session_uid, created_at, updated_at
@@ -84,8 +91,14 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const user = await getAuthenticatedUser(request);
     const body = await request.json();
-    const userId = Number(body.user_id) || 1;
+    const userId = user?.id || (Number(body.user_id) > 0 ? Number(body.user_id) : null);
+
+    if (!userId) {
+      return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
+    }
+
     const title = body.title || "New Welfare Assistance";
     const sessionUid = body.session_uid || `session_${Date.now()}`;
     const result = await query(

@@ -87,7 +87,7 @@ export function ProfileScreen() {
   const [phone, setPhone] = useState("");
   const [avatar, setAvatar] = useState("");
   const [avatarError, setAvatarError] = useState(false);
-  const [citizenUid, setCitizenUid] = useState("CIT-8849");
+  const [citizenUid, setCitizenUid] = useState("");
 
   // Tab State
   const [activeTab, setActiveTab] = useState<'personal' | 'demographics' | 'land' | 'dbt' | 'documents'>('personal');
@@ -300,10 +300,12 @@ export function ProfileScreen() {
 
               <div className="flex flex-col">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <h1 className="text-2xl font-black text-slate-900 tracking-tight">{formData.full_name || 'Citizen User'}</h1>
-                  <span className="px-2.5 py-0.5 bg-slate-100 text-slate-700 font-mono text-[10px] font-bold rounded-lg border border-slate-200">
-                    {citizenUid}
-                  </span>
+                  <h1 className="text-2xl font-black text-slate-900 tracking-tight">{formData.full_name || 'Citizen'}</h1>
+                  {citizenUid && (
+                    <span className="px-2.5 py-0.5 bg-slate-100 text-slate-700 font-mono text-[10px] font-bold rounded-lg border border-slate-200">
+                      {citizenUid}
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-wrap items-center gap-3 text-sm font-medium text-slate-500">
                   <span className="flex items-center gap-1.5"><Mail className="h-4 w-4 text-slate-400" /> {email}</span>

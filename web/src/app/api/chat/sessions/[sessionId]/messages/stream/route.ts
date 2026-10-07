@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { generateAssistantReply, saveChatMessage } from "@/lib/chat-server";
 import { query } from "@/lib/db";
+import { getAuthenticatedUser } from "@/lib/legacy-auth";
 
 async function resolveSession(rawParam: string) {
   const isNumeric = /^\d+$/.test(rawParam);
@@ -40,12 +41,14 @@ export async function POST(
         let session = await resolveSession(rawParam);
 
         if (!session) {
+          const authUser = await getAuthenticatedUser(request);
+          const userId = authUser?.id || 1;
           const createRes = await query(
             `INSERT INTO chat_sessions (user_id, title, language_code, session_uid, created_at, updated_at)
-             VALUES (1, 'New Welfare Consultation', 'en', $1, NOW(), NOW())
+             VALUES ($1, 'New Welfare Consultation', 'en', $2, NOW(), NOW())
              ON CONFLICT (session_uid) DO UPDATE SET title = EXCLUDED.title, updated_at = NOW()
              RETURNING id, user_id, title, session_uid`,
-            [rawParam]
+            [userId, rawParam]
           );
           session = createRes.rows[0];
         }

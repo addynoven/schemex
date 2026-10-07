@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Menu, X, Leaf, Search, Bell, User as UserIcon } from 'lucide-react'
 import { AppSidebar } from './AppSidebar'
-import { getCitizenUser } from '@/lib/session'
+import { getCitizenUser, saveCitizenUser } from '@/lib/session'
+import { citizenGetMe } from '@/lib/api'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -53,31 +54,44 @@ export function AppLayout({
   onSelectSession,
   onNewSession,
 }: AppLayoutProps) {
+  const router = useRouter()
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [avatarError, setAvatarError] = useState(false)
+  const [user, setUser] = useState<any>(null)
 
   useEffect(() => {
     setMounted(true)
-  }, [])
+    const local = getCitizenUser()
+    if (local) {
+      setUser(local)
+    }
 
-  const activeUser = mounted ? getCitizenUser() : null
+    citizenGetMe()
+      .then((data) => {
+        setUser(data)
+        saveCitizenUser(data)
+      })
+      .catch(() => {
+        if (!local && typeof window !== 'undefined') {
+          router.push('/login')
+        }
+      })
+  }, [router])
 
   const userName =
-    mounted && activeUser
-      ? activeUser?.profile?.full_name ||
-        activeUser?.full_name ||
-        activeUser?.displayName ||
-        (activeUser?.email ? activeUser.email.split('@')[0] : 'Citizen User')
-      : 'Citizen User'
+    user?.profile?.full_name ||
+    user?.full_name ||
+    user?.displayName ||
+    (user?.email ? user.email.split('@')[0] : 'Citizen')
 
-  const userAvatar = mounted
-    ? activeUser?.avatar_url ||
-      activeUser?.photoURL ||
-      activeUser?.profile?.avatar_url
-    : undefined
+  const userAvatar =
+    user?.avatar_url ||
+    user?.photoURL ||
+    user?.profile?.avatar_url ||
+    undefined
 
-  const citizenUid = mounted && activeUser?.citizen_uid ? activeUser.citizen_uid : 'IN-8849-KA'
+  const citizenUid = user?.citizen_uid || ''
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] text-slate-900 overflow-hidden font-sans">

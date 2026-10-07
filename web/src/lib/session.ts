@@ -139,16 +139,28 @@ export function getAdminUser(): any | null {
 // Citizen Auth Session
 export function saveCitizenToken(token: string) {
   setItem(CITIZEN_TOKEN_KEY, token)
+  if (typeof document !== 'undefined') {
+    document.cookie = `scheme_citizen_jwt=${encodeURIComponent(token)}; path=/; max-age=2592000; SameSite=Lax`
+  }
 }
 export const setCitizenToken = saveCitizenToken
 
 export function getCitizenToken(): string | null {
-  return getItem(CITIZEN_TOKEN_KEY)
+  const local = getItem(CITIZEN_TOKEN_KEY)
+  if (local) return local
+  if (typeof document !== 'undefined') {
+    const match = document.cookie.match(/(^| )scheme_citizen_jwt=([^;]+)/)
+    if (match) return decodeURIComponent(match[2])
+  }
+  return null
 }
 
 export function removeCitizenToken() {
   removeItem(CITIZEN_TOKEN_KEY)
   removeItem(CITIZEN_USER_KEY)
+  if (typeof document !== 'undefined') {
+    document.cookie = 'scheme_citizen_jwt=; path=/; max-age=0; SameSite=Lax'
+  }
 }
 export const clearCitizenToken = removeCitizenToken
 

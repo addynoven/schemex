@@ -143,10 +143,10 @@ export function AppSidebar({
         </div>
 
         {/* Primary Navigation Sections */}
-        <div className="p-4 space-y-6">
+        <div className="p-4 flex flex-col flex-1 min-h-0 space-y-6">
 
           {/* Civic Services */}
-          <div>
+          <div className="shrink-0">
             <div className="font-bold text-[11px] uppercase tracking-wider text-slate-500 px-2 pb-1">
               Civic Services
             </div>
@@ -175,7 +175,7 @@ export function AppSidebar({
           </div>
 
           {/* Account & Assistance */}
-          <div>
+          <div className="shrink-0">
             <div className="font-bold text-[11px] uppercase tracking-wider text-slate-500 px-2 pt-2 pb-1">
               Account & Assistance
             </div>
@@ -200,10 +200,10 @@ export function AppSidebar({
             </nav>
           </div>
 
-          {/* Consultation History (If active) */}
+          {/* Consultation History (If active) - Expands to fill available space */}
           {sessions.length > 0 && (
-            <div className="pt-2 border-t border-slate-200">
-              <div className="flex items-center justify-between px-2 pb-2">
+            <div className="pt-2 border-t border-slate-200 flex flex-col flex-1 min-h-0">
+              <div className="flex items-center justify-between px-2 pb-2 shrink-0">
                 <span className="font-bold text-[11px] uppercase tracking-wider text-slate-500">
                   Recent Queries
                 </span>
@@ -211,7 +211,7 @@ export function AppSidebar({
                   {sessions.length} Recorded
                 </span>
               </div>
-              <div className="flex flex-col gap-1.5 max-h-52 overflow-y-auto scrollbar-none">
+              <div className="flex flex-col gap-1.5 flex-1 overflow-y-auto pr-1">
                 {sessions.map((s) => {
                   const isSelected = currentSessionId === s.id || currentSessionId === s.session_uid;
                   return (
@@ -225,7 +225,7 @@ export function AppSidebar({
                         }
                         onCloseMobileDrawer?.();
                       }}
-                      className={`text-left p-2.5 rounded-xl transition-all flex flex-col gap-1 ${
+                      className={`text-left p-2.5 rounded-xl transition-all flex flex-col gap-1 shrink-0 ${
                         isSelected
                           ? 'bg-[#F2F3FF] border-l-4 border-[#0E6245]'
                           : 'hover:bg-[#F2F3FF]'

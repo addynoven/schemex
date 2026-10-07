@@ -10,10 +10,11 @@ function parseEqParam(val: string | null): string | null {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = parseEqParam(searchParams.get('user_id'));
+    const rawUserId = parseEqParam(searchParams.get('user_id'));
+    const parsedId = Number(rawUserId);
 
-    if (!userId) {
-      return NextResponse.json({ error: 'Missing user_id parameter' }, { status: 400 });
+    if (!rawUserId || isNaN(parsedId) || parsedId > 2147483647 || parsedId < 1) {
+      return NextResponse.json([]);
     }
 
     const res = await query(
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
        FROM user_saved_schemes
        WHERE user_id = $1
        ORDER BY created_at DESC`,
-      [Number(userId)]
+      [parsedId]
     );
 
     return NextResponse.json(res.rows);

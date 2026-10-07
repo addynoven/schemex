@@ -55,6 +55,7 @@ export function AppLayout({
 }: AppLayoutProps) {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [avatarError, setAvatarError] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -171,10 +172,11 @@ export function AppLayout({
                 <span className="text-[11px] font-mono font-semibold text-slate-500">{citizenUid}</span>
               </div>
 
-              {userAvatar ? (
+              {userAvatar && !avatarError ? (
                 <img
                   src={userAvatar}
                   alt="Profile"
+                  onError={() => setAvatarError(true)}
                   className="h-8 w-8 rounded-full object-cover border border-slate-200 shrink-0"
                 />
               ) : (

@@ -86,6 +86,7 @@ export function ProfileScreen() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [avatar, setAvatar] = useState("");
+  const [avatarError, setAvatarError] = useState(false);
   const [citizenUid, setCitizenUid] = useState("CIT-8849");
 
   // Tab State
@@ -278,11 +279,16 @@ export function ProfileScreen() {
           <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-5">
               <div className="relative">
-                {avatar ? (
-                  <img src={avatar} alt={formData.full_name} className="w-20 h-20 rounded-2xl object-cover border border-slate-200 shadow-sm" />
+                {avatar && !avatarError ? (
+                  <img
+                    src={avatar}
+                    alt={formData.full_name}
+                    onError={() => setAvatarError(true)}
+                    className="w-20 h-20 rounded-2xl object-cover border border-slate-200 shadow-sm"
+                  />
                 ) : (
                   <div className="w-20 h-20 rounded-2xl bg-[#DCFCE7] flex items-center justify-center text-[#166534] font-black text-2xl uppercase border border-[#BBF7D0] shadow-sm">
-                    {formData.full_name.charAt(0) || 'C'}
+                    {formData.full_name?.charAt(0) || 'A'}
                   </div>
                 )}
                 <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-sm border border-slate-100">

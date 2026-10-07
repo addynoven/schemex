@@ -9,9 +9,9 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const userId = Number(searchParams.get("user_id"));
     const schemeId = Number((await context.params).schemeId);
-    if (!userId || !schemeId) {
+    if (!userId || !schemeId || isNaN(userId) || userId > 2147483647 || userId < 1) {
       return NextResponse.json(
-        { error: "user_id and scheme id are required" },
+        { error: "Valid user_id and scheme id are required" },
         { status: 400 },
       );
     }

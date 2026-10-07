@@ -57,9 +57,13 @@ export async function GET(request: NextRequest) {
       sql += ` AND category = $${params.length}`;
     }
 
-    if (state && state !== "all" && state !== "All" && state !== "ALL_INDIA") {
-      params.push(state);
-      sql += ` AND (state = $${params.length} OR state = 'ALL_INDIA')`;
+    if (state && state !== "all" && state !== "All" && state !== "All India") {
+      if (state === "ALL_INDIA" || state === "Central Only") {
+        sql += ` AND state = 'ALL_INDIA'`;
+      } else {
+        params.push(state);
+        sql += ` AND (state = $${params.length} OR state = 'ALL_INDIA')`;
+      }
     }
 
     // Count total matches

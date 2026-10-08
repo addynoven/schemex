@@ -1,3 +1,29 @@
+# Environment variables & secrets
+.env
+.env.*
+.env.local
+.env.*.local
+*.env
+*.env.*
+google-services.json
+**/google-services.json
+*.pem
+*.key
+*.keystore
+*.jks
+*.p12
+
+# Local configuration archive copies
+/root.env
+/root.env.example
+/backend_python.env
+/web_nextjs.env.local
+/mobile_expo.env
+/go_backend.env
+
+# Archived old backend services
+archive/
+
 # Python-generated files
 __pycache__/
 *.py[oc]
@@ -14,11 +40,6 @@ htmlcov/
 env/
 venv/
 
-# Environment variables & secrets
-.env
-.env.local
-.env.*.local
-
 # IDE & Editor files
 .idea/
 .vscode/
@@ -27,10 +48,15 @@ venv/
 .DS_Store
 
 # Frontend dependencies and build outputs
+node_modules/
+**/node_modules/
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
 frontend/.next/
+web/.next/
+web/dist/
+web/.vercel/
 
 .pnpm-store
 web/.pnpm-store

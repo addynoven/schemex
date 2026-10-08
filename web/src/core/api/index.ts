@@ -14,9 +14,6 @@ export {
   listVaultDocuments,
   deleteVaultDocument,
   getSchemeDocumentReadiness,
-  extractVaultDocumentFacts,
-  confirmAndSyncProfileFacts,
-  extractQuickDocument,
   adminLogin,
   adminGetMe,
   adminListSchemes,
@@ -30,12 +27,10 @@ export {
   deleteChatSession,
   sendChatMessage,
   streamChatMessage,
-} from '@/lib/api'
+} from "@/lib/api";
 
-export type {
-  PaginatedResult,
-} from '@/lib/api'
+export type { PaginatedResult } from "@/lib/api";
 
-export * from './client'
-export * from './httpClient'
-export * from './entityMappers'
+export * from "./client";
+export * from "./httpClient";
+export * from "./entityMappers";

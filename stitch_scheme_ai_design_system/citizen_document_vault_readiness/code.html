@@ -1,0 +1,613 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-secondary-fixed-variant":"#005226","on-tertiary-fixed-variant":"#7a3000","outline":"#6f7973","surface-tint":"#1c6b4d","on-secondary-container":"#24703e","inverse-on-surface":"#eef0ff","surface-container-highest":"#dae2fd","error-container":"#ffdad6","tertiary":"#6d2a00","inverse-primary":"#8bd6b1","on-primary-fixed":"#002114","on-tertiary-fixed":"#341000","on-surface-variant":"#3f4943","inverse-surface":"#283044","primary-fixed-dim":"#8bd6b1","outline-variant":"#bfc9c1","surface-bright":"#faf8ff","surface-container":"#eaedff","on-tertiary-container":"#ffbd9e","on-error-container":"#93000a","primary-fixed":"#a6f2cc","surface-dim":"#d2d9f4","background":"#faf8ff","on-primary-container":"#90dbb6","secondary-fixed-dim":"#8bd79b","surface-variant":"#dae2fd","on-tertiary":"#ffffff","on-error":"#ffffff","secondary-container":"#a4f1b2","primary-container":"#0e6245","secondary-fixed":"#a6f4b5","tertiary-container":"#8f3e0c","on-secondary-fixed":"#00210b","tertiary-fixed":"#ffdbcb","on-surface":"#131b2e","secondary":"#1f6c3a","on-primary-fixed-variant":"#005138","surface-container-low":"#f2f3ff","surface-container-high":"#e2e7ff","tertiary-fixed-dim":"#ffb693","error":"#ba1a1a","on-primary":"#ffffff","on-background":"#131b2e","primary":"#004831","surface-container-lowest":"#ffffff","on-secondary":"#ffffff","surface":"#faf8ff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-lg":"1.5rem","space-md":"1rem","space-sm":"0.5rem","gutter":"1.5rem","margin":"2rem","space-xl":"2rem","gutter-mobile":"1rem","margin-mobile":"1rem","space-xs":"0.25rem"},"fontFamily":{"label-md":["Inter"],"headline-lg-mobile":["Inter"],"headline-md":["Inter"],"body-bold":["Inter"],"body-lg":["Inter"],"headline-sm":["Inter"],"label-sm":["Inter"],"code-mono":["JetBrains Mono"],"headline-xl":["Inter"],"headline-lg":["Inter"],"body-md":["Inter"],"headline-xl-mobile":["Inter"]},"fontSize":{"label-md":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"600"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"800"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"800"}],"body-bold":["15px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"700"}],"body-lg":["18px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"500"}],"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"700"}],"label-sm":["11px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"700"}],"code-mono":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"500"}],"headline-xl":["40px",{"lineHeight":"48px","letterSpacing":"-0.03em","fontWeight":"900"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.025em","fontWeight":"900"}],"body-md":["15px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"400"}],"headline-xl-mobile":["30px",{"lineHeight":"38px","letterSpacing":"-0.025em","fontWeight":"900"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-72 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-16 px-space-md flex items-center gap-space-sm bg-surface-container-lowest"><img alt="Scheme AI Official Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V_pyjhe_cZJHpk1JFhFfxxeNY4YsV4c8CR-hOc64yQSIomRh8V6X-r-1-FhBPuDa2OLDT-33OhUvyeVs772PrH-YdMnB5q1UTeGrHJwB1_V2RICqdDWnNekt1o-GYhQ-JFoyK18BoBI82NJKdRPT8IWad8n83A6QvFxhFAaHYifH-dHlJ3vruCci4b5RkAf_KjGnyKpYVlAp7fBJy_fvGtN7EROd2OAxG7-U2AF2Yd"><div class="flex flex-col min-w-0"><span class="font-headline-sm text-headline-sm text-primary tracking-tight truncate">Scheme AI</span><span class="font-label-sm text-label-sm text-on-surface-variant truncate">Citizen Welfare Navigator</span></div></div><div class="h-1 w-full bg-surface-container-high flex"><div class="w-1/3 bg-tertiary-container"></div><div class="w-1/3 bg-surface-container-lowest"></div><div class="w-1/3 bg-primary-container"></div></div><div class="p-space-md"><div class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant px-space-sm pb-space-xs">Civic Services</div><nav class="flex flex-col gap-space-xs" data-active-classes="bg-primary-container text-on-primary font-bold rounded-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="ai-advisor" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-space-lg">smart_toy</span><span class="font-label-md text-label-md">Chat (AI Advisor)</span></div><span class="px-space-xs py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">Live</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="schemes-directory" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-space-lg">account_balance</span><span class="font-label-md text-label-md">Schemes</span></div><span class="px-space-xs py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-code-mono">480+</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="eligibility-wizard" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-space-lg">fact_check</span><span class="font-label-md text-label-md">Check (Wizard)</span></div><span class="px-space-xs py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">Fast</span></a><a aria-current="page" class="flex items-center justify-between px-space-md py-space-sm transition-all bg-primary-container text-on-primary font-bold rounded-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]" data-path="document-vault" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-space-lg">folder_shared</span><span class="font-label-md text-label-md">Vault (Readiness)</span></div><span class="px-space-xs py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">4 Docs</span></a></nav><div class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant px-space-sm pt-space-lg pb-space-xs">Account &amp; Assistance</div><nav class="flex flex-col gap-space-xs" data-active-classes="bg-primary-container text-on-primary font-bold rounded-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="profile-settings" href="#"><span class="material-symbols-outlined text-space-lg">manage_accounts</span><span class="font-label-md text-label-md">Profile</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="support-helpdesk" href="#"><span class="material-symbols-outlined text-space-lg">help_center</span><span class="font-label-md text-label-md">Support</span></a></nav></div></div><div class="p-space-md bg-surface-container-low m-space-md rounded-xl flex flex-col gap-space-xs"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-primary text-space-md">verified_user</span><span class="font-label-sm text-label-sm text-primary font-bold uppercase tracking-wider">DigiLocker Linked</span></div><p class="font-label-sm text-label-sm text-on-surface-variant">Aadhaar verified tier for immediate benefit routing.</p></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md flex-1 max-w-xl"><div class="relative w-full flex items-center"><span class="material-symbols-outlined absolute left-space-md text-on-surface-variant pointer-events-none">search</span><input class="w-full h-10 pl-10 pr-space-md bg-surface-container-low rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="Search schemes by ministry, state, or benefit keywords..." type="text"></div></div><div class="flex items-center gap-space-md"><div class="hidden xl:flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-surface-container-low"><span class="h-2 w-2 rounded-full bg-secondary animate-pulse"></span><span class="font-label-sm text-label-sm font-code-mono text-on-surface-variant">S3 Encrypted • 256-bit Secure</span></div><button aria-label="Notifications" class="h-10 w-10 flex items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors relative" type="button"><span class="material-symbols-outlined">notifications</span><span class="absolute top-2 right-2 h-2 w-2 rounded-full bg-error"></span></button><div class="h-8 w-px bg-surface-container-high"></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="flex flex-col text-right"><span class="font-label-md text-label-md text-on-surface font-bold">Citizen User</span><span class="font-code-mono text-label-sm text-on-surface-variant">IN-8849-KA</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD44LgcNVgdhiwpBW0CrE4lcKxbOVSt2K3-W2z5QJXRvLnyCKqwvWuYEirfB3K6C_3__w6kFdp_JCoCEgc3ivFGoE8edN3eap4jG4RAQ99I13emaefS2DFcOUJujgT397TBR0agVzHssZA0Gj8nicnkdeID94wogXcbIb91NV7Pwiip15duHRlwzFgeUou-BIoEHbJd_xbGiXYxhlQcSxWHq5otmEsWbd9wJNQqnEs"></div></div></header><main class="relative pt-16 bg-background min-h-screen"><div class="w-full px-space-lg py-space-lg"><div class="flex flex-col w-full">
+<!-- Top Banner & Institutional Trust Callout -->
+<div class="flex flex-col gap-space-lg mb-space-xl">
+<!-- Security Affirmation Pill Bar -->
+<div class="flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary-container/40 text-on-secondary-fixed-variant font-label-md text-label-sm shadow-sm">
+<span class="material-symbols-outlined text-sm font-bold">lock</span>
+<span>S3 Encrypted • Private &amp; Secure (AES-256 GCM)</span>
+<span class="h-1.5 w-1.5 rounded-full bg-secondary inline-block ml-1 animate-ping"></span>
+</div>
+<div class="flex items-center gap-space-sm text-on-surface-variant font-code-mono text-label-sm">
+<span class="material-symbols-outlined text-base">verified_user</span>
+<span>DIGILOCKER GATEWAY v3.2 • CERTIFIED AUDIT LOGS</span>
+</div>
+</div>
+<!-- Main Hero Banner Card -->
+<div class="relative overflow-hidden rounded-3xl bg-surface-container-lowest p-6 sm:p-8 shadow-sm">
+<div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-primary-fixed/20 blur-3xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-space-lg">
+<div class="max-w-2xl">
+<div class="flex items-center gap-2 mb-2 text-primary font-bold font-label-sm uppercase tracking-wider">
+<span class="material-symbols-outlined text-lg">folder_managed</span>
+<span>Citizen Digital Asset Locker</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">
+            Hello, Citizen! Keep your documents safe &amp; application ready
+          </h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 leading-relaxed">
+            Upload once, auto-verify for over 450+ Central and State welfare initiatives. All credentials are cryptographically stamped and held under sovereign Indian data residency.
+          </p>
+<!-- Quick Metric Indicators -->
+<div class="flex flex-wrap items-center gap-space-sm mt-6">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-container font-label-md text-label-md text-on-surface">
+<span class="h-2 w-2 rounded-full bg-primary"></span>
+<span class="font-bold">7</span> Active Documents
+            </div>
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-secondary-container/50 text-on-secondary-fixed-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-base">verified</span>
+<span class="font-bold">4</span> Verified on DigiLocker
+            </div>
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary-fixed/40 text-on-primary-fixed font-label-md text-label-md">
+<span class="material-symbols-outlined text-base">speed</span>
+<span class="font-bold">92%</span> Average Readiness
+            </div>
+</div>
+</div>
+<!-- Visual Micro-Illustration Representation -->
+<div class="flex-shrink-0 flex items-center justify-center">
+<div class="p-6 rounded-2xl bg-surface-container-low shadow-sm flex flex-col items-center gap-3 text-center">
+<div class="relative">
+<div class="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center text-on-primary shadow-md">
+<span class="material-symbols-outlined text-3xl">token</span>
+</div>
+<span class="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-code-mono text-label-sm">KYC+</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Sovereign Vault</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">MeitY Compliant</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Quick Action Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md mb-space-xl">
+<!-- Action 1: Upload Document -->
+<div class="rounded-3xl bg-surface-container-lowest p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+<div class="flex items-start justify-between">
+<div class="w-12 h-12 rounded-2xl bg-primary-fixed/40 text-primary flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-2xl">cloud_upload</span>
+</div>
+<span class="font-code-mono text-label-sm text-on-surface-variant bg-surface-container-low px-2 py-1 rounded-md">Direct AES</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">Upload Document</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Drag &amp; drop PDF or scans. Instant OCR extracts and matches attributes.</p>
+</div>
+<button class="w-full flex items-center justify-center gap-2 h-12 bg-primary-container text-on-primary rounded-xl font-bold font-label-md text-label-md shadow-sm hover:bg-primary transition-colors" onclick="document.getElementById('vault-upload-zone').scrollIntoView({behavior: 'smooth'})" type="button">
+<span class="material-symbols-outlined text-lg">add</span>
+<span>Add New File</span>
+</button>
+</div>
+<!-- Action 2: Check Scheme Readiness -->
+<div class="rounded-3xl bg-surface-container-lowest p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+<div class="flex items-start justify-between">
+<div class="w-12 h-12 rounded-2xl bg-surface-container-highest text-secondary flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-2xl">speed</span>
+</div>
+<span class="font-code-mono text-label-sm text-on-surface-variant bg-surface-container-low px-2 py-1 rounded-md">Live AI</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">Check Scheme Readiness</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Instant gap analysis across PM Kisan, PMAY, and state agrarian subsidies.</p>
+</div>
+<button class="w-full flex items-center justify-center gap-2 h-12 bg-surface-container-high text-on-surface rounded-xl font-bold font-label-md text-label-md hover:bg-surface-container-highest transition-colors" onclick="document.getElementById('readiness-evaluator').scrollIntoView({behavior: 'smooth'})" type="button">
+<span class="material-symbols-outlined text-lg">analytics</span>
+<span>Run Audit</span>
+</button>
+</div>
+<!-- Action 3: Sync DigiLocker -->
+<div class="rounded-3xl bg-surface-container-lowest p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
+<div class="flex items-start justify-between">
+<div class="w-12 h-12 rounded-2xl bg-secondary-container/50 text-secondary flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-2xl">account_balance</span>
+</div>
+<span class="font-code-mono text-label-sm text-secondary-container bg-primary font-bold px-2 py-1 rounded-md">Govt Auth</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">Sync with DigiLocker</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Auto-import verified Aadhaar, PAN card, and NFSA ration entitlements instantly.</p>
+</div>
+<button class="w-full flex items-center justify-center gap-2 h-12 bg-secondary text-on-secondary rounded-xl font-bold font-label-md text-label-md hover:opacity-95 transition-opacity" type="button">
+<span class="material-symbols-outlined text-lg">sync</span>
+<span>Connect DigiLocker</span>
+</button>
+</div>
+</div>
+<!-- Live Scheme Readiness Evaluator -->
+<div class="rounded-3xl bg-surface-container-lowest p-6 sm:p-8 shadow-sm mb-space-xl" id="readiness-evaluator">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-6">
+<div>
+<div class="flex items-center gap-2 text-primary font-label-sm text-label-sm font-bold uppercase tracking-wider mb-1">
+<span class="material-symbols-outlined text-base">rule</span>
+<span>Prerequisites Engine</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Live Scheme Readiness Evaluator</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Evaluate your vault inventory against real-time central &amp; state scheme mandates.</p>
+</div>
+<!-- Scheme Selector Dropdown -->
+<div class="flex flex-col min-w-[280px] sm:min-w-[340px]">
+<label class="font-label-md text-label-md text-on-surface mb-1" for="scheme-select">Target Scheme</label>
+<div class="relative">
+<select class="w-full h-12 pl-4 pr-10 rounded-xl bg-surface-container-low font-body-bold text-body-bold text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-primary-container shadow-sm cursor-pointer" id="scheme-select">
+<option selected="" value="pm-kisan">PM Kisan Samman Nidhi (Farmer Income Support)</option>
+<option value="pmjay">Ayushman Bharat PM-JAY (Health Insurance)</option>
+<option value="pmay">Pradhan Mantri Awas Yojana (Gramin Housing)</option>
+<option value="kcc">Kisan Credit Card (Agri Working Capital)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-3 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Readiness Metric Banner with SVG Radial Visual -->
+<div class="rounded-2xl bg-surface-container-low p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
+<div class="flex items-center gap-6 w-full md:w-auto">
+<!-- Circular Progress Chart -->
+<div class="relative w-24 h-24 flex items-center justify-center flex-shrink-0">
+<svg class="w-24 h-24 -rotate-90 transform" viewBox="0 0 100 100">
+<circle class="text-surface-container-highest" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="10"></circle>
+<circle class="text-primary-container" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="62.8" stroke-linecap="round" stroke-width="10"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="font-headline-sm text-headline-sm font-black text-primary leading-none">75%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase mt-0.5">READY</span>
+</div>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm uppercase font-bold tracking-wide">3 of 4 Staged</span>
+<span class="font-label-sm text-label-sm font-code-mono text-on-surface-variant">DBT-ENABLED ACCOUNT</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mt-1">High Approval Probability</h4>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">One mandatory title deed verification is missing before one-click dispatch.</p>
+</div>
+</div>
+<!-- Linear visual summary track -->
+<div class="w-full md:w-72 flex flex-col gap-2">
+<div class="flex justify-between font-label-sm text-label-sm font-code-mono text-on-surface-variant">
+<span>COMPLIANCE GAUGE</span>
+<span class="text-primary font-bold">75 / 100</span>
+</div>
+<div class="w-full h-3 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 75%"></div>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Estimated sanction time: <span class="font-bold text-on-surface">3 working days</span> once uploaded</span>
+</div>
+</div>
+<!-- Side-by-side Segregated Document Checklist Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-space-lg">
+<!-- Column A: Ready in Vault (Verified) -->
+<div class="flex flex-col gap-3 rounded-2xl bg-surface-container-lowest p-5 shadow-sm">
+<div class="flex items-center justify-between pb-2">
+<div class="flex items-center gap-2 text-secondary font-headline-sm text-headline-sm">
+<span class="material-symbols-outlined text-2xl font-bold">task_alt</span>
+<span>Ready in Vault (3 Documents)</span>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-secondary-container/60 text-on-secondary-fixed-variant font-label-sm text-label-sm font-bold uppercase">Passed</span>
+</div>
+<!-- Item 1: Aadhaar -->
+<div class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-lowest flex items-center justify-center text-primary shadow-xs">
+<span class="material-symbols-outlined">badge</span>
+</div>
+<div>
+<div class="font-body-bold text-body-bold text-on-surface">Aadhaar Card</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant font-code-mono">UIDAI Linked • Tokenized Hash #9914</div>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-fixed-variant font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">check_circle</span>
+            Verified
+          </span>
+</div>
+<!-- Item 2: Bank Passbook -->
+<div class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-lowest flex items-center justify-center text-primary shadow-xs">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</div>
+<div>
+<div class="font-body-bold text-body-bold text-on-surface">Bank Passbook with IFSC</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant font-code-mono">DBT Direct Transfer Active • SBI #8392</div>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-fixed-variant font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">check_circle</span>
+            Verified
+          </span>
+</div>
+<!-- Item 3: Domicile Certificate -->
+<div class="flex items-center justify-between p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-lowest flex items-center justify-center text-primary shadow-xs">
+<span class="material-symbols-outlined">verified</span>
+</div>
+<div>
+<div class="font-body-bold text-body-bold text-on-surface">Domicile Certificate</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant font-code-mono">Karnataka Revenue Dept • Valid till 2028</div>
+</div>
+</div>
+<span class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-fixed-variant font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">check_circle</span>
+            Verified
+          </span>
+</div>
+</div>
+<!-- Column B: Missing / Action Required -->
+<div class="flex flex-col gap-3 rounded-2xl bg-error-container/20 p-5 shadow-sm">
+<div class="flex items-center justify-between pb-2">
+<div class="flex items-center gap-2 text-error font-headline-sm text-headline-sm">
+<span class="material-symbols-outlined text-2xl font-bold">error_outline</span>
+<span>Missing / Action Required (1 Document)</span>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-bold uppercase">Blocking</span>
+</div>
+<!-- Item: Missing RTC Pahani Record -->
+<div class="p-4 rounded-xl bg-surface-container-lowest flex flex-col gap-3 shadow-xs">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-error-container/40 flex items-center justify-center text-error">
+<span class="material-symbols-outlined">landscape</span>
+</div>
+<div>
+<div class="font-body-bold text-body-bold text-on-surface">Land Ownership Record (Pahani / RTC)</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Required by Ministry of Agriculture for landholding validation</div>
+</div>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-error-container text-on-error-container font-label-sm text-label-sm font-bold flex items-center gap-1 whitespace-nowrap">
+<span class="material-symbols-outlined text-xs">warning</span>
+              Missing!
+            </span>
+</div>
+<div class="p-3 rounded-xl bg-surface-container-low flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-1">
+<div class="flex items-center gap-2 text-on-surface-variant font-body-md text-label-md">
+<span class="material-symbols-outlined text-primary text-base">info</span>
+<span>Upload RTC / Pahani to reach <strong class="text-primary font-bold">100% eligibility</strong></span>
+</div>
+<button class="flex items-center justify-center gap-1.5 px-4 py-2 bg-error text-on-error font-bold font-label-md text-label-md rounded-xl hover:opacity-90 transition-opacity whitespace-nowrap shadow-xs" onclick="document.getElementById('doc-type-select').value='land-record'; document.getElementById('vault-upload-zone').scrollIntoView({behavior:'smooth'});" type="button">
+<span>Upload Now</span>
+<span class="material-symbols-outlined text-base">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Additional guidance prompt -->
+<div class="p-3.5 rounded-xl bg-surface-container-lowest flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+<span class="flex items-center gap-2">
+<span class="material-symbols-outlined text-base text-secondary">help</span>
+            Need assistance fetching official RTC from Bhoomi portal?
+          </span>
+<a class="text-primary font-bold hover:underline" href="#">Launch Bhoomi Bot</a>
+</div>
+</div>
+</div>
+</div>
+<!-- Document Upload Center Section -->
+<div class="rounded-3xl bg-surface-container-lowest p-6 sm:p-8 shadow-sm mb-space-xl" id="vault-upload-zone">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+<div>
+<div class="flex items-center gap-2 text-primary font-label-sm text-label-sm font-bold uppercase tracking-wider mb-1">
+<span class="material-symbols-outlined text-base">upload_file</span>
+<span>Encrypted Intake Pipeline</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Secure Document Ingestion</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Client-side pre-sanitized and cryptographically enveloped prior to storage.</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">security</span>
+<span class="font-code-mono text-label-sm text-on-surface-variant">ZERO-KNOWLEDGE METADATA INDEXING</span>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- Upload Drop Area (7 columns) -->
+<div class="lg:col-span-7 flex flex-col gap-4">
+<div class="relative flex flex-col items-center justify-center p-8 rounded-2xl bg-surface-container-low text-center hover:bg-surface-container transition-all cursor-pointer group shadow-sm">
+<input class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10" id="file-uploader-input" type="file">
+<div class="w-16 h-16 rounded-full bg-surface-container-lowest text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform shadow-xs">
+<span class="material-symbols-outlined text-3xl">upload_file</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-1">Drop files here or click to browse</h3>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-sm mb-4">
+            Supports official PDF, scanned JPG, PNG documents up to 15MB. Automatic optical character recognition will extract identifiers.
+          </p>
+<div class="flex flex-wrap items-center justify-center gap-2">
+<span class="px-2.5 py-1 rounded-md bg-surface-container-highest text-on-surface font-code-mono text-label-sm">PDF (Recommended)</span>
+<span class="px-2.5 py-1 rounded-md bg-surface-container-highest text-on-surface font-code-mono text-label-sm">PNG</span>
+<span class="px-2.5 py-1 rounded-md bg-surface-container-highest text-on-surface font-code-mono text-label-sm">JPEG</span>
+<span class="px-2.5 py-1 rounded-md bg-surface-container-highest text-on-surface font-code-mono text-label-sm">MAX 15 MB</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm px-1">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-secondary">verified</span>
+            Scanned for viruses &amp; malware via sovereign sandbox
+          </span>
+<span class="font-code-mono">TLS 1.3 In-Flight</span>
+</div>
+</div>
+<!-- Form Controls & Privacy Safeguards (5 columns) -->
+<div class="lg:col-span-5 flex flex-col gap-5 p-6 rounded-2xl bg-surface-container-low shadow-sm">
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Document Classification &amp; Privacy</h4>
+<!-- Document Type Dropdown -->
+<div class="flex flex-col">
+<label class="font-label-md text-label-md text-on-surface mb-1.5 font-bold" for="doc-type-select">
+            Select Document Category
+          </label>
+<div class="relative">
+<select class="w-full h-12 pl-4 pr-10 rounded-xl bg-surface-container-lowest font-body-md text-body-md text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-primary shadow-xs cursor-pointer" id="doc-type-select">
+<option disabled="" selected="" value="">Select Document Type...</option>
+<option value="aadhaar">Aadhaar Card (UIDAI Unique Identity)</option>
+<option value="pan">Permanent Account Number (PAN Card)</option>
+<option value="land-record">Land Ownership Record (RTC / Pahani / 7/12)</option>
+<option value="income">Income Certificate (Tahsildar / Revenue)</option>
+<option value="caste">Caste &amp; Community Certificate (SC/ST/OBC)</option>
+<option value="ration">Ration Card (NFSA Priority / Antyodaya)</option>
+<option value="passbook">Bank Passbook / Cancelled Cheque</option>
+<option value="disability">Disability Identity Card (UDID)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-3 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-1.5">Matches requirements across active welfare schemes automatically.</span>
+</div>
+<!-- Privacy & Masking Checkbox Toggle -->
+<div class="p-4 rounded-xl bg-surface-container-lowest flex items-start gap-3 shadow-xs">
+<input checked="" class="mt-1 h-5 w-5 rounded-md accent-primary cursor-pointer text-primary" id="masking-toggle" type="checkbox">
+<label class="cursor-pointer select-none" for="masking-toggle">
+<div class="font-body-bold text-body-bold text-on-surface flex items-center gap-1.5">
+<span>Automatic Aadhaar Masking</span>
+<span class="px-2 py-0.2 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold">Mandatory Best Practice</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-0.5 leading-relaxed">
+              Redact the first 8 digits of Aadhaar UID numbers before writing to storage, preserving only the last 4 digits in compliance with UIDAI Circular 2021/6.
+            </p>
+</label>
+</div>
+<!-- Additional Option: Instant DigiLocker Verification -->
+<div class="p-4 rounded-xl bg-surface-container-lowest flex items-start gap-3 shadow-xs">
+<input checked="" class="mt-1 h-5 w-5 rounded-md accent-primary cursor-pointer text-primary" id="digilocker-attest" type="checkbox">
+<label class="cursor-pointer select-none" for="digilocker-attest">
+<div class="font-body-bold text-body-bold text-on-surface">Auto-request DigiLocker Issuer Stamp</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">
+              Query MeitY digital repository to cryptographically stamp origin directly into welfare form submission packages.
+            </p>
+</label>
+</div>
+<button class="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-primary-container text-on-primary font-bold font-label-md text-label-md shadow-sm hover:bg-primary transition-colors mt-2" type="button">
+<span class="material-symbols-outlined">shield</span>
+<span>Encrypt &amp; Commit to Vault</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Encrypted Documents Grid (Existing Vault Items) -->
+<div class="rounded-3xl bg-surface-container-lowest p-6 sm:p-8 shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6">
+<div>
+<div class="flex items-center gap-2 text-primary font-label-sm text-label-sm font-bold uppercase tracking-wider mb-1">
+<span class="material-symbols-outlined text-base">inventory_2</span>
+<span>Current Repositories</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Encrypted Vault Items (4 Verified)</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Tamper-evident files available for instant welfare autofill and one-click submission.</p>
+</div>
+<!-- Quick filters & Search Inside Vault -->
+<div class="flex items-center gap-2">
+<div class="relative">
+<input class="h-10 pl-9 pr-3 rounded-xl bg-surface-container-low font-body-md text-label-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary shadow-xs" placeholder="Filter vault files..." type="text">
+<span class="material-symbols-outlined absolute left-2.5 top-2.5 text-on-surface-variant text-base">filter_list</span>
+</div>
+<button class="h-10 px-3.5 rounded-xl bg-surface-container-high text-on-surface font-label-md text-label-md font-bold flex items-center gap-1.5 hover:bg-surface-container-highest transition-colors" type="button">
+<span class="material-symbols-outlined text-base">refresh</span>
+<span>Sync</span>
+</button>
+</div>
+</div>
+<!-- Responsive Table / Card Stream Container -->
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface-container-low font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">
+<th class="py-3 px-4 rounded-l-xl">Document Name &amp; Token</th>
+<th class="py-3 px-4">Identifier / Ref</th>
+<th class="py-3 px-4">File Details</th>
+<th class="py-3 px-4">Verification Authority</th>
+<th class="py-3 px-4 rounded-r-xl text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<!-- Row 1: Aadhaar Card -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-4 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-primary-fixed/40 text-primary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined">badge</span>
+</div>
+<div>
+<div class="font-body-bold text-body-bold text-on-surface flex items-center gap-2">
+<span>Aadhaar Card</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-fixed-variant font-label-sm text-label-sm font-bold">DigiLocker</span>
+</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Government of India • UIDAI</div>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 font-code-mono text-body-md text-on-surface">
+              XXXX-XXXX-4921
+            </td>
+<td class="py-4 px-4">
+<span class="px-2 py-1 rounded bg-surface-container-high font-code-mono text-label-sm text-on-surface">PDF</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant ml-1.5 font-code-mono">1.2 MB</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-1.5 text-secondary font-label-md text-label-md font-bold">
+<span class="material-symbols-outlined text-base">verified</span>
+<span>DigiLocker Verified</span>
+</div>
+<div class="font-code-mono text-label-sm text-on-surface-variant">SHA-256 Validated</div>
+</td>
+<td class="py-4 px-4 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="h-9 w-9 rounded-xl bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-highest transition-colors" title="Download Document" type="button">
+<span class="material-symbols-outlined text-base">download</span>
+</button>
+<button class="h-9 w-9 rounded-xl bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-highest transition-colors" title="View Cryptographic Audit Log" type="button">
+<span class="material-symbols-outlined text-base">history</span>
+</button>
+<button class="h-9 w-9 rounded-xl bg-surface-container flex items-center justify-center text-error hover:bg-error-container hover:text-on-error-container transition-colors" title="Revoke &amp; Delete" type="button">
+<span class="material-symbols-outlined text-base">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Bank Passbook (SBI) -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-4 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container-highest text-secondary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<div>
+<div class="font-body-bold text-body-bold text-on-surface flex items-center gap-2">
+<span>Bank Passbook (SBI)</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface font-label-sm text-label-sm">Primary DBT</span>
+</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">State Bank of India • Hassan Branch</div>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 font-code-mono text-body-md text-on-surface">
+              XXXXXX8392
+            </td>
+<td class="py-4 px-4">
+<span class="px-2 py-1 rounded bg-surface-container-high font-code-mono text-label-sm text-on-surface">PNG</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant ml-1.5 font-code-mono">840 KB</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-1.5 text-secondary font-label-md text-label-md font-bold">
+<span class="material-symbols-outlined text-base">check_circle</span>
+<span>IFSC Verified (SBIN0001092)</span>
+</div>
+<div class="font-code-mono text-label-sm text-on-surface-variant">NPCI Mapper Linked</div>
+</td>
+<td class="py-4 px-4 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="h-9 w-9 rounded-xl bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-highest transition-colors" title="Download Document" type="button">
+<span class="material-symbols-outlined text-base">download</span>
+</button>
+<button class="h-9 w-9 rounded-xl bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-highest transition-colors" title="View Cryptographic Audit Log" type="button">
+<span class="material-symbols-outlined text-base">history</span>
+</button>
+<button class="h-9 w-9 rounded-xl bg-surface-container flex items-center justify-center text-error hover:bg-error-container hover:text-on-error-container transition-colors" title="Revoke &amp; Delete" type="button">
+<span class="material-symbols-outlined text-base">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Caste & Income Certificate -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-4 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-tertiary-fixed/40 text-tertiary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined">workspace_premium</span>
+</div>
+<div>
+<div class="font-body-bold text-body-bold text-on-surface flex items-center gap-2">
+<span>Caste &amp; Income Certificate</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-fixed-variant font-label-sm text-label-sm font-bold">Nadakacheri</span>
+</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Revenue Department Karnataka</div>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 font-code-mono text-body-md text-on-surface">
+              RD-2023-8819
+            </td>
+<td class="py-4 px-4">
+<span class="px-2 py-1 rounded bg-surface-container-high font-code-mono text-label-sm text-on-surface">PDF</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant ml-1.5 font-code-mono">2.4 MB</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-1.5 text-secondary font-label-md text-label-md font-bold">
+<span class="material-symbols-outlined text-base">verified</span>
+<span>Revenue Dept Valid</span>
+</div>
+<div class="font-code-mono text-label-sm text-on-surface-variant">Digital Signature: Tahsildar</div>
+</td>
+<td class="py-4 px-4 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="h-9 w-9 rounded-xl bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-highest transition-colors" title="Download Document" type="button">
+<span class="material-symbols-outlined text-base">download</span>
+</button>
+<button class="h-9 w-9 rounded-xl bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-highest transition-colors" title="View Cryptographic Audit Log" type="button">
+<span class="material-symbols-outlined text-base">history</span>
+</button>
+<button class="h-9 w-9 rounded-xl bg-surface-container flex items-center justify-center text-error hover:bg-error-container hover:text-on-error-container transition-colors" title="Revoke &amp; Delete" type="button">
+<span class="material-symbols-outlined text-base">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Ration Card -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-4 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-secondary-container/40 text-secondary flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined">receipt_long</span>
+</div>
+<div>
+<div class="font-body-bold text-body-bold text-on-surface flex items-center gap-2">
+<span>Ration Card (BPL Priority)</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-fixed-variant font-label-sm text-label-sm font-bold">NFSA Card</span>
+</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Department of Food &amp; Civil Supplies</div>
+</div>
+</div>
+</td>
+<td class="py-4 px-4 font-code-mono text-body-md text-on-surface">
+              KA-HAS-1092
+            </td>
+<td class="py-4 px-4">
+<span class="px-2 py-1 rounded bg-surface-container-high font-code-mono text-label-sm text-on-surface">PDF</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant ml-1.5 font-code-mono">1.1 MB</span>
+</td>
+<td class="py-4 px-4">
+<div class="flex items-center gap-1.5 text-secondary font-label-md text-label-md font-bold">
+<span class="material-symbols-outlined text-base">check_circle</span>
+<span>Active NFSA Allocation</span>
+</div>
+<div class="font-code-mono text-label-sm text-on-surface-variant">4 Beneficiaries Seeded</div>
+</td>
+<td class="py-4 px-4 text-right">
+<div class="flex items-center justify-end gap-1.5">
+<button class="h-9 w-9 rounded-xl bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-highest transition-colors" title="Download Document" type="button">
+<span class="material-symbols-outlined text-base">download</span>
+</button>
+<button class="h-9 w-9 rounded-xl bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-highest transition-colors" title="View Cryptographic Audit Log" type="button">
+<span class="material-symbols-outlined text-base">history</span>
+</button>
+<button class="h-9 w-9 rounded-xl bg-surface-container flex items-center justify-center text-error hover:bg-error-container hover:text-on-error-container transition-colors" title="Revoke &amp; Delete" type="button">
+<span class="material-symbols-outlined text-base">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Security & Sovereignty Footer Footnote inside Vault -->
+<div class="mt-6 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-on-surface-variant font-label-sm text-label-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-base">policy</span>
+<span>Stored under India Data Residency Clause (Digital Personal Data Protection Act 2023).</span>
+</div>
+<div class="flex items-center gap-4">
+<a class="hover:text-primary font-bold" href="#">View Access Audits</a>
+<span class="text-surface-dim">•</span>
+<a class="hover:text-primary font-bold" href="#">Export Vault Metadata (JSON)</a>
+</div>
+</div>
+</div>
+</div></div></main></div></body></html>

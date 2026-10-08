@@ -1,0 +1,702 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-secondary-fixed-variant":"#005226","on-tertiary-fixed-variant":"#7a3000","outline":"#6f7973","surface-tint":"#1c6b4d","on-secondary-container":"#24703e","inverse-on-surface":"#eef0ff","surface-container-highest":"#dae2fd","error-container":"#ffdad6","tertiary":"#6d2a00","inverse-primary":"#8bd6b1","on-primary-fixed":"#002114","on-tertiary-fixed":"#341000","on-surface-variant":"#3f4943","inverse-surface":"#283044","primary-fixed-dim":"#8bd6b1","outline-variant":"#bfc9c1","surface-bright":"#faf8ff","surface-container":"#eaedff","on-tertiary-container":"#ffbd9e","on-error-container":"#93000a","primary-fixed":"#a6f2cc","surface-dim":"#d2d9f4","background":"#faf8ff","on-primary-container":"#90dbb6","secondary-fixed-dim":"#8bd79b","surface-variant":"#dae2fd","on-tertiary":"#ffffff","on-error":"#ffffff","secondary-container":"#a4f1b2","primary-container":"#0e6245","secondary-fixed":"#a6f4b5","tertiary-container":"#8f3e0c","on-secondary-fixed":"#00210b","tertiary-fixed":"#ffdbcb","on-surface":"#131b2e","secondary":"#1f6c3a","on-primary-fixed-variant":"#005138","surface-container-low":"#f2f3ff","surface-container-high":"#e2e7ff","tertiary-fixed-dim":"#ffb693","error":"#ba1a1a","on-primary":"#ffffff","on-background":"#131b2e","primary":"#004831","surface-container-lowest":"#ffffff","on-secondary":"#ffffff","surface":"#faf8ff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-lg":"1.5rem","space-md":"1rem","space-sm":"0.5rem","gutter":"1.5rem","margin":"2rem","space-xl":"2rem","gutter-mobile":"1rem","margin-mobile":"1rem","space-xs":"0.25rem"},"fontFamily":{"label-md":["Inter"],"headline-lg-mobile":["Inter"],"headline-md":["Inter"],"body-bold":["Inter"],"body-lg":["Inter"],"headline-sm":["Inter"],"label-sm":["Inter"],"code-mono":["JetBrains Mono"],"headline-xl":["Inter"],"headline-lg":["Inter"],"body-md":["Inter"],"headline-xl-mobile":["Inter"]},"fontSize":{"label-md":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"600"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"800"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"800"}],"body-bold":["15px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"700"}],"body-lg":["18px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"500"}],"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"700"}],"label-sm":["11px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"700"}],"code-mono":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"500"}],"headline-xl":["40px",{"lineHeight":"48px","letterSpacing":"-0.03em","fontWeight":"900"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.025em","fontWeight":"900"}],"body-md":["15px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"400"}],"headline-xl-mobile":["30px",{"lineHeight":"38px","letterSpacing":"-0.025em","fontWeight":"900"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-72 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-16 px-space-md flex items-center gap-space-sm bg-surface-container-lowest"><img alt="Scheme AI Official Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V_pyjhe_cZJHpk1JFhFfxxeNY4YsV4c8CR-hOc64yQSIomRh8V6X-r-1-FhBPuDa2OLDT-33OhUvyeVs772PrH-YdMnB5q1UTeGrHJwB1_V2RICqdDWnNekt1o-GYhQ-JFoyK18BoBI82NJKdRPT8IWad8n83A6QvFxhFAaHYifH-dHlJ3vruCci4b5RkAf_KjGnyKpYVlAp7fBJy_fvGtN7EROd2OAxG7-U2AF2Yd"><div class="flex flex-col min-w-0"><span class="font-headline-sm text-headline-sm text-primary tracking-tight truncate">Scheme AI</span><span class="font-label-sm text-label-sm text-on-surface-variant truncate">Citizen Welfare Navigator</span></div></div><div class="h-1 w-full bg-surface-container-high flex"><div class="w-1/3 bg-tertiary-container"></div><div class="w-1/3 bg-surface-container-lowest"></div><div class="w-1/3 bg-primary-container"></div></div><div class="p-space-md"><div class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant px-space-sm pb-space-xs">Civic Services</div><nav class="flex flex-col gap-space-xs" data-active-classes="bg-primary-container text-on-primary font-bold rounded-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="ai-advisor" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-space-lg">smart_toy</span><span class="font-label-md text-label-md">Chat (AI Advisor)</span></div><span class="px-space-xs py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">Live</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="schemes-directory" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-space-lg">account_balance</span><span class="font-label-md text-label-md">Schemes</span></div><span class="px-space-xs py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-code-mono">480+</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="eligibility-wizard" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-space-lg">fact_check</span><span class="font-label-md text-label-md">Check (Wizard)</span></div><span class="px-space-xs py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">Fast</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="document-vault" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-space-lg">folder_shared</span><span class="font-label-md text-label-md">Vault (Readiness)</span></div><span class="px-space-xs py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">4 Docs</span></a></nav><div class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant px-space-sm pt-space-lg pb-space-xs">Account &amp; Assistance</div><nav class="flex flex-col gap-space-xs" data-active-classes="bg-primary-container text-on-primary font-bold rounded-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="profile-settings" href="#"><span class="material-symbols-outlined text-space-lg">manage_accounts</span><span class="font-label-md text-label-md">Profile</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="support-helpdesk" href="#"><span class="material-symbols-outlined text-space-lg">help_center</span><span class="font-label-md text-label-md">Support</span></a></nav></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md flex-1 max-w-xl"><div class="relative w-full flex items-center"><span class="material-symbols-outlined absolute left-space-md text-on-surface-variant pointer-events-none">search</span><input class="w-full h-10 pl-10 pr-space-md bg-surface-container-low rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="Search schemes by ministry, state, or benefit keywords..." type="text"></div></div><div class="flex items-center gap-space-md"><div class="hidden xl:flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-surface-container-low"><span class="h-2 w-2 rounded-full bg-secondary animate-pulse"></span><span class="font-label-sm text-label-sm font-code-mono text-on-surface-variant">S3 Encrypted • 256-bit Secure</span></div><button aria-label="Notifications" class="h-10 w-10 flex items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors relative" type="button"><span class="material-symbols-outlined">notifications</span><span class="absolute top-2 right-2 h-2 w-2 rounded-full bg-error"></span></button><div class="h-8 w-px bg-surface-container-high"></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="flex flex-col text-right"><span class="font-label-md text-label-md text-on-surface font-bold">Citizen User</span><span class="font-code-mono text-label-sm text-on-surface-variant">IN-8849-KA</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD44LgcNVgdhiwpBW0CrE4lcKxbOVSt2K3-W2z5QJXRvLnyCKqwvWuYEirfB3K6C_3__w6kFdp_JCoCEgc3ivFGoE8edN3eap4jG4RAQ99I13emaefS2DFcOUJujgT397TBR0agVzHssZA0Gj8nicnkdeID94wogXcbIb91NV7Pwiip15duHRlwzFgeUou-BIoEHbJd_xbGiXYxhlQcSxWHq5otmEsWbd9wJNQqnEs"></div></div></header><main class="relative pt-16 bg-background min-h-screen"><div class="flex flex-col w-full">
+<!-- Civic Support Top Hero Banner -->
+<div class="px-margin pt-space-lg pb-space-xl bg-gradient-to-b from-surface-container-low to-background">
+<!-- Breadcrumbs & Official Portal Badge -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm mb-space-md">
+<div class="flex items-center gap-space-xs font-label-md text-label-md text-on-surface-variant">
+<span class="">Citizen Portal</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="">Account &amp; Assistance</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-primary font-bold">Help &amp; Support</span>
+</div>
+<div class="flex items-center gap-space-xs px-space-md py-1 rounded-full bg-surface-container-highest text-primary">
+<span class="material-symbols-outlined text-sm">verified</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider font-bold">Official Citizen Helpdesk • Portal v3.4</span>
+</div>
+</div>
+<!-- Title, Tagline & National Support Toll -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-end mb-space-lg">
+<div class="lg:col-span-8 flex flex-col gap-space-xs">
+<div class="inline-flex items-center gap-2 text-secondary font-label-sm text-label-sm uppercase tracking-wider font-bold">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+          People First • Har Nagrik Ke Saath
+        </div>
+<h1 class="font-headline-xl text-headline-xl text-primary tracking-tight">Help &amp; Civic Support Center</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+          Get swift answers, discover statutory guidelines, resolve Direct Benefit Transfer (DBT) issues, or consult our 24/7 AI Civic Advisor in your regional dialect.
+        </p>
+</div>
+<div class="lg:col-span-4 flex flex-col items-start lg:items-end justify-end">
+<div class="p-space-md rounded-2xl bg-surface-container-lowest shadow-sm flex items-center gap-space-md w-full sm:w-auto">
+<div class="w-12 h-12 rounded-xl bg-tertiary-container text-on-tertiary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-2xl">call</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase text-on-surface-variant font-bold tracking-wider">National DBT Toll-Free</span>
+<span class="font-code-mono text-headline-sm text-primary font-bold">1800-115-526</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Toll Free • Mon-Sat 09:00 - 18:00 IST</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Multilingual Strip Notice -->
+<div class="p-space-md rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-xl">translate</span>
+<span class="font-body-bold text-body-bold text-on-surface">Assistance Available in 14 Languages:</span>
+<span class="font-body-md text-body-md text-on-surface-variant">हिंदी, ಕನ್ನಡ, தமிழ், తెలుగు, বাংলা, मराठी &amp; English</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="px-space-sm py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">Live Sync: 99.98% SLA</span>
+<span class="px-space-sm py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-code-mono">Kiosk Latency: 18ms</span>
+</div>
+</div>
+<!-- High-Impact Search & Filter Rail -->
+<div class="mt-space-lg flex flex-col gap-space-md">
+<div class="relative w-full shadow-sm rounded-2xl overflow-hidden bg-surface-container-lowest">
+<span class="material-symbols-outlined absolute left-space-md top-1/2 -translate-y-1/2 text-primary text-2xl pointer-events-none">manage_search</span>
+<input class="w-full h-14 pl-14 pr-32 bg-surface-container-lowest font-body-lg text-body-lg text-on-surface placeholder:text-on-surface-variant focus:outline-none" id="faq-search-input" placeholder="Search FAQs, DBT status, DigiLocker token readiness, caste certificate renewal, or grievance forms..." type="text">
+<div class="absolute right-space-sm top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-space-xs">
+<kbd class="px-2 py-1 bg-surface-container-high rounded text-label-sm font-code-mono text-on-surface-variant">ESC</kbd>
+<button class="h-9 px-space-md rounded-xl bg-primary text-on-primary font-label-md text-label-md font-bold hover:bg-primary-container transition-all" id="clear-search-btn">Search</button>
+</div>
+</div>
+<!-- Quick Filter Pills -->
+<div class="flex flex-wrap items-center gap-space-xs">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant mr-space-xs font-bold">Filter By:</span>
+<button class="faq-filter-btn px-space-md py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-bold shadow-sm" data-category="all">All Topics (28)</button>
+<button class="faq-filter-btn px-space-md py-1.5 rounded-full bg-surface-container-lowest text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low font-label-sm text-label-sm font-bold shadow-sm transition-colors" data-category="eligibility">Eligibility &amp; Rules (9)</button>
+<button class="faq-filter-btn px-space-md py-1.5 rounded-full bg-surface-container-lowest text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low font-label-sm text-label-sm font-bold shadow-sm transition-colors" data-category="documents">Vault &amp; DigiLocker (7)</button>
+<button class="faq-filter-btn px-space-md py-1.5 rounded-full bg-surface-container-lowest text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low font-label-sm text-label-sm font-bold shadow-sm transition-colors" data-category="dbt">DBT &amp; Bank Seeding (6)</button>
+<button class="faq-filter-btn px-space-md py-1.5 rounded-full bg-surface-container-lowest text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low font-label-sm text-label-sm font-bold shadow-sm transition-colors" data-category="account">Citizen ID &amp; Login (6)</button>
+</div>
+</div>
+</div>
+<!-- Support Pathways Grid -->
+<div class="px-margin -mt-4 pb-space-lg">
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<!-- Card 1: AI Advisor (Primary Highlight) -->
+<div class="rounded-3xl p-space-lg bg-surface-container-lowest shadow-md flex flex-col justify-between relative overflow-hidden group hover:shadow-xl transition-all">
+<div class="absolute top-0 right-0 w-28 h-28 bg-primary/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform"></div>
+<div class="flex flex-col">
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-12 h-12 rounded-2xl bg-primary-container text-on-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-2xl">smart_toy</span>
+</div>
+<span class="px-space-sm py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span> 24/7 Instant
+            </span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">Scheme AI Advisor</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+            Instant evaluation across 480+ central and state schemes. Voice inputs and vernacular audio translation supported.
+          </p>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs font-code-mono text-label-sm text-secondary font-bold">
+<span class="material-symbols-outlined text-sm">schedule</span> Average Response: &lt; 2s
+          </div>
+<a class="mt-space-xs h-11 w-full rounded-xl bg-primary text-on-primary font-body-bold text-body-bold flex items-center justify-center gap-space-xs hover:bg-primary-container shadow-sm transition-all" href="#">
+<span class="">Start AI Consultation</span>
+<span class="material-symbols-outlined text-base">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Card 2: WhatsApp Citizen Desk -->
+<div class="rounded-3xl p-space-lg bg-surface-container-lowest shadow-md flex flex-col justify-between relative overflow-hidden group hover:shadow-xl transition-all">
+<div class="flex flex-col">
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-12 h-12 rounded-2xl bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-2xl">chat</span>
+</div>
+<span class="px-space-sm py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-secondary text-sm">check_circle</span> Verified Desk
+            </span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">WhatsApp Citizen Desk</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+            Send application screenshots, download sanction orders, and track grievance tickets directly via WhatsApp messaging.
+          </p>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs font-code-mono text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">forum</span> Verified WhatsApp: +91 80 2234 5678
+          </div>
+<a class="mt-space-xs h-11 w-full rounded-xl bg-surface-container-low text-on-surface font-body-bold text-body-bold flex items-center justify-center gap-space-xs hover:bg-surface-container-high shadow-sm transition-all" href="#">
+<span class="material-symbols-outlined text-base text-secondary">send</span>
+<span class="">Chat on WhatsApp</span>
+</a>
+</div>
+</div>
+<!-- Card 3: Email & Grievance Tickets -->
+<div class="rounded-3xl p-space-lg bg-surface-container-lowest shadow-md flex flex-col justify-between relative overflow-hidden group hover:shadow-xl transition-all">
+<div class="flex flex-col">
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-12 h-12 rounded-2xl bg-surface-container-high text-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-2xl">mail</span>
+</div>
+<span class="px-space-sm py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-bold">
+              Formal Ticketing
+            </span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">E-Mail &amp; Grievance Cell</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+            Submit formal affidavits, appeal rejected subsidies, or dispute missing DBT installments with statutory case numbers.
+          </p>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs font-code-mono text-label-sm text-on-surface-variant truncate">
+<span class="material-symbols-outlined text-sm">alternate_email</span> grievance@schemeapp.gov.in
+          </div>
+<button class="mt-space-xs h-11 w-full rounded-xl bg-surface-container-low text-on-surface font-body-bold text-body-bold flex items-center justify-center gap-space-xs hover:bg-surface-container-high shadow-sm transition-all" onclick="document.getElementById('ticket-modal').classList.remove('hidden')">
+<span class="material-symbols-outlined text-base text-primary">add_circle</span>
+<span class="">File Grievance Ticket</span>
+</button>
+</div>
+</div>
+<!-- Card 4: Local CSC / Grama One Kiosks -->
+<div class="rounded-3xl p-space-lg bg-surface-container-lowest shadow-md flex flex-col justify-between relative overflow-hidden group hover:shadow-xl transition-all">
+<div class="flex flex-col">
+<div class="flex items-center justify-between mb-space-md">
+<div class="w-12 h-12 rounded-2xl bg-surface-container-high text-tertiary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-2xl">location_city</span>
+</div>
+<span class="px-space-sm py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm font-bold">
+              In-Person Centers
+            </span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-space-xs">Grama One &amp; CSC Locator</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-md">
+            Locate approved village administrative centers for biometric scans, physical document stamping, and passbook updates.
+          </p>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs font-code-mono text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-sm">distance</span> 12 Centers Near You (3.2 km)
+          </div>
+<a class="mt-space-xs h-11 w-full rounded-xl bg-surface-container-low text-on-surface font-body-bold text-body-bold flex items-center justify-center gap-space-xs hover:bg-surface-container-high shadow-sm transition-all" href="#">
+<span class="material-symbols-outlined text-base text-tertiary">near_me</span>
+<span class="">Locate Nearest Desk</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Split Layout (FAQs & Knowledge Base vs Live Operations & Escalations) -->
+<div class="px-margin pb-space-xl">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl">
+<!-- Left Column: Knowledge Base & Interactive FAQ Accordions (7 cols) -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg">
+<!-- Accordion Section Header -->
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Direct Assistance Archive</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Frequently Asked Questions</h2>
+</div>
+<span class="px-space-md py-1 rounded-full bg-surface-container-low font-code-mono text-label-sm text-on-surface-variant font-bold">
+            Showing <span id="active-count" class="">7</span> of 28
+          </span>
+</div>
+<!-- Accordion Group -->
+<div class="flex flex-col gap-space-md" id="faq-container">
+<!-- Item 1: Pre-expanded Primary Scheme Verification Flow -->
+<div class="faq-item rounded-3xl bg-surface-container-lowest shadow-md overflow-hidden transition-all" data-cat="eligibility">
+<button aria-expanded="true" class="faq-toggle w-full px-space-lg py-space-md flex items-center justify-between text-left gap-space-md hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-10 h-10 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">fact_check</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-space-xs mb-0.5">
+<span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary font-label-sm text-label-sm uppercase font-bold">Eligibility Check</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold">Most Viewed</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">How do I check my eligibility for a government scheme?</span>
+</div>
+</div>
+<span class="faq-icon material-symbols-outlined text-primary text-2xl rotate-180 transition-transform">expand_more</span>
+</button>
+<div class="faq-content px-space-lg pb-space-lg pt-space-xs">
+<div class="p-space-md rounded-2xl bg-surface-container-low mb-space-md flex flex-col gap-space-sm">
+<p class="font-body-md text-body-md text-on-surface">
+                  You can verify and discover scheme qualification instantly using two automated official methods:
+                </p>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm pt-space-xs">
+<div class="p-space-sm rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-primary text-on-primary font-code-mono text-label-sm flex items-center justify-center font-bold">1</span>
+<span class="font-body-bold text-body-bold text-on-surface">Eligibility Wizard</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">
+                      Navigate to the <span class="font-bold text-primary">Check (Wizard)</span> module in your sidebar. Pre-populate land holding, family income category, and Aadhaar age bracket in 3 taps.
+                    </p>
+<a class="mt-auto inline-flex items-center gap-1 font-label-sm text-label-sm text-primary font-bold hover:underline" href="#">
+                      Go to Wizard <span class="material-symbols-outlined text-xs">arrow_forward</span>
+</a>
+</div>
+<div class="p-space-sm rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center gap-2">
+<span class="w-6 h-6 rounded-full bg-primary text-on-primary font-code-mono text-label-sm flex items-center justify-center font-bold">2</span>
+<span class="font-body-bold text-body-bold text-on-surface">Ask AI Advisor in Chat</span>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant">
+                      Type or speak naturally (e.g. <em>"I am a 32-year-old small farmer from Hassan with 1.8 acres of dry land"</em>) to receive matched welfare schemes with disbursement timelines.
+                    </p>
+<a class="mt-auto inline-flex items-center gap-1 font-label-sm text-label-sm text-primary font-bold hover:underline" href="#">
+                      Launch Chat Advisor <span class="material-symbols-outlined text-xs">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant text-label-sm font-label-sm">
+<span class="">Was this resolution helpful?</span>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-sm py-1 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">thumb_up</span> Yes (1,492)
+                  </button>
+<button class="px-space-sm py-1 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">thumb_down</span> No
+                  </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Item 2: Vault & DigiLocker -->
+<div class="faq-item rounded-3xl bg-surface-container-lowest shadow-md overflow-hidden transition-all" data-cat="documents">
+<button aria-expanded="false" class="faq-toggle w-full px-space-lg py-space-md flex items-center justify-between text-left gap-space-md hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">folder_shared</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm uppercase font-bold w-max mb-0.5">Documents &amp; Vault</span>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">How do I upload and verify documents in the Citizen Vault?</span>
+</div>
+</div>
+<span class="faq-icon material-symbols-outlined text-on-surface-variant text-2xl transition-transform">expand_more</span>
+</button>
+<div class="faq-content hidden px-space-lg pb-space-lg pt-space-xs">
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-sm">
+                Click on <strong>Vault (Readiness)</strong> in the left navigation panel. You can authenticate via your linked DigiLocker profile to fetch digitally verified Aadhaar, Ration Card, Caste Certificates, and RTC Pahani without needing scanned physical paper copies.
+              </p>
+<div class="p-space-sm rounded-xl bg-surface-container-low flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary">verified_user</span>
+<span class="font-label-sm text-label-sm text-on-surface">Supported formats: PDF, JPG, PNG (Max size: 5MB per certificate). Auto-encrypted with SHA-256.</span>
+</div>
+</div>
+</div>
+<!-- Item 3: Language Support -->
+<div class="faq-item rounded-3xl bg-surface-container-lowest shadow-md overflow-hidden transition-all" data-cat="account">
+<button aria-expanded="false" class="faq-toggle w-full px-space-lg py-space-md flex items-center justify-between text-left gap-space-md hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">translate</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm uppercase font-bold w-max mb-0.5">Regional Dialects</span>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">Can I use Scheme AI in Hindi, Kannada, Tamil, or Telugu?</span>
+</div>
+</div>
+<span class="faq-icon material-symbols-outlined text-on-surface-variant text-2xl transition-transform">expand_more</span>
+</button>
+<div class="faq-content hidden px-space-lg pb-space-lg pt-space-xs">
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-sm">
+                Yes! Both our desktop interface and WhatsApp bot allow complete vernacular navigation. Toggle the language picker in your <strong>Profile Settings</strong> or simply prompt the AI Advisor in your preferred script. Voice input automatically transcribes regional spoken dialects.
+              </p>
+</div>
+</div>
+<!-- Item 4: DBT & NPCI Bank Seeding -->
+<div class="faq-item rounded-3xl bg-surface-container-lowest shadow-md overflow-hidden transition-all" data-cat="dbt">
+<button aria-expanded="false" class="faq-toggle w-full px-space-lg py-space-md flex items-center justify-between text-left gap-space-md hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-10 h-10 rounded-xl bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">account_balance</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="px-2 py-0.5 rounded-full bg-tertiary-container text-on-tertiary font-label-sm text-label-sm uppercase font-bold w-max mb-0.5">DBT Payment Status</span>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">What should I do if my bank account is not seeded with NPCI / Aadhaar?</span>
+</div>
+</div>
+<span class="faq-icon material-symbols-outlined text-on-surface-variant text-2xl transition-transform">expand_more</span>
+</button>
+<div class="faq-content hidden px-space-lg pb-space-lg pt-space-xs">
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-sm">
+                Direct Benefit Transfer (DBT) funds like PM-Kisan or Gruha Lakshmi require your primary savings account to be linked with the NPCI Aadhaar Payment Bridge (APB). You can generate the standardized NPCI Aadhaar Seeding Mandate Form from Scheme AI, print it, and submit it to your bank branch or local India Post Payments Bank (IPPB) agent.
+              </p>
+<div class="flex items-center gap-space-sm">
+<a class="px-space-md py-1.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md font-bold flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-sm">download</span> Download Mandate PDF
+                </a>
+<a class="px-space-md py-1.5 rounded-xl bg-surface-container-low text-on-surface font-label-md text-label-md font-bold hover:bg-surface-container-high" href="#">
+                  Check NPCI Status Online
+                </a>
+</div>
+</div>
+</div>
+<!-- Item 5: Tracking Application Status -->
+<div class="faq-item rounded-3xl bg-surface-container-lowest shadow-md overflow-hidden transition-all" data-cat="eligibility">
+<button aria-expanded="false" class="faq-toggle w-full px-space-lg py-space-md flex items-center justify-between text-left gap-space-md hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">timeline</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm uppercase font-bold w-max mb-0.5">Application Lifecycle</span>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">How do I track my submitted application status (e.g. PM-Kisan DBT)?</span>
+</div>
+</div>
+<span class="faq-icon material-symbols-outlined text-on-surface-variant text-2xl transition-transform">expand_more</span>
+</button>
+<div class="faq-content hidden px-space-lg pb-space-lg pt-space-xs">
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Enter your Acknowledgement Number (ACK-XXXX-YYYY) or registered Aadhaar mobile number in the Scheme Directory or AI Chat. The dashboard will retrieve real-time state nodal sanction logs, taluk revenue officer remarks, and public financial management system (PFMS) credit batches.
+              </p>
+</div>
+</div>
+<!-- Item 6: Free & Government Verified -->
+<div class="faq-item rounded-3xl bg-surface-container-lowest shadow-md overflow-hidden transition-all" data-cat="account">
+<button aria-expanded="false" class="faq-toggle w-full px-space-lg py-space-md flex items-center justify-between text-left gap-space-md hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-10 h-10 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">shield</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm uppercase font-bold w-max mb-0.5">Trust &amp; Compliance</span>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">Is Scheme AI completely free and government-verified?</span>
+</div>
+</div>
+<span class="faq-icon material-symbols-outlined text-on-surface-variant text-2xl transition-transform">expand_more</span>
+</button>
+<div class="faq-content hidden px-space-lg pb-space-lg pt-space-xs">
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Scheme AI is 100% free for all Indian citizens. We never charge processing fees or brokerage commissions. All scheme requirements, gazette notifications, and financial subsidy rules are synced directly with National Informatics Centre (NIC) and MyScheme APIs.
+              </p>
+</div>
+</div>
+<!-- Item 7: Missing Documents Support -->
+<div class="faq-item rounded-3xl bg-surface-container-lowest shadow-md overflow-hidden transition-all" data-cat="documents">
+<button aria-expanded="false" class="faq-toggle w-full px-space-lg py-space-md flex items-center justify-between text-left gap-space-md hover:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-space-md min-w-0">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">pending_actions</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm uppercase font-bold w-max mb-0.5">Document Vault</span>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">What if I don't have all required documents yet?</span>
+</div>
+</div>
+<span class="faq-icon material-symbols-outlined text-on-surface-variant text-2xl transition-transform">expand_more</span>
+</button>
+<div class="faq-content hidden px-space-lg pb-space-lg pt-space-xs">
+<p class="font-body-md text-body-md text-on-surface-variant">
+                The Vault displays a <strong>"Readiness Score"</strong>. If you lack an Income Certificate or Land RTC record, Scheme AI automatically generates pre-filled Nadakacheri or Revenue Portal application drafts and points you to the nearest Seva Sindhu or Grama One kiosk to procure them.
+              </p>
+</div>
+</div>
+</div>
+<!-- Inline Prompt Widget: Still Haven't Found What You Need? -->
+<div class="rounded-3xl p-space-lg bg-surface-container-lowest shadow-md flex flex-col md:flex-row items-center gap-space-lg">
+<div class="w-16 h-16 rounded-2xl bg-primary-container text-on-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-3xl">smart_toy</span>
+</div>
+<div class="flex flex-col flex-1">
+<span class="font-headline-sm text-headline-sm text-on-surface">Still have unanswered questions?</span>
+<p class="font-body-md text-body-md text-on-surface-variant mb-space-sm">
+              Type your specific circumstance below. Our model analyzes your state circulars and gives direct statutory citations in seconds.
+            </p>
+<div class="flex items-center gap-space-xs">
+<input class="flex-1 h-11 px-space-md bg-surface-container-low rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none" placeholder="Ask e.g., 'How can a widow farmer get pension in Karnataka?'" type="text">
+<button class="h-11 px-space-md rounded-xl bg-primary text-on-primary font-label-md text-label-md font-bold hover:bg-primary-container transition-all shrink-0">
+                Ask AI Now
+              </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Operational Timings, Field Officer & Quick Escalation (5 cols) -->
+<div class="lg:col-span-5 flex flex-col gap-space-md">
+<!-- Live Support Hours & Official Contact Card -->
+<div class="rounded-3xl p-space-lg bg-surface-container-lowest shadow-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary animate-ping"></span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Support Hours &amp; Helplines</span>
+</div>
+<span class="px-space-sm py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold">Desk Active</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-start gap-space-sm p-space-sm rounded-2xl bg-surface-container-low">
+<span class="material-symbols-outlined text-primary text-2xl mt-0.5">schedule</span>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-bold text-on-surface">General Support Timings</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Monday – Saturday: 9:00 AM – 6:00 PM IST</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">(Excluding 2nd Saturdays &amp; National Gazetted Holidays)</span>
+</div>
+</div>
+<div class="flex items-start gap-space-sm p-space-sm rounded-2xl bg-surface-container-low">
+<span class="material-symbols-outlined text-secondary text-2xl mt-0.5">support_agent</span>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-bold text-on-surface">Emergency Grievance Line</span>
+<span class="font-code-mono text-body-bold text-primary font-bold">14449 / 1800-115-526</span>
+<span class="font-label-sm text-label-sm text-secondary font-bold">Avg. Citizen Wait Time: 1m 40s</span>
+</div>
+</div>
+<div class="flex items-start gap-space-sm p-space-sm rounded-2xl bg-surface-container-low">
+<span class="material-symbols-outlined text-tertiary text-2xl mt-0.5">mark_email_read</span>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-bold text-on-surface">Escalation Email</span>
+<span class="font-code-mono text-body-md text-on-surface-variant">grievance-nodal@schemeapp.gov.in</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Statutory SLA Response within 24 Hours</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Before You Contact Support Checklist -->
+<div class="rounded-3xl p-space-lg bg-surface-container-lowest shadow-md flex flex-col gap-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-2xl">checklist</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Before You Call or File a Ticket</span>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant">
+            Keep these details on hand so our officers can resolve your query in a single touchpoint:
+          </p>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm p-space-xs">
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface">Your 12-digit Aadhaar Number or DigiLocker Mobile OTP ready</span>
+</div>
+<div class="flex items-center gap-space-sm p-space-xs">
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface">Application Acknowledgment Number (e.g. KAR-2024-XXXX)</span>
+</div>
+<div class="flex items-center gap-space-sm p-space-xs">
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface">Clear photo or screenshot of any error code / rejection reason</span>
+</div>
+<div class="flex items-center gap-space-sm p-space-xs">
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface">Bank Passbook front-page for Direct Benefit Transfer seeding check</span>
+</div>
+</div>
+</div>
+<!-- Designated Field Officer & Assigned Local Kiosk -->
+<div class="rounded-3xl p-space-lg bg-surface-container-lowest shadow-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Assigned Jurisdictional Officer</span>
+<span class="px-space-xs py-0.5 rounded-full bg-surface-container-high text-primary font-code-mono text-label-sm font-bold">WARD #14</span>
+</div>
+<div class="flex items-center gap-space-md p-space-sm rounded-2xl bg-surface-container-low">
+<img class="w-14 h-14 rounded-2xl object-cover shrink-0" data-alt="Close up professional portrait photo of Shri Ramesh Gowda, an Indian village administrative officer in formal light blue khadi shirt with warm dignified expression against a civic government office backdrop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6ZneiazcJW28qnrap3nqR85kjV6_9AjHNijQjfylU01FA_fijMUcnL6MLhgqvWVgOiATREYO9JqFvL_FwO0w3qsWfGOher-_y2cRsOJ3SMatuOrKDdfYhztMciwaURhXL4TWwVipuKyY3XzvrXO5c3heqnJcwpUVhjlOqxL-uo3LaXNryPx9gaBVDbubq-QhTQ-yBkujhAlSnE-kcunYtD9lLkQ6QeHnZZmZ3uZE">
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">Shri. Ramesh Gowda</span>
+<span class="font-label-md text-label-md text-on-surface-variant truncate">Village Administrative Officer (VAO)</span>
+<span class="font-label-sm text-label-sm text-secondary font-bold">Hassan Taluk Civic Secretariat</span>
+</div>
+</div>
+<div class="p-space-sm rounded-2xl bg-surface-container-low flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-bold uppercase">Nearest Physical Kiosk:</span>
+<span class="font-code-mono text-label-sm text-secondary font-bold">1.4 km Away</span>
+</div>
+<span class="font-body-bold text-body-bold text-on-surface">Hassan Grama One Citizen Service Center</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Opp. Sub-Registrar Office, Salagame Road, Hassan 573201</span>
+<div class="flex items-center gap-space-md mt-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span> 09:00 - 18:30 IST</span>
+<span class="flex items-center gap-1 text-primary font-bold"><span class="material-symbols-outlined text-sm">directions</span> Get Directions</span>
+</div>
+</div>
+<!-- Micro Location Map Element -->
+<div class="w-full h-32 rounded-2xl bg-surface-container-high relative overflow-hidden flex items-end p-space-sm shadow-inner" data-location="Salagame Road, Hassan, Karnataka, India">
+<div class="px-space-sm py-1 rounded-lg bg-surface-container-lowest/90 backdrop-blur-sm text-on-surface font-label-sm text-label-sm font-bold flex items-center gap-1 shadow-sm">
+<span class="material-symbols-outlined text-primary text-sm">pin_drop</span> Grama One Hassan #04
+            </div>
+</div>
+</div>
+<!-- Citizen Feedback Suggestion Box -->
+<div class="rounded-3xl p-space-md bg-surface-container-lowest shadow-md flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-xl">reviews</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-bold text-on-surface">Portal Feedback &amp; Ideas</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Help us make civic navigations easier for all</span>
+</div>
+</div>
+<button class="px-space-md py-1.5 rounded-xl bg-surface-container-low hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-bold transition-all">
+            Share
+          </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Civic Trust Assurance Bottom Footer Strip -->
+<div class="px-margin py-space-lg bg-surface-container-low flex flex-col md:flex-row items-center justify-between gap-space-md">
+<div class="flex flex-wrap items-center gap-space-lg">
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-base">verified</span>
+<span class="">MeitY 256-bit Certified</span>
+</div>
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-base">cloud_done</span>
+<span class="">DigiLocker Linked System</span>
+</div>
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-base">account_balance</span>
+<span class="">National DBT Redressal Active</span>
+</div>
+</div>
+<div class="flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant font-code-mono">
+<span class="">REF ID: IN-2025-HLP-8849</span>
+<span class="">•</span>
+<span class="">All Citizen Data Protected under DPDPA 2023</span>
+</div>
+</div>
+<!-- Raise Grievance Ticket Slideout Modal (Hidden by Default) -->
+<div class="hidden fixed inset-0 z-50 bg-on-surface/40 backdrop-blur-sm flex items-center justify-center p-space-md" id="ticket-modal">
+<div class="w-full max-w-xl bg-surface-container-lowest rounded-3xl p-space-xl shadow-xl flex flex-col gap-space-md max-h-[90vh] overflow-y-auto">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">confirmation_number</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Raise Formal Civic Ticket</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Official Central Grievance Redressal Mechanism</span>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container-high flex items-center justify-center text-on-surface" onclick="document.getElementById('ticket-modal').classList.add('hidden')">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+<form class="flex flex-col gap-space-md" id="grievance-form" onsubmit="event.preventDefault(); alert('Ticket submitted successfully! Ref: GRV-2025-9982. SMS confirmation sent to your Aadhaar mobile.'); document.getElementById('ticket-modal').classList.add('hidden');">
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1">Scheme Category</label>
+<select class="w-full h-11 px-space-md bg-surface-container-low rounded-xl font-body-md text-body-md text-on-surface focus:outline-none">
+<option>PM-Kisan Samman Nidhi (Agriculture)</option>
+<option>Gruha Lakshmi DBT (Direct Financial Assistance)</option>
+<option>Pradhan Mantri Awas Yojana (Housing)</option>
+<option>Ayushman Bharat PM-JAY (Health Insurance)</option>
+<option>DigiLocker / Document Vault Token Error</option>
+<option>Other Civic Grievance</option>
+</select>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1">Application Reference No. (Optional)</label>
+<input class="w-full h-11 px-space-md bg-surface-container-low rounded-xl font-body-md text-body-md text-on-surface focus:outline-none" placeholder="e.g. IN-8849-KA or ACK-2024-9182" type="text">
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1">Issue Description &amp; Details</label>
+<textarea class="w-full p-space-md bg-surface-container-low rounded-xl font-body-md text-body-md text-on-surface focus:outline-none" placeholder="Detail the issue: e.g., 'DBT 15th installment delayed due to Aadhaar NPCI mismatch, bank reports branch level KYC accepted.'" rows="4"></textarea>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1">Upload Supporting Documents (Optional)</label>
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col items-center justify-center gap-space-xs text-center cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-2xl text-primary">upload_file</span>
+<span class="font-label-md text-label-md text-on-surface font-bold">Drag &amp; drop passbook photocopy or error screenshot</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-code-mono">PDF, JPG up to 5MB</span>
+</div>
+</div>
+<div class="flex items-center justify-end gap-space-sm pt-space-sm">
+<button class="px-space-lg py-2.5 rounded-xl bg-surface-container-low text-on-surface font-label-md text-label-md font-bold" onclick="document.getElementById('ticket-modal').classList.add('hidden')" type="button">
+            Cancel
+          </button>
+<button class="px-space-xl py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md font-bold hover:bg-primary-container shadow-sm transition-all" type="submit">
+            Submit Grievance
+          </button>
+</div>
+</form>
+</div>
+</div>
+</div>
+<script>
+  // Interactive Accordion Handling
+  document.querySelectorAll('.faq-toggle').forEach(button => {
+    button.addEventListener('click', () => {
+      const isExpanded = button.getAttribute('aria-expanded') === 'true';
+      const content = button.nextElementSibling;
+      const icon = button.querySelector('.faq-icon');
+
+      if (isExpanded) {
+        button.setAttribute('aria-expanded', 'false');
+        content.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+        icon.classList.remove('text-primary');
+        icon.classList.add('text-on-surface-variant');
+      } else {
+        button.setAttribute('aria-expanded', 'true');
+        content.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+        icon.classList.add('text-primary');
+        icon.classList.remove('text-on-surface-variant');
+      }
+    });
+  });
+
+  // Filter Pills Handling
+  const filterButtons = document.querySelectorAll('.faq-filter-btn');
+  const faqItems = document.querySelectorAll('.faq-item');
+  const countEl = document.getElementById('active-count');
+
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterButtons.forEach(b => {
+        b.classList.remove('bg-primary', 'text-on-primary');
+        b.classList.add('bg-surface-container-lowest', 'text-on-surface-variant');
+      });
+      btn.classList.add('bg-primary', 'text-on-primary');
+      btn.classList.remove('bg-surface-container-lowest', 'text-on-surface-variant');
+
+      const cat = btn.getAttribute('data-category');
+      let visibleCount = 0;
+
+      faqItems.forEach(item => {
+        if (cat === 'all' || item.getAttribute('data-cat') === cat) {
+          item.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+
+      if (countEl) countEl.textContent = visibleCount;
+    });
+  });
+
+  // Live Search Filter
+  const searchInput = document.getElementById('faq-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      let visibleCount = 0;
+
+      faqItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (text.includes(query)) {
+          item.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+
+      if (countEl) countEl.textContent = visibleCount;
+    });
+  }
+</script></main></div>
+
+</body></html>

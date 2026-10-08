@@ -1,0 +1,460 @@
+<!DOCTYPE html><html lang="en" style=""><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-secondary-fixed-variant":"#005226","on-tertiary-fixed-variant":"#7a3000","outline":"#6f7973","surface-tint":"#1c6b4d","on-secondary-container":"#24703e","inverse-on-surface":"#eef0ff","surface-container-highest":"#dae2fd","error-container":"#ffdad6","tertiary":"#6d2a00","inverse-primary":"#8bd6b1","on-primary-fixed":"#002114","on-tertiary-fixed":"#341000","on-surface-variant":"#3f4943","inverse-surface":"#283044","primary-fixed-dim":"#8bd6b1","outline-variant":"#bfc9c1","surface-bright":"#faf8ff","surface-container":"#eaedff","on-tertiary-container":"#ffbd9e","on-error-container":"#93000a","primary-fixed":"#a6f2cc","surface-dim":"#d2d9f4","background":"#faf8ff","on-primary-container":"#90dbb6","secondary-fixed-dim":"#8bd79b","surface-variant":"#dae2fd","on-tertiary":"#ffffff","on-error":"#ffffff","secondary-container":"#a4f1b2","primary-container":"#0e6245","secondary-fixed":"#a6f4b5","tertiary-container":"#8f3e0c","on-secondary-fixed":"#00210b","tertiary-fixed":"#ffdbcb","on-surface":"#131b2e","secondary":"#1f6c3a","on-primary-fixed-variant":"#005138","surface-container-low":"#f2f3ff","surface-container-high":"#e2e7ff","tertiary-fixed-dim":"#ffb693","error":"#ba1a1a","on-primary":"#ffffff","on-background":"#131b2e","primary":"#004831","surface-container-lowest":"#ffffff","on-secondary":"#ffffff","surface":"#faf8ff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-lg":"1.5rem","space-md":"1rem","space-sm":"0.5rem","gutter":"1.5rem","margin":"2rem","space-xl":"2rem","gutter-mobile":"1rem","margin-mobile":"1rem","space-xs":"0.25rem"},"fontFamily":{"label-md":["Inter"],"headline-lg-mobile":["Inter"],"headline-md":["Inter"],"body-bold":["Inter"],"body-lg":["Inter"],"headline-sm":["Inter"],"label-sm":["Inter"],"code-mono":["JetBrains Mono"],"headline-xl":["Inter"],"headline-lg":["Inter"],"body-md":["Inter"],"headline-xl-mobile":["Inter"]},"fontSize":{"label-md":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"600"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"800"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"800"}],"body-bold":["15px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"700"}],"body-lg":["18px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"500"}],"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"700"}],"label-sm":["11px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"700"}],"code-mono":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"500"}],"headline-xl":["40px",{"lineHeight":"48px","letterSpacing":"-0.03em","fontWeight":"900"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.025em","fontWeight":"900"}],"body-md":["15px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"400"}],"headline-xl-mobile":["30px",{"lineHeight":"38px","letterSpacing":"-0.025em","fontWeight":"900"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased"><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md flex-1 max-w-xl"><div class="relative w-full flex items-center"><span class="material-symbols-outlined absolute left-space-md text-on-surface-variant pointer-events-none">search</span><input class="w-full h-10 pl-10 pr-space-md bg-surface-container-low rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="Search schemes by ministry, state, or benefit keywords..." type="text"></div></div><div class="flex items-center gap-space-md"><div class="hidden xl:flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-surface-container-low"><span class="h-2 w-2 rounded-full bg-secondary animate-pulse"></span><span class="font-label-sm text-label-sm font-code-mono text-on-surface-variant">S3 Encrypted • 256-bit Secure</span></div><button aria-label="Notifications" class="h-10 w-10 flex items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors relative" type="button"><span class="material-symbols-outlined">notifications</span><span class="absolute top-2 right-2 h-2 w-2 rounded-full bg-error"></span></button><div class="h-8 w-px bg-surface-container-high"></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="flex flex-col text-right"><span class="font-label-md text-label-md text-on-surface font-bold">Citizen User</span><span class="font-code-mono text-label-sm text-on-surface-variant">IN-8849-KA</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD44LgcNVgdhiwpBW0CrE4lcKxbOVSt2K3-W2z5QJXRvLnyCKqwvWuYEirfB3K6C_3__w6kFdp_JCoCEgc3ivFGoE8edN3eap4jG4RAQ99I13emaefS2DFcOUJujgT397TBR0agVzHssZA0Gj8nicnkdeID94wogXcbIb91NV7Pwiip15duHRlwzFgeUou-BIoEHbJd_xbGiXYxhlQcSxWHq5otmEsWbd9wJNQqnEs"></div></div></header><main class="relative pt-16 bg-background min-h-screen"><div class="flex flex-col w-full">
+<!-- Interactive Toast Notification (Step 5 Simulation) -->
+<div class="fixed bottom-6 right-8 z-50 flex items-center gap-space-sm bg-primary-container text-on-primary px-space-md py-space-sm rounded-xl shadow-xl transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none" id="saveToast">
+<span class="material-symbols-outlined text-secondary-container" style="font-variation-settings: &quot;FILL&quot; 1;">check_circle</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-primary font-bold">Saved to My Schemes</span>
+<span class="font-label-sm text-label-sm text-on-primary-container">Added to your quick vault for offline tracking</span>
+</div>
+<button aria-label="Dismiss Notification" class="ml-space-sm text-on-primary-container hover:text-on-primary" onclick="dismissToast()">
+<span class="material-symbols-outlined text-space-md">close</span>
+</button>
+</div>
+<!-- Top Hero / Guided Discovery Banner (Desktop Translation of Step Pipeline) -->
+<section class="p-space-lg bg-surface-container-lowest shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="px-space-xs py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm uppercase">National Direct Benefit Portal</span>
+<span class="text-outline text-label-sm">•</span>
+<span class="font-code-mono text-label-sm text-on-surface-variant">Live DBT Synchronized</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Schemes — Browse &amp; Discover Hub</h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+          Search, filter, evaluate statutory eligibility, and bookmark citizen welfare initiatives from 4,160+ central and state government ministries.
+        </p>
+</div>
+<!-- Quick Metrics Counter Group -->
+<div class="flex items-center gap-space-sm self-start xl:self-auto">
+<div class="flex flex-col px-space-md py-space-sm rounded-xl bg-surface-container-low">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Total Schemes</span>
+<span class="font-headline-sm text-headline-sm text-primary font-code-mono">4,162</span>
+</div>
+<div class="flex flex-col px-space-md py-space-sm rounded-xl bg-surface-container-low">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Filtered Matches</span>
+<span class="font-headline-sm text-headline-sm text-secondary font-code-mono" id="resultsCountHeader">142</span>
+</div>
+<div class="flex flex-col px-space-md py-space-sm rounded-xl bg-surface-container-low">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">My Saved</span>
+<span class="font-headline-sm text-headline-sm text-tertiary-container font-code-mono" id="savedCountHeader">3</span>
+</div>
+</div>
+</div>
+<!-- 7-Step Mobile Flow Process Line Translated for Desktop Navigation -->
+
+</section>
+<!-- Filter & Controls Toolbar (Step 2 of Flow) -->
+<section class="px-space-lg py-space-md bg-surface-container-lowest shadow-sm border-b border-surface-container-low flex flex-col gap-space-sm"><div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md"><div class="relative flex-1"><span class="material-symbols-outlined absolute left-space-md top-1/2 -translate-y-1/2 text-on-surface-variant">search</span><input class="w-full h-11 pl-11 pr-10 rounded-xl bg-surface-container-low font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary-container border border-transparent transition-all" id="schemeSearchInput" placeholder="Search by scheme name, ministry, target demographic or benefit..." type="text" value="farmer"><button aria-label="Clear Search Input" class="absolute right-space-md top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface flex items-center justify-center" id="clearSearchBtn" onclick="clearSearch()"><span class="material-symbols-outlined text-space-md">cancel</span></button></div><div class="flex items-center gap-space-sm flex-wrap sm:flex-nowrap"><div class="relative min-w-[170px]"><select class="w-full h-11 pl-space-md pr-8 rounded-xl bg-surface-container-low font-label-md text-label-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container appearance-none cursor-pointer border border-transparent"><option value="all">🇮🇳 All India (Central)</option><option selected="" value="ka">Karnataka (State &amp; Central)</option><option value="mh">Maharashtra</option><option value="up">Uttar Pradesh</option><option value="tn">Tamil Nadu</option></select><span class="material-symbols-outlined absolute right-space-sm top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-space-md">expand_more</span></div><div class="relative min-w-[170px]"><select class="w-full h-11 pl-space-md pr-8 rounded-xl bg-surface-container-low font-label-md text-label-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container appearance-none cursor-pointer border border-transparent"><option>Sort: Relevance</option><option selected="">Sort: Highest Benefit</option><option>Sort: Earliest Deadline</option><option>Sort: Recently Added</option></select><span class="material-symbols-outlined absolute right-space-sm top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-space-md">sort</span></div><div class="flex items-center p-1 bg-surface-container-low rounded-xl"><button class="px-space-md py-1.5 rounded-lg font-label-md text-label-md bg-surface-container-lowest text-primary font-bold shadow-sm transition-all flex items-center gap-1.5" id="tabAllSchemes" onclick="switchMainTab('all')"><span class="">All Schemes</span><span class="px-1.5 py-0.2 rounded-full bg-surface-container-high text-on-surface font-code-mono text-label-sm">4,160</span></button><button class="px-space-md py-1.5 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1.5" id="tabSavedSchemes" onclick="switchMainTab('saved')"><span class="material-symbols-outlined text-[16px] text-tertiary-container">bookmark</span><span class="">Saved</span><span class="px-1.5 py-0.2 rounded-full bg-secondary-container text-on-secondary-container font-code-mono text-label-sm" id="savedPillBadge">3</span></button></div></div></div><div class="flex items-center gap-space-xs overflow-x-auto py-1 scrollbar-none"><button class="px-space-md py-1.5 rounded-xl bg-primary-container text-on-primary font-label-md text-label-md font-bold whitespace-nowrap flex items-center gap-1 shadow-sm"><span class="">All Categories</span></button><button class="px-space-md py-1.5 rounded-xl bg-surface-container-low text-primary font-label-md text-label-md font-bold hover:bg-surface-container-high whitespace-nowrap flex items-center gap-1 transition-colors"><span class="material-symbols-outlined text-[16px] text-secondary">agriculture</span><span class="">Agriculture</span><span class="px-1.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-label-sm font-code-mono">68</span></button><button class="px-space-md py-1.5 rounded-xl bg-surface-container-low text-on-surface font-label-md text-label-md hover:bg-surface-container-high whitespace-nowrap flex items-center gap-1 transition-colors"><span class="material-symbols-outlined text-[16px] text-primary">payments</span><span class="">Cash Grants</span></button><button class="px-space-md py-1.5 rounded-xl bg-surface-container-low text-on-surface font-label-md text-label-md hover:bg-surface-container-high whitespace-nowrap flex items-center gap-1 transition-colors"><span class="material-symbols-outlined text-[16px] text-tertiary-container">price_check</span><span class="">Subsidies</span></button><button class="px-space-md py-1.5 rounded-xl bg-surface-container-low text-on-surface font-label-md text-label-md hover:bg-surface-container-high whitespace-nowrap flex items-center gap-1 transition-colors"><span class="material-symbols-outlined text-[16px]">account_balance</span><span class="">Loans &amp; Credit</span></button><button class="px-space-md py-1.5 rounded-xl bg-surface-container-low text-on-surface font-label-md text-label-md hover:bg-surface-container-high whitespace-nowrap flex items-center gap-1 transition-colors"><span class="material-symbols-outlined text-[16px]">woman</span><span class="">Women Welfare</span></button><button class="px-space-md py-1.5 rounded-xl bg-surface-container-low text-on-surface font-label-md text-label-md hover:bg-surface-container-high whitespace-nowrap flex items-center gap-1 transition-colors"><span class="material-symbols-outlined text-[16px]">storefront</span><span class="">MSME</span></button><button class="px-space-md py-1.5 rounded-xl bg-surface-container-low text-on-surface font-label-md text-label-md hover:bg-surface-container-high whitespace-nowrap flex items-center gap-1 transition-colors"><span class="material-symbols-outlined text-[16px]">school</span><span class="">Education</span></button></div><div class="flex items-center justify-between pt-1 flex-wrap gap-space-xs border-t border-surface-container-low"><div class="flex items-center gap-space-xs flex-wrap"><span class="font-label-sm text-label-sm text-on-surface-variant">Filters:</span><span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-medium">Keyword: "farmer"<button aria-label="Remove filter keyword farmer" class="hover:opacity-75" onclick="clearSearch()"><span class="material-symbols-outlined text-[14px]">close</span></button></span><span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-medium">Karnataka &amp; Central<button aria-label="Remove filter jurisdiction" class="hover:opacity-75"><span class="material-symbols-outlined text-[14px]">close</span></button></span><span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-medium">Direct Cash / Subsidy<button aria-label="Remove filter benefit type" class="hover:opacity-75"><span class="material-symbols-outlined text-[14px]">close</span></button></span><button class="font-label-sm text-label-sm text-primary hover:underline ml-space-xs font-semibold">Reset All</button></div><div class="font-label-sm text-label-sm text-on-surface-variant font-code-mono">Showing 1 - 5 of 142</div></div></section>
+<!-- Master-Detail 2-Column Desktop Layout (Steps 3, 4, 5, 7) -->
+<div class="p-space-lg grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT COLUMN: Scheme Discovery & Browse List (Steps 3 & 5) -->
+<div class="lg:col-span-5 flex flex-col gap-space-md" id="schemeCardsColumn">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-space-xs">
+<span class="">Schemes Catalog</span>
+<span class="px-space-xs py-0.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm">142</span>
+</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Click card to preview details</span>
+</div>
+<!-- Scheme Card 1 (ACTIVE / SELECTED - PM Kisan Samman Nidhi) -->
+<article class="scheme-card group cursor-pointer bg-surface-container-lowest p-space-md rounded-2xl shadow-sm hover:shadow-md transition-all relative flex flex-col gap-space-sm" id="card-pm-kisan" onclick="selectScheme('pm-kisan')">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-space-lg" style="font-variation-settings: &quot;FILL&quot; 1;">eco</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5 flex-wrap">
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-primary font-bold">Central Government</span>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                  Active DBT
+                </span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary font-bold mt-0.5 group-hover:text-primary-container transition-colors truncate">
+                PM Kisan Samman Nidhi
+              </h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">Ministry of Agriculture &amp; Farmers Welfare</span>
+</div>
+</div>
+<button aria-label="Bookmark PM Kisan Samman Nidhi" class="bookmark-btn p-1.5 rounded-lg text-primary hover:bg-surface-container-low transition-colors" onclick="toggleBookmark(event, 'pm-kisan')" title="Remove or Save Scheme">
+<span class="material-symbols-outlined text-space-lg text-primary" style="font-variation-settings: &quot;FILL&quot; 1;">bookmark</span>
+</button>
+</div>
+<!-- Highlight Benefit Sub-card -->
+<div class="bg-surface-container-lowest p-space-sm rounded-xl flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Direct Income Transfer</span>
+<span class="font-headline-md text-headline-md text-primary font-code-mono">₹6,000 <span class="text-label-md font-body-md text-on-surface-variant font-normal">/ year</span></span>
+</div>
+<div class="text-right flex flex-col items-end">
+<span class="font-label-sm text-label-sm text-secondary font-bold">98% Eligibility Match</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">3 Installments • DBT</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="px-2 py-0.5 rounded-md bg-surface-container text-on-surface font-label-sm text-label-sm">All India</span>
+<span class="px-2 py-0.5 rounded-md bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">Cash Grant</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-bold flex items-center gap-0.5">
+            Details Open <span class="material-symbols-outlined text-space-sm">arrow_forward</span>
+</span>
+</div>
+</article>
+<!-- Scheme Card 2: PM Fasal Bima Yojana -->
+<article class="scheme-card group cursor-pointer bg-surface-container-lowest p-space-md rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col gap-space-sm border border-surface-container-high/60" id="card-pm-fby" onclick="selectScheme('pm-fby')"><div class="flex items-start justify-between gap-space-sm"><div class="flex items-center gap-space-sm flex-1"><div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary"><span class="material-symbols-outlined text-space-lg">shield</span></div><div class="flex flex-col min-w-0"><div class="flex items-center gap-1.5 flex-wrap"><span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-medium">Central Scheme</span><span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface font-medium">Insurance</span></div><h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mt-0.5 group-hover:text-primary transition-colors">PM Fasal Bima Yojana (PMFBY)</h3><span class="font-label-sm text-label-sm text-on-surface-variant truncate">Ministry of Agriculture &amp; Farmers Welfare</span></div></div><button aria-label="Bookmark PM Fasal Bima Yojana" class="bookmark-btn p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" onclick="toggleBookmark(event, 'pm-fby')" title="Bookmark Scheme"><span class="material-symbols-outlined text-space-lg">bookmark</span></button></div><p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">Comprehensive crop insurance cover against non-preventable natural risks from pre-sowing to post-harvest stages.</p><div class="bg-surface-container-low p-space-sm rounded-xl flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Farmer Premium Share</span><span class="font-headline-sm text-headline-sm text-on-surface font-code-mono font-bold">1.5% - 2.0% <span class="text-label-sm font-normal text-on-surface-variant">only</span></span></div><span class="px-2 py-1 rounded-lg bg-surface-container-lowest text-primary font-label-sm text-label-sm font-bold shadow-sm">Govt covers balance</span></div><div class="flex items-center justify-between pt-1"><div class="flex items-center gap-space-xs"><span class="px-2 py-0.5 rounded-md bg-surface-container text-on-surface font-label-sm text-label-sm">All India</span><span class="px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface font-label-sm text-label-sm">Subsidized Premium</span></div><span class="font-label-sm text-label-sm text-on-surface-variant font-code-mono">Closes 31 Jul (Kharif)</span></div></article>
+<!-- Scheme Card 3: Kisan Credit Card -->
+<article class="scheme-card group cursor-pointer bg-surface-container-lowest p-space-md rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col gap-space-sm border border-surface-container-high/60" id="card-kcc" onclick="selectScheme('kcc')"><div class="flex items-start justify-between gap-space-sm"><div class="flex items-center gap-space-sm flex-1"><div class="w-10 h-10 rounded-xl bg-tertiary-fixed flex items-center justify-center text-tertiary"><span class="material-symbols-outlined text-space-lg">credit_card</span></div><div class="flex flex-col min-w-0"><div class="flex items-center gap-1.5 flex-wrap"><span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-medium">Banking &amp; Credit</span><span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-medium">Subsidized</span></div><h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mt-0.5 group-hover:text-primary transition-colors">Kisan Credit Card (KCC)</h3><span class="font-label-sm text-label-sm text-on-surface-variant truncate">Dept. of Agriculture &amp; Farmers Welfare</span></div></div><button aria-label="Bookmark Kisan Credit Card Scheme" class="bookmark-btn p-1.5 rounded-lg text-primary hover:bg-surface-container-low transition-colors" onclick="toggleBookmark(event, 'kcc')" title="Bookmark Scheme"><span class="material-symbols-outlined text-space-lg text-primary" style="font-variation-settings: &quot;FILL&quot; 1;">bookmark</span></button></div><div class="bg-surface-container-low p-space-sm rounded-xl flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Collateral-Free Credit</span><span class="font-headline-md text-headline-md text-primary font-code-mono font-bold">Up to ₹3,00,000</span></div><div class="text-right"><span class="font-label-sm text-label-sm text-on-surface-variant">Concessional Rate</span><p class="font-label-md text-label-md text-tertiary font-bold font-code-mono">4% p.a.</p></div></div><div class="flex items-center justify-between pt-1"><div class="flex items-center gap-space-xs"><span class="px-2 py-0.5 rounded-md bg-surface-container text-on-surface font-label-sm text-label-sm">All India</span><span class="px-2 py-0.5 rounded-md bg-tertiary-fixed-dim text-on-tertiary-fixed font-label-sm text-label-sm">Concessional Loan</span></div><span class="font-label-sm text-label-sm text-secondary font-bold flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">verified</span>Pre-Qualified in Vault</span></div></article>
+<!-- Scheme Card 4: Paramparagat Krishi Vikas Yojana -->
+<article class="scheme-card group cursor-pointer bg-surface-container-lowest p-space-md rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col gap-space-sm border border-surface-container-high/60" id="card-pkvy" onclick="selectScheme('pkvy')"><div class="flex items-start justify-between gap-space-sm"><div class="flex items-center gap-space-sm flex-1"><div class="w-10 h-10 rounded-xl bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed"><span class="material-symbols-outlined text-space-lg">yard</span></div><div class="flex flex-col min-w-0"><div class="flex items-center gap-1.5 flex-wrap"><span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-medium">Organic Farming</span><span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-medium">Cluster Model</span></div><h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mt-0.5 group-hover:text-primary transition-colors">Paramparagat Krishi Vikas (PKVY)</h3><span class="font-label-sm text-label-sm text-on-surface-variant truncate">Ministry of Agriculture &amp; Farmers Welfare</span></div></div><button aria-label="Bookmark Paramparagat Krishi Vikas Yojana" class="bookmark-btn p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors" onclick="toggleBookmark(event, 'pkvy')" title="Bookmark Scheme"><span class="material-symbols-outlined text-space-lg">bookmark</span></button></div><div class="bg-surface-container-low p-space-sm rounded-xl flex items-center justify-between"><div class="flex flex-col"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Grant per Hectare</span><span class="font-headline-sm text-headline-sm text-primary font-code-mono font-bold">₹50,000 / ha</span></div><span class="font-label-sm text-label-sm text-on-surface-variant font-code-mono">Cluster based (20 ha)</span></div><div class="flex items-center justify-between pt-1"><div class="flex items-center gap-space-xs"><span class="px-2 py-0.5 rounded-md bg-surface-container text-on-surface font-label-sm text-label-sm">All India</span><span class="px-2 py-0.5 rounded-md bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">Direct Grant</span></div><span class="font-label-sm text-label-sm text-on-surface-variant">Active Scheme</span></div></article>
+<!-- Scheme Card 5: National Horticulture Mission -->
+<article class="scheme-card group cursor-pointer bg-surface-container-lowest p-space-md rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col gap-space-sm border border-surface-container-high/60 bg-gradient-to-r from-surface-container-lowest to-surface-container-low shadow-md" id="card-nhm" onclick="selectScheme('nhm')"><div class="flex items-start justify-between gap-space-sm"><div class="flex items-start gap-space-sm flex-1 min-w-0"><div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shrink-0"><span class="material-symbols-outlined text-space-lg">agriculture</span></div><div class="flex flex-col min-w-0 flex-1"><div class="flex items-center gap-1.5 flex-wrap"><span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-medium whitespace-nowrap">MIDH Sub-Mission</span><span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-medium whitespace-nowrap">Infrastructure</span></div><h3 class="font-headline-sm text-headline-sm text-on-surface font-bold mt-0.5 group-hover:text-primary transition-colors truncate">National Horticulture Mission (NHM)</h3><span class="font-label-sm text-label-sm text-on-surface-variant truncate">Assistance for cold chains, greenhouses &amp; nursery setup</span></div></div><button aria-label="Bookmark National Horticulture Mission" class="bookmark-btn p-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low transition-colors shrink-0" onclick="toggleBookmark(event, 'nhm')" title="Bookmark Scheme"><span class="material-symbols-outlined text-space-lg">bookmark</span></button></div><div class="bg-surface-container-low p-space-sm rounded-xl flex items-center justify-between gap-space-sm flex-wrap"><div class="flex flex-col min-w-0"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Infrastructure Subsidy</span><span class="font-headline-sm text-headline-sm text-primary font-code-mono font-bold">35% - 50% Capital</span></div><span class="px-2 py-1 rounded-lg bg-surface-container-lowest text-primary font-label-sm text-label-sm font-bold shadow-sm whitespace-nowrap">Central + State</span></div><div class="flex items-center justify-between pt-1 gap-space-xs flex-wrap"><div class="flex items-center gap-space-xs flex-wrap"><span class="px-2 py-0.5 rounded-md bg-surface-container text-on-surface font-label-sm text-label-sm whitespace-nowrap">State Specific</span><span class="px-2 py-0.5 rounded-md bg-secondary-container text-on-secondary-container font-label-sm text-label-sm whitespace-nowrap">Capital Subsidy</span></div><span class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">Applications Open</span></div></article>
+<!-- Pagination Footer -->
+<div class="flex items-center justify-between pt-space-xs">
+<button class="px-space-md py-2 rounded-xl bg-surface-container-low text-on-surface-variant font-label-md text-label-md disabled:opacity-50" disabled="">
+          Previous
+        </button>
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 rounded-lg bg-primary-container text-on-primary font-code-mono text-label-sm">1</button>
+<button class="w-8 h-8 rounded-lg bg-surface-container-low text-on-surface font-code-mono text-label-sm hover:bg-surface-container">2</button>
+<button class="w-8 h-8 rounded-lg bg-surface-container-low text-on-surface font-code-mono text-label-sm hover:bg-surface-container">3</button>
+<span class="px-1 text-on-surface-variant">...</span>
+<button class="w-8 h-8 rounded-lg bg-surface-container-low text-on-surface font-code-mono text-label-sm hover:bg-surface-container">29</button>
+</div>
+<button class="px-space-md py-2 rounded-xl bg-surface-container-low text-primary font-label-md text-label-md hover:bg-surface-container">
+          Next
+        </button>
+</div>
+</div>
+<!-- RIGHT COLUMN: Scheme Detailed Inspector & Action Terminal (Steps 4, 5, 6 & 7) -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg sticky top-20">
+<!-- Primary Detail Container -->
+<section class="bg-surface-container-lowest rounded-3xl p-space-lg shadow-sm flex flex-col gap-space-lg relative overflow-hidden">
+<!-- Header Ribbon: Central Identity, Direct Actions -->
+<div class="flex items-center justify-between pb-space-sm border-b border-surface-container-low">
+<div class="flex items-center gap-space-xs">
+<span class="px-space-sm py-1 rounded-md bg-primary-container text-on-primary font-label-sm text-label-sm uppercase font-bold tracking-wider">
+              Central Government
+            </span>
+<span class="px-space-sm py-1 rounded-md bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-secondary"></span> Verified Official
+            </span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-md py-2 rounded-xl bg-surface-container-low hover:bg-surface-container text-primary font-label-md text-label-md font-bold flex items-center gap-1.5 transition-colors" id="detailBookmarkBtn" onclick="toggleBookmark(event, 'pm-kisan')">
+<span class="material-symbols-outlined text-[18px] text-primary" style="font-variation-settings: &quot;FILL&quot; 1;">bookmark</span>
+<span class="">Saved in Vault</span>
+</button>
+<button aria-label="Share Scheme Link" class="h-10 w-10 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors" onclick="copyShareLink()" title="Share Scheme">
+<span class="material-symbols-outlined text-space-md">share</span>
+</button>
+</div>
+</div>
+<!-- Scheme Hero Graphic Card with Real Field Context -->
+<div class="relative w-full rounded-2xl overflow-hidden bg-surface-container-low flex flex-col justify-end p-space-md h-48 sm:h-56">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="Dignified Indian farmer standing proudly in lush green agricultural field during golden hour sunlight with crop harvest in background, cinematic natural lighting, modern government welfare editorial photography, warm tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBc0lT3dMURYAaY83SnCZBD6EDUC8TeK__JHJBqSw5RrQByhNgUMQNIz4moQnPWA9ZFc8-9dJapkDfcA2tO2V8RDRLOjX7V9eo0GHdiaFkxwLX4_WmbBaQd8eAs9S830vKfOZ0oXRAo6GUGQNi44K-jODDAb3aIb5SahJM1gpW2Do-6QrgXKBFnhU3FK009fiNwm5-D7iupFoUI2fJEnbiP13QZqyLF2oAJDbgSj4Y">
+<div class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/60 to-transparent"></div>
+<div class="relative z-10 flex flex-col gap-1 text-on-primary">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-primary-container font-code-mono">Direct Benefit Transfer • DBT-0019</span>
+<h2 class="font-headline-lg text-headline-lg text-on-primary font-black tracking-tight drop-shadow-sm">
+              PM Kisan Samman Nidhi
+            </h2>
+<p class="font-label-md text-label-md text-on-primary-container max-w-xl">
+              Ministry of Agriculture &amp; Farmers Welfare, Government of India
+            </p>
+</div>
+</div>
+<!-- Saved Notification Pill (Step 5 of Flow Confirmation) -->
+<div class="flex items-center justify-between p-space-md rounded-xl bg-secondary-container text-on-secondary-container">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-space-lg" style="font-variation-settings: &quot;FILL&quot; 1;">bookmark_added</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold">Saved to "My Schemes"</span>
+<span class="font-label-sm text-label-sm opacity-90">You can view and track eligibility anytime in your personal vault.</span>
+</div>
+</div>
+<button class="px-space-md py-1.5 rounded-lg bg-primary-container text-on-primary font-label-sm text-label-sm font-bold" onclick="switchMainTab('saved')">
+            View All Saved (3)
+          </button>
+</div>
+<!-- Key Benefit Card (Highlight Stat) -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+<div class="p-space-md rounded-2xl bg-surface-container-low flex flex-col justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Benefit Scale</span>
+<div class="mt-2">
+<span class="font-headline-md text-headline-md text-primary font-code-mono">₹6,000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">per year to family</span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-bold mt-2">100% Central Funding</span>
+</div>
+<div class="p-space-md rounded-2xl bg-surface-container-low flex flex-col justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Installment Structure</span>
+<div class="mt-2">
+<span class="font-headline-md text-headline-md text-on-surface font-code-mono">₹2,000 × 3</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Every 4 months</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-2 font-code-mono">Apr-Jul, Aug-Nov, Dec-Mar</span>
+</div>
+<div class="p-space-md rounded-2xl bg-surface-container-low flex flex-col justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Citizen Profile Match</span>
+<div class="mt-2">
+<span class="font-headline-md text-headline-md text-secondary font-code-mono">98% Match</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant block">Based on Aadhaar Land Registry</span>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-bold mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">check_circle</span> Auto-Verified
+            </span>
+</div>
+</div>
+<!-- Segmented Tab Navigation for Detailed Sections (Step 4 of Flow) -->
+<div class="flex items-center gap-space-xs p-1 bg-surface-container-low rounded-xl overflow-x-auto scrollbar-none">
+<button class="flex-1 py-2 px-space-md rounded-lg font-label-md text-label-md bg-surface-container-lowest text-primary font-bold shadow-sm text-center whitespace-nowrap" id="detailTabOverview" onclick="switchDetailTab('overview')">
+            Overview
+          </button>
+<button class="flex-1 py-2 px-space-md rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface font-medium text-center whitespace-nowrap" id="detailTabEligibility" onclick="switchDetailTab('eligibility')">
+            Eligibility Criteria
+          </button>
+<button class="flex-1 py-2 px-space-md rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface font-medium text-center whitespace-nowrap" id="detailTabDocuments" onclick="switchDetailTab('documents')">
+            Required Documents
+          </button>
+<button class="flex-1 py-2 px-space-md rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface font-medium text-center whitespace-nowrap" id="detailTabFAQ" onclick="switchDetailTab('faq')">
+            FAQs &amp; Helplines
+          </button>
+</div>
+<!-- Dynamic Tab Panel 1: Overview Content -->
+<div class="flex flex-col gap-space-md" id="panelOverview">
+<div class="flex flex-col gap-space-xs">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">About the Scheme</h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              Pradhan Mantri Kisan Samman Nidhi (PM-KISAN) is a flagship Central Sector scheme launched to augment the income of all landholding farmers' families in the country to support their financial needs for procuring various agricultural inputs and domestic necessities.
+            </p>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              Under this initiative, the complete financial liability is borne by the Government of India. Funds are directly transferred into the bank accounts of beneficiaries through Aadhaar-enabled public financial management system (DBT) to prevent intermediaries.
+            </p>
+</div>
+<!-- Metadata Spec Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md p-space-md rounded-2xl bg-surface-container-low font-body-md text-body-md"><div class="flex items-start gap-space-sm p-space-xs"><div class="w-10 h-10 rounded-xl bg-surface-container-highest/60 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-primary text-space-lg">account_balance</span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Implementing Ministry</span><span class="font-body-bold text-body-bold text-on-surface mt-0.5 leading-snug break-words">Ministry of Agriculture &amp; Farmers Welfare</span></div></div><div class="flex items-start gap-space-sm p-space-xs"><div class="w-10 h-10 rounded-xl bg-surface-container-highest/60 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-primary text-space-lg">event</span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Launch Date</span><span class="font-body-bold text-body-bold text-on-surface font-code-mono mt-0.5 leading-snug break-words">1 December 2018 (Nationwide)</span></div></div><div class="flex items-start gap-space-sm p-space-xs"><div class="w-10 h-10 rounded-xl bg-surface-container-highest/60 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-primary text-space-lg">public</span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Official Govt Portal</span><a class="font-body-bold text-body-bold text-primary hover:underline inline-flex items-center gap-1 font-code-mono mt-0.5 break-all" href="https://pmkisan.gov.in" rel="noopener noreferrer" target="_blank"><span class="truncate">https://pmkisan.gov.in</span><span class="material-symbols-outlined text-[14px] shrink-0">open_in_new</span></a></div></div><div class="flex items-start gap-space-sm p-space-xs"><div class="w-10 h-10 rounded-xl bg-surface-container-highest/60 flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-primary text-space-lg">group</span></div><div class="flex flex-col min-w-0 flex-1"><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider block">Target Beneficiary</span><span class="font-body-bold text-body-bold text-on-surface mt-0.5 leading-snug break-words">Small &amp; Marginal landholder farmer families</span></div></div></div>
+</div>
+<!-- Dynamic Tab Panel 2: Eligibility Criteria (Initially Hidden or displayed on tab click) -->
+<div class="hidden flex-col gap-space-md" id="panelEligibility">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Eligibility Matrix &amp; Restrictions</h3>
+<div class="flex flex-col gap-space-xs">
+<!-- Passed Criteria -->
+<div class="flex items-start gap-space-sm p-space-sm rounded-xl bg-surface-container-low">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: &quot;FILL&quot; 1;">check_circle</span>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-bold text-on-surface">Cultivable Land Ownership</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Farmer families holding cultivable land in their names as per state land record records.</span>
+</div>
+</div>
+<!-- Passed Criteria 2 -->
+<div class="flex items-start gap-space-sm p-space-sm rounded-xl bg-surface-container-low">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: &quot;FILL&quot; 1;">check_circle</span>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-bold text-on-surface">Aadhaar Linked Bank Account (eKYC)</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Active bank account seeded with Aadhaar and verified through NPCI biometric eKYC gateway.</span>
+</div>
+</div>
+<!-- Exclusion Criteria -->
+<div class="flex items-start gap-space-sm p-space-sm rounded-xl bg-surface-container-low">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: &quot;FILL&quot; 1;">cancel</span>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-bold text-on-surface">Exclusion: Institutional Landholders &amp; Income Tax Payers</span>
+<span class="font-body-md text-body-md text-on-surface-variant">Institutional landholders or individuals paying income tax in the last assessment year are ineligible.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Dynamic Tab Panel 3: Required Documents -->
+<div class="hidden flex-col gap-space-md" id="panelDocuments">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Statutory Document Readiness</h3>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between p-space-sm rounded-xl bg-surface-container-low">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary">badge</span>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-bold text-on-surface">Aadhaar Card with Mobile Link</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">DigiLocker Verified (IN-8849-KA)</span>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold">Ready in Vault</span>
+</div>
+<div class="flex items-center justify-between p-space-sm rounded-xl bg-surface-container-low">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary">landscape</span>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-bold text-on-surface">Land Ownership Records (RoR / Khata / Patta)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">State Revenue Department Registry record</span>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold">Ready in Vault</span>
+</div>
+<div class="flex items-center justify-between p-space-sm rounded-xl bg-surface-container-low">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+<div class="flex flex-col">
+<span class="font-body-bold text-body-bold text-on-surface">DBT-Enabled Bank Passbook / Mandate</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">NPCI Mapper active on State Bank of India</span>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold">Ready in Vault</span>
+</div>
+</div>
+</div>
+<!-- Dynamic Tab Panel 4: FAQs -->
+<div class="hidden flex-col gap-space-xs" id="panelFAQ">
+<h3 class="font-headline-sm text-headline-sm text-on-surface pb-1">Frequently Asked Questions</h3>
+<details class="group p-space-sm rounded-xl bg-surface-container-low cursor-pointer">
+<summary class="font-body-bold text-body-bold text-on-surface flex justify-between items-center">
+<span class="">What is the PM Kisan mandatory eKYC deadline?</span>
+<span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">
+              eKYC is mandatory for all PM-KISAN registered farmers. OTP based eKYC is available on PMKISAN Portal or through nearest CSC centers for biometric authentication.
+            </p>
+</details>
+<details class="group p-space-sm rounded-xl bg-surface-container-low cursor-pointer">
+<summary class="font-body-bold text-body-bold text-on-surface flex justify-between items-center">
+<span class="">Can both husband and wife receive PM-Kisan payments?</span>
+<span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">
+              No. As per guidelines, only one beneficiary per 'farmer family' (comprising husband, wife, and minor children) is eligible to receive benefits.
+            </p>
+</details>
+</div>
+<!-- Action Terminal / Sticky Decision Footer (Step 7: Continue Your Journey) -->
+
+</section>
+<!-- Saved Quick Drawer Card (Desktop translation of Step 6: View Saved Schemes) -->
+
+</div>
+</div>
+</div>
+<script>
+  // Interactive Scheme Selection & Tab Switch Logic
+  let savedCount = 3;
+  let activeTab = 'all';
+
+  function selectScheme(schemeId) {
+    // Reset all card selections
+    document.querySelectorAll('.scheme-card').forEach(card => {
+      card.classList.remove('bg-gradient-to-r', 'from-surface-container-lowest', 'to-surface-container-low', 'shadow-md');
+    });
+
+    const activeEl = document.getElementById('card-' + schemeId);
+    if (activeEl) {
+      activeEl.classList.add('bg-gradient-to-r', 'from-surface-container-lowest', 'to-surface-container-low', 'shadow-md');
+    }
+  }
+
+  function toggleBookmark(event, schemeId) {
+    if (event) event.stopPropagation();
+
+    const toast = document.getElementById('saveToast');
+    const headerSaved = document.getElementById('savedCountHeader');
+    const pillBadge = document.getElementById('savedPillBadge');
+
+    const btn = event.currentTarget;
+    const icon = btn.querySelector('.material-symbols-outlined');
+
+    const isSaved = icon.style.fontVariationSettings && icon.style.fontVariationSettings.includes("'FILL' 1");
+
+    if (isSaved) {
+      icon.style.fontVariationSettings = "'FILL' 0";
+      icon.classList.remove('text-primary');
+      icon.classList.add('text-on-surface-variant');
+      savedCount = Math.max(0, savedCount - 1);
+    } else {
+      icon.style.fontVariationSettings = "'FILL' 1";
+      icon.classList.add('text-primary');
+      icon.classList.remove('text-on-surface-variant');
+      savedCount += 1;
+      showToast();
+    }
+
+    if (headerSaved) headerSaved.textContent = savedCount;
+    if (pillBadge) pillBadge.textContent = savedCount;
+  }
+
+  function showToast() {
+    const toast = document.getElementById('saveToast');
+    toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+    toast.classList.add('translate-y-0', 'opacity-100');
+    setTimeout(() => {
+      dismissToast();
+    }, 3800);
+  }
+
+  function dismissToast() {
+    const toast = document.getElementById('saveToast');
+    toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+    toast.classList.remove('translate-y-0', 'opacity-100');
+  }
+
+  function switchMainTab(tab) {
+    activeTab = tab;
+    const tabAll = document.getElementById('tabAllSchemes');
+    const tabSaved = document.getElementById('tabSavedSchemes');
+    const cardsColumn = document.getElementById('schemeCardsColumn');
+
+    if (tab === 'saved') {
+      tabSaved.className = "px-space-md py-2 rounded-lg font-label-md text-label-md bg-surface-container-lowest text-primary font-bold shadow-sm transition-all flex items-center gap-1.5";
+      tabAll.className = "px-space-md py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1.5";
+      
+      // Filter list simulation: Show only saved items
+      document.getElementById('card-pm-fby').style.display = 'none';
+      document.getElementById('card-nhm').style.display = 'none';
+      document.getElementById('resultsCountHeader').textContent = savedCount;
+    } else {
+      tabAll.className = "px-space-md py-2 rounded-lg font-label-md text-label-md bg-surface-container-lowest text-primary font-bold shadow-sm transition-all flex items-center gap-1.5";
+      tabSaved.className = "px-space-md py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-1.5";
+      
+      document.getElementById('card-pm-fby').style.display = 'flex';
+      document.getElementById('card-nhm').style.display = 'flex';
+      document.getElementById('resultsCountHeader').textContent = "142";
+    }
+  }
+
+  function switchDetailTab(tabKey) {
+    const tabs = ['overview', 'eligibility', 'documents', 'faq'];
+    tabs.forEach(t => {
+      const panel = document.getElementById('panel' + t.charAt(0).toUpperCase() + t.slice(1));
+      const btn = document.getElementById('detailTab' + t.charAt(0).toUpperCase() + t.slice(1));
+      
+      if (t === tabKey) {
+        panel.classList.remove('hidden');
+        panel.classList.add('flex');
+        btn.className = "flex-1 py-2 px-space-md rounded-lg font-label-md text-label-md bg-surface-container-lowest text-primary font-bold shadow-sm text-center whitespace-nowrap";
+      } else {
+        panel.classList.add('hidden');
+        panel.classList.remove('flex');
+        btn.className = "flex-1 py-2 px-space-md rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface font-medium text-center whitespace-nowrap";
+      }
+    });
+  }
+
+  function clearSearch() {
+    const input = document.getElementById('schemeSearchInput');
+    input.value = '';
+    input.focus();
+  }
+
+  function copyShareLink() {
+    navigator.clipboard.writeText(window.location.href);
+    const toast = document.getElementById('saveToast');
+    const toastTitle = toast.querySelector('.text-on-primary');
+    const originalText = toastTitle.textContent;
+    toastTitle.textContent = "Scheme Link Copied to Clipboard";
+    showToast();
+    setTimeout(() => {
+      toastTitle.textContent = originalText;
+    }, 4000);
+  }
+</script></main></div>
+
+
+</body></html>

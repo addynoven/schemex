@@ -1,0 +1,619 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta content="width=device-width, initial-scale=1.0" name="viewport"><meta content="web_dashboard" name="shell-type"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"><link href="https://fonts.googleapis.com" rel="preconnect"><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-secondary-fixed-variant":"#005226","on-tertiary-fixed-variant":"#7a3000","outline":"#6f7973","surface-tint":"#1c6b4d","on-secondary-container":"#24703e","inverse-on-surface":"#eef0ff","surface-container-highest":"#dae2fd","error-container":"#ffdad6","tertiary":"#6d2a00","inverse-primary":"#8bd6b1","on-primary-fixed":"#002114","on-tertiary-fixed":"#341000","on-surface-variant":"#3f4943","inverse-surface":"#283044","primary-fixed-dim":"#8bd6b1","outline-variant":"#bfc9c1","surface-bright":"#faf8ff","surface-container":"#eaedff","on-tertiary-container":"#ffbd9e","on-error-container":"#93000a","primary-fixed":"#a6f2cc","surface-dim":"#d2d9f4","background":"#faf8ff","on-primary-container":"#90dbb6","secondary-fixed-dim":"#8bd79b","surface-variant":"#dae2fd","on-tertiary":"#ffffff","on-error":"#ffffff","secondary-container":"#a4f1b2","primary-container":"#0e6245","secondary-fixed":"#a6f4b5","tertiary-container":"#8f3e0c","on-secondary-fixed":"#00210b","tertiary-fixed":"#ffdbcb","on-surface":"#131b2e","secondary":"#1f6c3a","on-primary-fixed-variant":"#005138","surface-container-low":"#f2f3ff","surface-container-high":"#e2e7ff","tertiary-fixed-dim":"#ffb693","error":"#ba1a1a","on-primary":"#ffffff","on-background":"#131b2e","primary":"#004831","surface-container-lowest":"#ffffff","on-secondary":"#ffffff","surface":"#faf8ff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-lg":"1.5rem","space-md":"1rem","space-sm":"0.5rem","gutter":"1.5rem","margin":"2rem","space-xl":"2rem","gutter-mobile":"1rem","margin-mobile":"1rem","space-xs":"0.25rem"},"fontFamily":{"label-md":["Inter"],"headline-lg-mobile":["Inter"],"headline-md":["Inter"],"body-bold":["Inter"],"body-lg":["Inter"],"headline-sm":["Inter"],"label-sm":["Inter"],"code-mono":["JetBrains Mono"],"headline-xl":["Inter"],"headline-lg":["Inter"],"body-md":["Inter"],"headline-xl-mobile":["Inter"]},"fontSize":{"label-md":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"600"}],"headline-lg-mobile":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"800"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"800"}],"body-bold":["15px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"700"}],"body-lg":["18px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"500"}],"headline-sm":["20px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"700"}],"label-sm":["11px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"700"}],"code-mono":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"500"}],"headline-xl":["40px",{"lineHeight":"48px","letterSpacing":"-0.03em","fontWeight":"900"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.025em","fontWeight":"900"}],"body-md":["15px",{"lineHeight":"24px","letterSpacing":"0em","fontWeight":"400"}],"headline-xl-mobile":["30px",{"lineHeight":"38px","letterSpacing":"-0.025em","fontWeight":"900"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-72 bg-surface-container-lowest z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="h-16 px-space-md flex items-center gap-space-sm bg-surface-container-lowest"><img alt="Scheme AI Official Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V_pyjhe_cZJHpk1JFhFfxxeNY4YsV4c8CR-hOc64yQSIomRh8V6X-r-1-FhBPuDa2OLDT-33OhUvyeVs772PrH-YdMnB5q1UTeGrHJwB1_V2RICqdDWnNekt1o-GYhQ-JFoyK18BoBI82NJKdRPT8IWad8n83A6QvFxhFAaHYifH-dHlJ3vruCci4b5RkAf_KjGnyKpYVlAp7fBJy_fvGtN7EROd2OAxG7-U2AF2Yd"><div class="flex flex-col min-w-0"><span class="font-headline-sm text-headline-sm text-primary tracking-tight truncate">Scheme AI</span><span class="font-label-sm text-label-sm text-on-surface-variant truncate">Citizen Welfare Navigator</span></div></div><div class="h-1 w-full bg-surface-container-high flex"><div class="w-1/3 bg-tertiary-container"></div><div class="w-1/3 bg-surface-container-lowest"></div><div class="w-1/3 bg-primary-container"></div></div><div class="p-space-md"><div class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant px-space-sm pb-space-xs">Civic Services</div><nav class="flex flex-col gap-space-xs" data-active-classes="bg-primary-container text-on-primary font-bold rounded-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="ai-advisor" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-space-lg">smart_toy</span><span class="font-label-md text-label-md">Chat (AI Advisor)</span></div><span class="px-space-xs py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">Live</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="schemes-directory" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-space-lg">account_balance</span><span class="font-label-md text-label-md">Schemes</span></div><span class="px-space-xs py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-code-mono">480+</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="eligibility-wizard" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-space-lg">fact_check</span><span class="font-label-md text-label-md">Check (Wizard)</span></div><span class="px-space-xs py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">Fast</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="document-vault" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-space-lg">folder_shared</span><span class="font-label-md text-label-md">Vault (Readiness)</span></div><span class="px-space-xs py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm">4 Docs</span></a></nav><div class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant px-space-sm pt-space-lg pb-space-xs">Account &amp; Assistance</div><nav class="flex flex-col gap-space-xs" data-active-classes="bg-primary-container text-on-primary font-bold rounded-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="profile-settings" href="#"><span class="material-symbols-outlined text-space-lg">manage_accounts</span><span class="font-label-md text-label-md">Profile</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all" data-path="support-helpdesk" href="#"><span class="material-symbols-outlined text-space-lg">help_center</span><span class="font-label-md text-label-md">Support</span></a></nav></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md flex-1 max-w-xl"><div class="relative w-full flex items-center"><span class="material-symbols-outlined absolute left-space-md text-on-surface-variant pointer-events-none">search</span><input class="w-full h-10 pl-10 pr-space-md bg-surface-container-low rounded-xl font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary-container" placeholder="Search schemes by ministry, state, or benefit keywords..." type="text"></div></div><div class="flex items-center gap-space-md"><div class="hidden xl:flex items-center gap-space-xs px-space-md py-1.5 rounded-full bg-surface-container-low"><span class="h-2 w-2 rounded-full bg-secondary animate-pulse"></span><span class="font-label-sm text-label-sm font-code-mono text-on-surface-variant">S3 Encrypted • 256-bit Secure</span></div><button aria-label="Notifications" class="h-10 w-10 flex items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors relative" type="button"><span class="material-symbols-outlined">notifications</span><span class="absolute top-2 right-2 h-2 w-2 rounded-full bg-error"></span></button><div class="h-8 w-px bg-surface-container-high"></div><div class="flex items-center gap-space-sm pl-space-xs"><div class="flex flex-col text-right"><span class="font-label-md text-label-md text-on-surface font-bold">Citizen User</span><span class="font-code-mono text-label-sm text-on-surface-variant">IN-8849-KA</span></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD44LgcNVgdhiwpBW0CrE4lcKxbOVSt2K3-W2z5QJXRvLnyCKqwvWuYEirfB3K6C_3__w6kFdp_JCoCEgc3ivFGoE8edN3eap4jG4RAQ99I13emaefS2DFcOUJujgT397TBR0agVzHssZA0Gj8nicnkdeID94wogXcbIb91NV7Pwiip15duHRlwzFgeUou-BIoEHbJd_xbGiXYxhlQcSxWHq5otmEsWbd9wJNQqnEs"></div></div></header><main class="relative pt-16 bg-background min-h-screen"><div class="flex flex-col w-full"><div class="max-w-6xl mx-auto w-full px-space-lg py-space-xl flex flex-col gap-space-xl"><!-- Top Banner: Grounded Civic Help Header with Clear Contrast -->
+<div class="rounded-3xl bg-primary text-on-primary p-space-xl shadow-md border border-primary-container relative overflow-hidden">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-lg relative z-10">
+    <div class="max-w-2xl">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-container text-on-primary font-label-sm text-xs mb-space-sm">
+        <span class="w-2 h-2 rounded-full bg-secondary-fixed animate-pulse"></span>
+        <span class="">Official Government Citizen Assistance Desk</span>
+        <span class="opacity-60">•</span>
+        <span class="font-code-mono text-secondary-fixed">24x7 Helpline Active</span>
+      </div>
+      <h1 class="text-2xl md:text-3xl font-extrabold text-on-primary tracking-tight mb-2">
+        How can we help resolve your issue today?
+      </h1>
+      <p class="text-surface-variant font-body-md text-sm md:text-base leading-relaxed">
+        Direct help for stopped DBT payments, stuck applications, e-KYC mismatches, or formal grievances. No waiting in lines.
+      </p>
+    </div>
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-space-sm shrink-0">
+      <a href="tel:1800115526" class="px-space-lg py-3 rounded-xl bg-secondary text-on-secondary font-bold text-sm flex items-center justify-center gap-2 shadow-sm hover:bg-secondary-container hover:text-on-secondary-container transition-all">
+        <span class="material-symbols-outlined text-xl">phone_in_talk</span>
+        <span class="">Call Toll-Free 1800-115-526</span>
+      </a>
+      <button onclick="document.getElementById('ticket-modal').classList.remove('hidden')" class="px-space-lg py-3 rounded-xl bg-surface-container-lowest text-primary font-bold text-sm flex items-center justify-center gap-2 shadow-sm hover:bg-surface-container-high transition-all">
+        <span class="material-symbols-outlined text-xl">report_problem</span>
+        <span class="">File Urgent Grievance</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Panic & Urgent Triage Row: Clear high-contrast actionable cards for panic scenarios -->
+<div>
+  <div class="flex items-center justify-between mb-space-sm">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-error font-bold text-xl">emergency_home</span>
+      <h2 class="text-base font-bold text-on-surface uppercase tracking-wide">Immediate Assistance &amp; Quick Triage</h2>
+    </div>
+    <span class="text-xs text-on-surface-variant">Select what best describes your situation</span>
+  </div>
+  
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+    <!-- Triage 1: DBT / Payment stopped -->
+    <button onclick="openFaqItem(2)" class="p-space-md rounded-2xl bg-surface-container-lowest border-2 border-outline-variant/40 hover:border-primary text-left flex flex-col justify-between shadow-sm hover:shadow-md transition-all group cursor-pointer">
+      <div class="flex items-start justify-between mb-space-sm">
+        <div class="w-10 h-10 rounded-xl bg-tertiary-fixed text-tertiary flex items-center justify-center">
+          <span class="material-symbols-outlined text-2xl">currency_rupee</span>
+        </div>
+        <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-error-container text-on-error-container font-code-mono">Urgent</span>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-on-surface group-hover:text-primary transition-colors mb-1">DBT / Money Not Received</h3>
+        <p class="text-xs text-on-surface-variant leading-relaxed">Payment delayed, bank NPCI unlinked, or installment missing.</p>
+      </div>
+      <div class="mt-space-md pt-space-xs border-t border-outline-variant/20 flex items-center justify-between text-xs font-bold text-primary">
+        <span class="">Fix bank DBT link</span>
+        <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+      </div>
+    </button>
+
+    <!-- Triage 2: Stuck / Rejected Application -->
+    <button onclick="openFaqItem(0)" class="p-space-md rounded-2xl bg-surface-container-lowest border-2 border-outline-variant/40 hover:border-primary text-left flex flex-col justify-between shadow-sm hover:shadow-md transition-all group cursor-pointer">
+      <div class="flex items-start justify-between mb-space-sm">
+        <div class="w-10 h-10 rounded-xl bg-surface-container-high text-primary flex items-center justify-center">
+          <span class="material-symbols-outlined text-2xl">assignment_late</span>
+        </div>
+        <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-surface-container-high text-on-surface font-code-mono">Appeals</span>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-on-surface group-hover:text-primary transition-colors mb-1">Application Stuck or Rejected</h3>
+        <p class="text-xs text-on-surface-variant leading-relaxed">Pending verification for &gt;15 days or rejected with objection.</p>
+      </div>
+      <div class="mt-space-md pt-space-xs border-t border-outline-variant/20 flex items-center justify-between text-xs font-bold text-primary">
+        <span class="">Check objection reason</span>
+        <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+      </div>
+    </button>
+
+    <!-- Triage 3: Document / e-KYC Mismatch -->
+    <button onclick="openFaqItem(1)" class="p-space-md rounded-2xl bg-surface-container-lowest border-2 border-outline-variant/40 hover:border-primary text-left flex flex-col justify-between shadow-sm hover:shadow-md transition-all group cursor-pointer">
+      <div class="flex items-start justify-between mb-space-sm">
+        <div class="w-10 h-10 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center">
+          <span class="material-symbols-outlined text-2xl">badge</span>
+        </div>
+        <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-secondary-container text-on-secondary-container font-code-mono">DigiLocker</span>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-on-surface group-hover:text-primary transition-colors mb-1">Document / e-KYC Issue</h3>
+        <p class="text-xs text-on-surface-variant leading-relaxed">Name mismatch on Aadhaar, expired income certificate, or RTC error.</p>
+      </div>
+      <div class="mt-space-md pt-space-xs border-t border-outline-variant/20 flex items-center justify-between text-xs font-bold text-primary">
+        <span class="">Correct my documents</span>
+        <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+      </div>
+    </button>
+
+    <!-- Triage 4: Speak with an Officer Directly -->
+    <div class="p-space-md rounded-2xl bg-surface-container-high border-2 border-outline-variant/30 text-left flex flex-col justify-between shadow-sm group">
+      <div class="flex items-start justify-between mb-space-sm">
+        <div class="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center">
+          <span class="material-symbols-outlined text-2xl">support_agent</span>
+        </div>
+        <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-secondary text-on-secondary font-code-mono flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-white"></span> Live Now
+        </span>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-on-surface mb-1">Talk to a Live Officer</h3>
+        <p class="text-xs text-on-surface-variant leading-relaxed">Connect directly to an administrative desk in your local dialect.</p>
+      </div>
+      <div class="mt-space-md pt-space-xs border-t border-outline-variant/20 flex items-center justify-between text-xs font-bold text-primary">
+        <a href="tel:1800115526" class="inline-flex items-center gap-1 hover:underline">
+          <span class="material-symbols-outlined text-sm">call</span> 1800-115-526
+        </a>
+        <span class="font-code-mono text-on-surface-variant text-[11px]">&lt; 1 min wait</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Support Grid: Left Column (Channels & FAQ Solutions) / Right Column (Status Tracker & Local Desk) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+  
+  <!-- LEFT COLUMN (8 cols): Direct Resolution Channels + Practical FAQs -->
+  <div class="lg:col-span-8 flex flex-col gap-space-lg">
+    
+    <!-- 4 Structured Channels -->
+    <div class="bg-surface-container-lowest rounded-3xl p-space-lg border border-outline-variant/30 shadow-sm">
+      <h2 class="text-base font-bold text-on-surface mb-space-md flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">contact_support</span>
+        <span class="">Official Resolution Channels</span>
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+        <!-- Channel 1: Phone Helpline -->
+        <div class="p-space-md rounded-2xl bg-surface-container-low border border-outline-variant/30 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">phone</span>
+              </div>
+              <span class="font-bold text-sm text-on-surface">National Civic Helpline</span>
+            </div>
+            <span class="text-[11px] font-bold text-secondary flex items-center gap-1 font-code-mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Available
+            </span>
+          </div>
+          <div class="text-xl font-bold font-code-mono text-primary mb-1">1800-115-526</div>
+          <p class="text-xs text-on-surface-variant mb-space-sm">Toll-free • Mon – Sat, 9:00 AM – 6:00 PM IST (Available in 14 languages)</p>
+          <a href="tel:1800115526" class="w-full py-2 rounded-xl bg-primary text-on-primary font-bold text-xs flex items-center justify-center gap-1 hover:bg-primary-container transition-all">
+            <span class="material-symbols-outlined text-sm">call</span> Call Toll-Free
+          </a>
+        </div>
+
+        <!-- Channel 2: WhatsApp Desk -->
+        <div class="p-space-md rounded-2xl bg-surface-container-low border border-outline-variant/30 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-secondary text-on-secondary flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">chat</span>
+              </div>
+              <span class="font-bold text-sm text-on-surface">WhatsApp Citizen Bot</span>
+            </div>
+            <span class="text-[11px] font-bold text-on-surface-variant font-code-mono">Instant</span>
+          </div>
+          <div class="text-xl font-bold font-code-mono text-secondary mb-1">+91 98765 43210</div>
+          <p class="text-xs text-on-surface-variant mb-space-sm">Send certificate scans, track payments, and get automated receipt status.</p>
+          <a href="https://wa.me/" target="_blank" class="w-full py-2 rounded-xl bg-secondary text-on-secondary font-bold text-xs flex items-center justify-center gap-1 hover:bg-secondary-container hover:text-on-secondary-container transition-all">
+            <span class="material-symbols-outlined text-sm">send</span> Chat on WhatsApp
+          </a>
+        </div>
+
+        <!-- Channel 3: Statutory Grievance Ticket -->
+        <div class="p-space-md rounded-2xl bg-surface-container-low border border-outline-variant/30 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-surface-container-high text-primary flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">assignment</span>
+              </div>
+              <span class="font-bold text-sm text-on-surface">Statutory Grievance</span>
+            </div>
+            <span class="text-[11px] font-bold text-tertiary bg-tertiary-fixed px-1.5 py-0.5 rounded font-code-mono">48-hr SLA</span>
+          </div>
+          <div class="text-sm font-bold text-on-surface mb-1">File Official Petition</div>
+          <p class="text-xs text-on-surface-variant mb-space-sm">Legally mandated portal review by the District Nodal Officer within 48 hours.</p>
+          <button onclick="document.getElementById('ticket-modal').classList.remove('hidden')" class="w-full py-2 rounded-xl bg-surface-container-lowest text-primary border border-outline-variant/30 font-bold text-xs flex items-center justify-center gap-1 hover:bg-surface-container-high transition-all">
+            <span class="material-symbols-outlined text-sm">edit_document</span> Submit Petition Ticket
+          </button>
+        </div>
+
+        <!-- Channel 4: In-Person Kiosk -->
+        <div class="p-space-md rounded-2xl bg-surface-container-low border border-outline-variant/30 flex flex-col justify-between">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-surface-container-high text-primary flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">storefront</span>
+              </div>
+              <span class="font-bold text-sm text-on-surface">Offline Seva Kendra</span>
+            </div>
+            <span class="text-[11px] font-bold text-secondary font-code-mono">1.4 km away</span>
+          </div>
+          <div class="text-sm font-bold text-on-surface mb-1">Grama One / CSC Center</div>
+          <p class="text-xs text-on-surface-variant mb-space-sm">Biometric Aadhaar authentication, paper scanning, and physical counter assistance.</p>
+          <a href="#local-desk" class="w-full py-2 rounded-xl bg-surface-container-lowest text-primary border border-outline-variant/30 font-bold text-xs flex items-center justify-center gap-1 hover:bg-surface-container-high transition-all">
+            <span class="material-symbols-outlined text-sm">near_me</span> View Center Details
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search & Frequent Solutions (Clear Accordion) -->
+    <div class="bg-surface-container-lowest rounded-3xl p-space-lg border border-outline-variant/30 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm mb-space-md border-b border-outline-variant/20 pb-space-sm">
+        <div>
+          <h2 class="text-base font-bold text-on-surface">Frequently Encountered Problems &amp; Solutions</h2>
+          <p class="text-xs text-on-surface-variant">Instant answers verified by the Department of Civic Welfare</p>
+        </div>
+        <div class="flex items-center gap-1">
+          <button class="faq-filter-btn px-3 py-1 rounded-lg bg-primary text-on-primary text-xs font-bold transition-all" data-category="all">All</button>
+          <button class="faq-filter-btn px-3 py-1 rounded-lg bg-surface-container-low text-on-surface-variant hover:text-on-surface text-xs font-bold transition-all" data-category="dbt">DBT / Bank</button>
+          <button class="faq-filter-btn px-3 py-1 rounded-lg bg-surface-container-low text-on-surface-variant hover:text-on-surface text-xs font-bold transition-all" data-category="eligibility">Appeals</button>
+          <button class="faq-filter-btn px-3 py-1 rounded-lg bg-surface-container-low text-on-surface-variant hover:text-on-surface text-xs font-bold transition-all" data-category="documents">Documents</button>
+        </div>
+      </div>
+
+      <!-- Accordion Items with high contrast -->
+      <div class="flex flex-col gap-space-sm" id="faq-container">
+        
+        <!-- FAQ 1: DBT Error (Open by default) -->
+        <div class="faq-item rounded-2xl bg-surface-container-low border border-outline-variant/30 overflow-hidden" data-cat="dbt">
+          <button aria-expanded="true" class="faq-toggle w-full px-space-md py-space-md flex items-center justify-between text-left gap-space-md hover:bg-surface-container-high/40 transition-colors">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2 h-2 rounded-full bg-error shrink-0"></span>
+              <span class="font-bold text-on-surface text-sm sm:text-base">My DBT installment shows "Failed / PFMS Rejected". What should I do?</span>
+            </div>
+            <span class="faq-icon material-symbols-outlined text-primary text-xl rotate-180 transition-transform shrink-0">expand_more</span>
+          </button>
+          <div class="faq-content px-space-md pb-space-md text-on-surface-variant text-sm leading-relaxed border-t border-outline-variant/20 pt-space-sm">
+            <p class="mb-space-sm text-on-surface">
+              Over 94% of payment failures occur because the bank account is either inactive or not mapped with the <strong>NPCI Aadhaar Payment Bridge</strong>. Follow these 2 steps:
+            </p>
+            <ol class="list-disc pl-5 space-y-1.5 mb-space-md text-on-surface text-xs sm:text-sm">
+              <li class=""><strong>Verify NPCI Status:</strong> Check your bank account status directly on the NPCI / UIDAI dashboard or visit your branch.</li>
+              <li class=""><strong>Instant Post Office Account (Alternative):</strong> If your commercial bank takes time, open an India Post Payments Bank (IPPB) DBT account at any local post office within 10 minutes. Payments will automatically route there.</li>
+            </ol>
+            <div class="p-space-sm rounded-xl bg-surface-container-lowest border border-outline-variant/30 flex items-center justify-between">
+              <span class="text-xs font-bold text-on-surface">Need the official seeding form?</span>
+              <a href="#" class="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+                <span class="material-symbols-outlined text-sm">download</span> Download NPCI Mandate Form (PDF)
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ 2: Application Stuck -->
+        <div class="faq-item rounded-2xl bg-surface-container-low border border-outline-variant/30 overflow-hidden" data-cat="eligibility">
+          <button aria-expanded="false" class="faq-toggle w-full px-space-md py-space-md flex items-center justify-between text-left gap-space-md hover:bg-surface-container-high/40 transition-colors">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2 h-2 rounded-full bg-secondary shrink-0"></span>
+              <span class="font-bold text-on-surface text-sm sm:text-base">My application has been "Under Verification" for more than 15 days</span>
+            </div>
+            <span class="faq-icon material-symbols-outlined text-on-surface-variant text-xl transition-transform shrink-0">expand_more</span>
+          </button>
+          <div class="faq-content hidden px-space-md pb-space-md text-on-surface-variant text-sm leading-relaxed border-t border-outline-variant/20 pt-space-sm">
+            <p class="mb-2 text-on-surface">
+              Under the Sakala Services Act, village administrative desks must process eligible applications within 21 working days. If your timeline has lapsed:
+            </p>
+            <p class="text-xs sm:text-sm mb-space-sm">
+              Use the <strong>Quick Tracker</strong> on the right sidebar to copy your token, or click "Submit Petition" above. An automatic reminder notice will be triggered to the Taluk Tahsildar with an escalated 48-hour SLA deadline.
+            </p>
+          </div>
+        </div>
+
+        <!-- FAQ 3: Document Upload Issue -->
+        <div class="faq-item rounded-2xl bg-surface-container-low border border-outline-variant/30 overflow-hidden" data-cat="documents">
+          <button aria-expanded="false" class="faq-toggle w-full px-space-md py-space-md flex items-center justify-between text-left gap-space-md hover:bg-surface-container-high/40 transition-colors">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2 h-2 rounded-full bg-primary shrink-0"></span>
+              <span class="font-bold text-on-surface text-sm sm:text-base">DigiLocker error or certificate name spelling mismatch</span>
+            </div>
+            <span class="faq-icon material-symbols-outlined text-on-surface-variant text-xl transition-transform shrink-0">expand_more</span>
+          </button>
+          <div class="faq-content hidden px-space-md pb-space-md text-on-surface-variant text-sm leading-relaxed border-t border-outline-variant/20 pt-space-sm">
+            <p class="text-xs sm:text-sm text-on-surface mb-2">
+              If your name spelling in your Aadhaar card differs slightly from your Caste/Income certificate or Land Record (RTC), government AI verification allows a <strong>gazette self-affidavit upload</strong>.
+            </p>
+            <p class="text-xs text-on-surface-variant">
+              You do not need to cancel your application. Visit your nearest Seva Kendra or upload the self-declaration directly via your Citizen Vault settings.
+            </p>
+          </div>
+        </div>
+
+        <!-- FAQ 4: Dialect and Language -->
+        <div class="faq-item rounded-2xl bg-surface-container-low border border-outline-variant/30 overflow-hidden" data-cat="all">
+          <button aria-expanded="false" class="faq-toggle w-full px-space-md py-space-md flex items-center justify-between text-left gap-space-md hover:bg-surface-container-high/40 transition-colors">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2 h-2 rounded-full bg-outline-variant shrink-0"></span>
+              <span class="font-bold text-on-surface text-sm sm:text-base">Can I submit complaints and speak in Kannada, Telugu, Tamil or Hindi?</span>
+            </div>
+            <span class="faq-icon material-symbols-outlined text-on-surface-variant text-xl transition-transform shrink-0">expand_more</span>
+          </button>
+          <div class="faq-content hidden px-space-md pb-space-md text-on-surface-variant text-sm leading-relaxed border-t border-outline-variant/20 pt-space-sm">
+            <p class="text-xs sm:text-sm text-on-surface">
+              Yes. Both our toll-free phone officers and ticket systems process petitions in all 14 official regional Indian languages. When calling 1800-115-526, press 2 for Kannada, 3 for Hindi, 4 for Telugu, or 5 for Tamil.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN (4 cols): Quick Status Lookup, Local Assigned Officer & Escalation -->
+  <div class="lg:col-span-4 flex flex-col gap-space-md">
+    
+    <!-- Quick Tracker Box (Crucial for panic: "Where is my status?") -->
+    <div class="bg-surface-container-lowest rounded-3xl p-space-lg border-2 border-primary/20 shadow-sm">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="material-symbols-outlined text-primary font-bold">search_check</span>
+        <span class="text-xs font-bold text-primary uppercase tracking-wider">Instant Status Lookup</span>
+      </div>
+      <h3 class="text-base font-bold text-on-surface mb-1">Track Your Application or Payment</h3>
+      <p class="text-xs text-on-surface-variant mb-space-md">Enter acknowledgement number or registered mobile to view live officer remarks.</p>
+      <form onsubmit="event.preventDefault(); alert('Found application KAR-2024-8849: Verification completed by Grama Panchayat. Forwarded to Taluk Treasury for disbursement.');" class="flex flex-col gap-space-xs">
+        <div class="relative">
+          <input type="text" placeholder="e.g. IN-8849-KA or mobile" class="w-full h-11 pl-3 pr-space-md bg-surface-container-low rounded-xl text-xs font-code-mono text-on-surface border border-outline-variant/30 focus:outline-none focus:ring-2 focus:ring-primary" value="IN-8849-KA" required="">
+        </div>
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-primary text-on-primary font-bold text-xs flex items-center justify-center gap-1 hover:bg-primary-container shadow-sm transition-all">
+          <span class="material-symbols-outlined text-sm">manage_search</span> Check Live Status
+        </button>
+      </form>
+      <div class="mt-space-sm pt-space-xs border-t border-outline-variant/20 flex items-center justify-between text-[11px] text-on-surface-variant">
+        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> PFMS Gate Synchronized</span>
+        <span class="font-code-mono">Today, 09:30 AM</span>
+      </div>
+    </div>
+
+    <!-- Assigned Local Administrative Desk (Visual high contrast, grounded) -->
+    <div id="local-desk" class="bg-surface-container-low rounded-3xl p-space-lg border-2 border-outline-variant/30 flex flex-col gap-space-md shadow-sm">
+      <div class="flex items-center justify-between border-b border-outline-variant/20 pb-space-xs">
+        <span class="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">location_on</span> Your Assigned Field Desk
+        </span>
+        <span class="text-[11px] font-code-mono font-bold px-2 py-0.5 rounded bg-surface-container-high text-on-surface">Ward #14</span>
+      </div>
+      
+      <div class="flex items-center gap-space-sm">
+        <img alt="Field Officer Shri Ramesh Gowda" class="w-12 h-12 rounded-2xl object-cover border border-outline-variant/30 shrink-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6ZneiazcJW28qnrap3nqR85kjV6_9AjHNijQjfylU01FA_fijMUcnL6MLhgqvWVgOiATREYO9JqFvL_FwO0w3qsWfGOher-_y2cRsOJ3SMatuOrKDdfYhztMciwaURhXL4TWwVipuKyY3XzvrXO5c3heqnJcwpUVhjlOqxL-uo3LaXNryPx9gaBVDbubq-QhTQ-yBkujhAlSnE-kcunYtD9lLkQ6QeHnZZmZ3uZE">
+        <div class="flex flex-col min-w-0">
+          <span class="text-sm font-bold text-on-surface truncate">Shri. Ramesh Gowda</span>
+          <span class="text-xs text-on-surface-variant truncate">Village Administrative Officer (VAO)</span>
+          <span class="text-[11px] text-secondary font-semibold font-code-mono">Duty Hours: 10 AM – 5 PM</span>
+        </div>
+      </div>
+
+      <div class="p-space-sm rounded-2xl bg-surface-container-lowest border border-outline-variant/20 flex flex-col gap-1 text-xs text-on-surface-variant">
+        <div class="flex items-center justify-between font-bold text-on-surface">
+          <span class="">Hassan Grama One Center</span>
+          <span class="text-secondary font-code-mono font-bold">1.4 km away</span>
+        </div>
+        <p class="text-on-surface-variant/90 leading-relaxed">
+          Salagame Road, Opposite Sub-Registrar Office, Hassan, Karnataka - 573201
+        </p>
+        <div class="mt-1 flex items-center justify-between pt-1 border-t border-outline-variant/10 text-xs">
+          <span class="font-code-mono text-on-surface font-semibold">Ph: 08172-268142</span>
+          <a href="#" class="text-primary font-bold inline-flex items-center gap-1 hover:underline">
+            <span class="material-symbols-outlined text-xs">directions</span> Directions
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Emergency Escalation Line Box -->
+    <div class="p-space-md rounded-2xl bg-error-container text-on-error-container border border-error/20 flex items-start gap-space-sm shadow-sm">
+      <span class="material-symbols-outlined text-error text-2xl shrink-0 mt-0.5">shield_with_heart</span>
+      <div class="flex flex-col text-xs leading-relaxed">
+        <span class="font-bold text-sm text-on-error-container mb-0.5">Emergency National Escalation: 14449</span>
+        <span class="">For illegal bribe demands, fraudulent scheme agents, or urgent distress escalations. Calls are recorded directly for the Chief Minister's Grievance Cell.</span>
+      </div>
+    </div>
+
+    <!-- Document Checklist -->
+    <div class="p-space-md rounded-2xl bg-surface-container-lowest border border-outline-variant/30 flex flex-col gap-space-xs text-xs text-on-surface-variant shadow-sm">
+      <span class="font-bold text-on-surface uppercase tracking-wider text-[11px]">Keep Handy Before Calling</span>
+      <div class="space-y-1.5 mt-1">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary text-base">check_circle</span>
+          <span class="">12-digit Aadhaar Number or linked phone</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary text-base">check_circle</span>
+          <span class="">Application Acknowledgment Slip (ACK)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-secondary text-base">check_circle</span>
+          <span class="">Bank Passbook front page or IFSC Code</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Subtle Trust & Statutory Protection Footer -->
+<div class="pt-space-md pb-space-lg border-t border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-space-sm text-xs text-on-surface-variant">
+  <div class="flex items-center gap-space-md">
+    <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm text-primary">verified</span> MeitY 256-bit Secure</span>
+    <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm text-primary">cloud_done</span> DigiLocker Integrated</span>
+    <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-sm text-primary">gavel</span> Sakala Act Guaranteed SLA</span>
+  </div>
+  <div class="font-code-mono text-on-surface-variant/80">
+    REF: IN-2025-HLP-8849 • Citizen data protected under DPDPA 2023
+  </div>
+</div>
+
+<script>
+  function openFaqItem(index) {
+    const toggles = document.querySelectorAll('.faq-toggle');
+    if (toggles[index]) {
+      const btn = toggles[index];
+      const content = btn.nextElementSibling;
+      const icon = btn.querySelector('.faq-icon');
+      btn.setAttribute('aria-expanded', 'true');
+      content.classList.remove('hidden');
+      if (icon) {
+        icon.classList.add('rotate-180', 'text-primary');
+        icon.classList.remove('text-on-surface-variant');
+      }
+      btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+</script></div>
+<!-- Grievance Ticket Slideout Modal -->
+<div class="hidden fixed inset-0 z-50 bg-on-surface/40 backdrop-blur-sm flex items-center justify-center p-space-md" id="ticket-modal">
+<div class="w-full max-w-xl bg-surface-container-lowest rounded-3xl p-space-xl shadow-xl flex flex-col gap-space-md max-h-[90vh] overflow-y-auto border border-outline-variant/30">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">confirmation_number</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">File a Support Ticket</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Central Civic Grievance Redressal</span>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container-high flex items-center justify-center text-on-surface transition-colors" onclick="document.getElementById('ticket-modal').classList.add('hidden')">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+<form class="flex flex-col gap-space-md" id="grievance-form" onsubmit="event.preventDefault(); alert('Ticket submitted successfully! Ref: GRV-2025-9982.'); document.getElementById('ticket-modal').classList.add('hidden');">
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1">Scheme or Service</label>
+<select class="w-full h-11 px-space-md bg-surface-container-low rounded-xl font-body-md text-body-md text-on-surface focus:outline-none">
+<option>PM-Kisan Samman Nidhi (Agriculture)</option>
+<option>Gruha Lakshmi DBT (Direct Financial Assistance)</option>
+<option>Pradhan Mantri Awas Yojana (Housing)</option>
+<option>Ayushman Bharat PM-JAY (Health)</option>
+<option>DigiLocker / Document Vault Token Error</option>
+<option>Other Civic Query</option>
+</select>
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1">Application Reference No. (Optional)</label>
+<input class="w-full h-11 px-space-md bg-surface-container-low rounded-xl font-body-md text-body-md text-on-surface focus:outline-none" placeholder="e.g. IN-8849-KA or ACK-2024-9182" type="text">
+</div>
+<div>
+<label class="block font-label-md text-label-md text-on-surface mb-1">Description of Issue</label>
+<textarea class="w-full p-space-md bg-surface-container-low rounded-xl font-body-md text-body-md text-on-surface focus:outline-none" placeholder="Please describe what happened, any error messages, or dates..." rows="4"></textarea>
+</div>
+<div class="flex items-center justify-end gap-space-sm pt-space-sm">
+<button class="px-space-lg py-2.5 rounded-xl bg-surface-container-low text-on-surface font-label-md text-label-md font-bold hover:bg-surface-container-high transition-colors" onclick="document.getElementById('ticket-modal').classList.add('hidden')" type="button">
+          Cancel
+        </button>
+<button class="px-space-xl py-2.5 rounded-xl bg-primary text-on-primary font-label-md text-label-md font-bold hover:bg-primary-container shadow-sm transition-all" type="submit">
+          Submit Ticket
+        </button>
+</div>
+</form>
+</div>
+</div>
+<script>
+  // Re-bind accordion clicks
+  document.querySelectorAll('.faq-toggle').forEach(button => {
+    button.addEventListener('click', () => {
+      const isExpanded = button.getAttribute('aria-expanded') === 'true';
+      const content = button.nextElementSibling;
+      const icon = button.querySelector('.faq-icon');
+      if (isExpanded) {
+        button.setAttribute('aria-expanded', 'false');
+        content.classList.add('hidden');
+        icon.classList.remove('rotate-180', 'text-primary');
+        icon.classList.add('text-on-surface-variant');
+      } else {
+        button.setAttribute('aria-expanded', 'true');
+        content.classList.remove('hidden');
+        icon.classList.add('rotate-180', 'text-primary');
+        icon.classList.remove('text-on-surface-variant');
+      }
+    });
+  });
+
+  // Category Filter
+  document.querySelectorAll('.faq-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.faq-filter-btn').forEach(b => {
+        b.classList.remove('bg-primary', 'text-on-primary');
+        b.classList.add('text-on-surface-variant');
+      });
+      btn.classList.add('bg-primary', 'text-on-primary');
+      btn.classList.remove('text-on-surface-variant');
+
+      const cat = btn.getAttribute('data-category');
+      document.querySelectorAll('.faq-item').forEach(item => {
+        if (cat === 'all' || item.getAttribute('data-cat') === cat) {
+          item.classList.remove('hidden');
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+    });
+  });
+
+  // Search Input Filter
+  const sInput = document.getElementById('faq-search-input');
+  if (sInput) {
+    sInput.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      document.querySelectorAll('.faq-item').forEach(item => {
+        const txt = item.textContent.toLowerCase();
+        if (txt.includes(q)) {
+          item.classList.remove('hidden');
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+    });
+  }
+</script></div>
+<script>
+  // Interactive Accordion Handling
+  document.querySelectorAll('.faq-toggle').forEach(button => {
+    button.addEventListener('click', () => {
+      const isExpanded = button.getAttribute('aria-expanded') === 'true';
+      const content = button.nextElementSibling;
+      const icon = button.querySelector('.faq-icon');
+
+      if (isExpanded) {
+        button.setAttribute('aria-expanded', 'false');
+        content.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+        icon.classList.remove('text-primary');
+        icon.classList.add('text-on-surface-variant');
+      } else {
+        button.setAttribute('aria-expanded', 'true');
+        content.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+        icon.classList.add('text-primary');
+        icon.classList.remove('text-on-surface-variant');
+      }
+    });
+  });
+
+  // Filter Pills Handling
+  const filterButtons = document.querySelectorAll('.faq-filter-btn');
+  const faqItems = document.querySelectorAll('.faq-item');
+  const countEl = document.getElementById('active-count');
+
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterButtons.forEach(b => {
+        b.classList.remove('bg-primary', 'text-on-primary');
+        b.classList.add('bg-surface-container-lowest', 'text-on-surface-variant');
+      });
+      btn.classList.add('bg-primary', 'text-on-primary');
+      btn.classList.remove('bg-surface-container-lowest', 'text-on-surface-variant');
+
+      const cat = btn.getAttribute('data-category');
+      let visibleCount = 0;
+
+      faqItems.forEach(item => {
+        if (cat === 'all' || item.getAttribute('data-cat') === cat) {
+          item.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+
+      if (countEl) countEl.textContent = visibleCount;
+    });
+  });
+
+  // Live Search Filter
+  const searchInput = document.getElementById('faq-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      let visibleCount = 0;
+
+      faqItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (text.includes(query)) {
+          item.classList.remove('hidden');
+          visibleCount++;
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+
+      if (countEl) countEl.textContent = visibleCount;
+    });
+  }
+</script></main></div>
+
+
+</body></html>

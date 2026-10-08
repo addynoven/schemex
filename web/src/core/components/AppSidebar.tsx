@@ -7,7 +7,7 @@ import {
   MessageSquare,
   Search,
   FolderLock,
-  Users,
+  HelpCircle,
   Plus,
   PanelLeftClose,
   PanelLeft,
@@ -117,6 +117,7 @@ export function AppSidebar({
     { label: 'Browse Schemes', href: '/schemes', icon: Search, active: currentPath.startsWith('/schemes') },
     { label: 'Eligibility Check', href: '/check', icon: Sparkles, active: currentPath === '/check' },
     { label: 'Document Vault', href: '/vault', icon: FolderLock, active: currentPath === '/vault' },
+    { label: 'Help & Support', href: '/support', icon: HelpCircle, active: currentPath === '/support' },
   ]
 
   return (

@@ -1,0 +1,539 @@
+<!DOCTYPE html><html class="h-full" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Scheme AI — Citizen Welfare Portal Authentication</title>
+<!-- Tailwind CSS CDN with forms and container-queries plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Custom Config -->
+<script data-purpose="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            emerald: {
+              850: '#06422d',
+              900: '#0e6245',
+              950: '#06291d',
+            },
+            saffron: {
+              400: '#ffca28',
+              500: '#ffea3b',
+              600: '#f59e0b'
+            },
+            coral: {
+              500: '#ff2d55',
+              600: '#e02447'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Animation Styles -->
+<style data-purpose="animations">
+    @keyframes float-blob {
+      0%, 100% { transform: translate(0px, 0px) scale(1) rotate(0deg); }
+      33% { transform: translate(25px, -35px) scale(1.08) rotate(4deg); }
+      66% { transform: translate(-20px, 20px) scale(0.95) rotate(-3deg); }
+    }
+
+    @keyframes float-confetti {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-18px) rotate(180deg); }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 45, 85, 0.55), 0 10px 25px -5px rgba(255, 45, 85, 0.4); }
+      50% { box-shadow: 0 0 0 16px rgba(255, 45, 85, 0), 0 20px 35px -5px rgba(255, 45, 85, 0.55); }
+    }
+
+    @keyframes shimmer-sweep {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+
+    .animate-blob-slow {
+      animation: float-blob 18s ease-in-out infinite;
+    }
+
+    .animate-blob-reverse {
+      animation: float-blob 22s ease-in-out infinite reverse;
+    }
+
+    .animate-confetti-1 {
+      animation: float-confetti 7s ease-in-out infinite;
+    }
+
+    .animate-confetti-2 {
+      animation: float-confetti 9s ease-in-out 1.5s infinite;
+    }
+
+    .animate-confetti-3 {
+      animation: float-confetti 11s ease-in-out 3s infinite;
+    }
+
+    .pulse-seam {
+      animation: pulse-glow 2.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    /* 3D Perspective for central emblem card */
+    .perspective-container {
+      perspective: 1200px;
+    }
+
+    .tilt-card {
+      transition: transform 0.15s ease-out, box-shadow 0.25s ease;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+  </style>
+<!-- Visual Utility Details -->
+<style data-purpose="decorations">
+    .glass-surface {
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .text-gradient-emerald {
+      background: linear-gradient(135deg, #0e6245 0%, #15803d 50%, #047857 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .text-gradient-gold {
+      background: linear-gradient(135deg, #f59e0b 0%, #ffea3b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+</head>
+<body class="h-full bg-[#f4f6f5] text-slate-800 font-sans antialiased overflow-x-hidden selection:bg-emerald-900 selection:text-white">
+<!-- BEGIN: AmbientDecorativeCanvas -->
+<!-- Ambient Morphing Organic Blobs in Outer Space (Reference Image Aesthetic) -->
+<div aria-hidden="true" class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+<!-- Top-Right Vibrant Yellow Saffron Blob -->
+<div class="absolute -top-24 -right-24 w-[380px] h-[380px] bg-[#ffea3b] rounded-[45%_55%_65%_35%/50%_45%_55%_50%] opacity-90 filter blur-[1px] animate-blob-slow"></div>
+<!-- Bottom-Left Saffron Accent Blob -->
+<div class="absolute -bottom-28 -left-28 w-[440px] h-[440px] bg-[#ffd54f] rounded-[60%_40%_45%_55%/40%_60%_50%_50%] opacity-95 filter blur-[1px] animate-blob-reverse"></div>
+<!-- Geometric Floating Confetti (Reference Triangles, Dots, Rings) -->
+<!-- Magenta triangle top center -->
+<div class="absolute top-12 left-[32%] w-0 h-0 border-l-[11px] border-l-transparent border-r-[11px] border-r-transparent border-b-[20px] border-b-[#ff2d55] opacity-80 animate-confetti-1"></div>
+<!-- Soft pink triangle bottom left -->
+<div class="absolute bottom-16 left-[24%] w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[15px] border-b-[#ff80ab] opacity-75 animate-confetti-2"></div>
+<!-- Yellow circle top right -->
+<div class="absolute top-20 right-[30%] w-7 h-7 bg-[#ffd600] rounded-full opacity-85 shadow-sm animate-confetti-3"></div>
+<!-- Neutral grey diamond center left -->
+<div class="absolute top-[52%] left-10 w-4 h-4 bg-slate-300 rotate-45 opacity-60"></div>
+<!-- Subtle grey outline circle bottom center -->
+<div class="absolute bottom-24 left-[46%] w-12 h-12 rounded-full border-4 border-slate-200/80 opacity-60"></div>
+<!-- Saffron small diamond bottom right -->
+<div class="absolute bottom-14 right-[28%] w-5 h-5 bg-[#ffca28] rotate-45 opacity-90 shadow-sm animate-confetti-2"></div>
+<!-- Grey tiny dot center -->
+<div class="absolute bottom-10 right-[51%] w-2.5 h-2.5 bg-slate-400 rounded-full opacity-50"></div>
+</div>
+<!-- END: AmbientDecorativeCanvas -->
+<!-- BEGIN: MainPortalWrapper -->
+<!-- Center Main Elevation Container -->
+<main class="relative z-10 flex min-h-screen items-center justify-center p-3 sm:p-6 md:p-10 lg:p-12">
+<!-- Card Shell: Split 46% (Form) / 54% (Botanical Canvas) -->
+<div class="relative w-full max-w-[1280px] bg-white rounded-3xl shadow-[0_30px_90px_-20px_rgba(15,40,30,0.22)] border border-slate-200/80 overflow-hidden flex flex-col lg:flex-row min-h-[740px]">
+<!-- BEGIN: LeftAuthenticationSection (46% width) -->
+<section class="w-full lg:w-[46%] bg-white p-7 sm:p-10 lg:p-12 flex flex-col justify-between relative z-10" data-purpose="credential-form">
+<!-- Top Header & Brand Bar -->
+<div>
+<div class="flex items-center justify-between gap-4 mb-8">
+<!-- Brand Monogram + Title -->
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-[#0e6245] flex items-center justify-center shadow-md shadow-emerald-900/20 text-white font-black text-xl tracking-tighter">
+<span class="">as</span>
+</div>
+<div class="leading-tight">
+<span class="block text-xs font-semibold uppercase tracking-wider text-emerald-800">Govt. of India • MeitY</span>
+<span class="block text-lg font-bold tracking-tight text-slate-900">Scheme AI</span>
+</div>
+</div>
+<!-- Civic Trust Security Pill -->
+
+</div>
+<!-- Hero Headline (Styled faithful to reference "We are aroma") -->
+<div class="mb-7">
+<h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-800 leading-snug">
+              We are <span class="text-gradient-emerald">scheme.ai</span>
+</h1>
+<p class="mt-2 text-sm text-slate-500 leading-relaxed max-w-sm">
+              Welcome back. Access 4,160+ central and state citizen entitlements directly through sovereign authentication.
+            </p>
+</div>
+<!-- Authentication Method Segmented Tabs -->
+<div class="mb-6 p-1 bg-slate-100 rounded-xl flex text-xs font-semibold text-slate-600 gap-1 border border-slate-200/60" role="tablist"><button aria-selected="true" class="flex-1 py-2 px-2.5 rounded-lg bg-white text-emerald-900 shadow-xs font-bold transition duration-200" id="tab-login" role="tab" type="button">Login</button><button aria-selected="false" class="flex-1 py-2 px-2.5 rounded-lg text-slate-600 hover:text-slate-900 transition duration-200 font-bold" id="tab-signup" role="tab" type="button">Sign Up</button></div>
+<!-- Credential Input Form -->
+<form class="space-y-4" id="portal-login-form" onsubmit="event.preventDefault();"><!-- Google One-Click SSO Button --><div><button class="w-full py-2.5 px-4 bg-white hover:bg-slate-50 active:scale-[0.99] border border-slate-200/90 rounded-lg text-xs font-bold text-slate-700 flex items-center justify-center gap-2.5 shadow-2xs transition duration-150" type="button"><svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"></path><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"></path><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"></path><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"></path></svg><span class="">Continue with Google</span></button></div><!-- Divider --><div class="relative flex items-center justify-center"><div class="w-full border-t border-slate-200"></div><span class="absolute px-3 bg-white text-[11px] font-semibold text-slate-400 uppercase tracking-wider">or continue with email</span></div><!-- Stacked Input Box --><div class="rounded-xl border border-slate-200 overflow-hidden shadow-xs divide-y divide-slate-100 bg-white"><!-- Input 1: Email --><div class="relative px-4 pt-2.5 pb-2 border-l-4 border-l-[#ff2d55] bg-white transition-colors focus-within:bg-emerald-50/30"><label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider" for="email-input">Email Address</label><div class="mt-0.5 flex items-center"><input class="w-full p-0 border-0 text-sm font-semibold text-slate-900 placeholder:text-slate-300 focus:ring-0 bg-transparent" id="email-input" name="email" placeholder="name@example.com" required="" type="email" value="citizen.arun@gov.in"><span class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 shadow-xs" title="Verified email"><svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg></span></div></div><!-- Input 2: Password with Show/Hide toggle --><div class="relative px-4 pt-2.5 pb-2.5 transition-colors focus-within:bg-emerald-50/30"><div class="flex items-center justify-between"><label class="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider" for="password-input">Password</label></div><div class="mt-0.5 flex items-center justify-between"><input class="w-full p-0 border-0 text-sm font-semibold tracking-widest text-slate-900 placeholder:text-slate-300 focus:ring-0 bg-transparent" id="password-input" name="password" placeholder="Enter your password" required="" type="password" value="••••••••••••"><button aria-label="Toggle password visibility" class="text-slate-400 hover:text-slate-600 transition focus:outline-none p-0.5" type="button"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></button></div></div></div><!-- Remember Me & Forgot Password Links --><div class="flex items-center justify-between text-xs pt-0.5"><label class="flex items-center gap-2 cursor-pointer select-none text-slate-600 font-medium"><input checked="" class="w-3.5 h-3.5 rounded border-slate-300 text-emerald-800 focus:ring-emerald-800 focus:ring-offset-0" type="checkbox"><span class="">Remember this device</span></label><a class="font-semibold text-slate-500 hover:text-emerald-800 transition" href="#forgot">Forgot password?</a></div><!-- Action Buttons: Login + Sign Up --><div class="pt-2 flex items-center gap-3"><button class="flex-1 py-3 px-6 bg-black hover:bg-slate-900 active:scale-[0.99] text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow-md transition duration-150 flex items-center justify-center gap-2" type="submit"><span class="">Login</span><span class="text-emerald-400">→</span></button><button class="py-3 px-6 bg-white hover:bg-slate-50 active:scale-[0.99] border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider rounded-lg shadow-2xs transition duration-150" type="button">Sign up</button></div><!-- Sign Up Prompt Footer --><div class="pt-1 text-center"><p class="text-xs text-slate-500 font-medium">Don't have an account? <a class="font-bold text-emerald-900 hover:underline transition" href="#signup">Sign up for Scheme AI</a></p></div></form>
+</div>
+<!-- Footer Legal & Trust Compliance Info -->
+<footer class="mt-8 pt-6 border-t border-slate-100 text-[11px] text-slate-400 leading-relaxed">
+<p class="">
+            By signing in, you agree to Scheme AI's 
+            <a class="font-bold text-slate-700 hover:text-emerald-900 underline decoration-slate-300" href="#terms">Terms and Conditions</a> 
+            &amp; 
+            <a class="font-bold text-slate-700 hover:text-emerald-900 underline decoration-slate-300" href="#privacy">Privacy Policy</a>.
+          </p>
+<div class="mt-2 flex items-center justify-between text-[10px] text-slate-400 font-medium">
+<span class="">NIC / MeitY Sovereign Infrastructure</span>
+<span class="flex items-center gap-1">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+              256-Bit SSL Live
+            </span>
+</div>
+</footer>
+</section>
+<!-- END: LeftAuthenticationSection -->
+<!-- BEGIN: RightBotanicalCanvasSection (54% width) -->
+<section class="w-full lg:w-[54%] relative overflow-hidden bg-[#0a2e1c] min-h-[500px] lg:min-h-full flex flex-col justify-between p-6 sm:p-8 md:p-10" data-purpose="botanical-showcase">
+<!-- WebGL Lush Foliage Shader Canvas -->
+<div class="absolute inset-0 z-0">
+<!-- STITCH_SHADER_START:ANIMATION_36 class="absolute inset-0 w-full h-full object-cover" -->
+<div class="absolute inset-0 w-full h-full object-cover" style="display:block;">
+<canvas id="shader-canvas-ANIMATION_36" style="display:block;width:100%;height:100%" width="638" height="749"></canvas>
+<script>
+(function() {
+  const canvas = document.getElementById('shader-canvas-ANIMATION_36');
+
+  // Sync the WebGL drawing-buffer size with the CSS-driven layout size.
+  // This fires on initial layout and whenever the element is resized.
+  function syncSize() {
+    const w = canvas.clientWidth  || 1280;
+    const h = canvas.clientHeight || 720;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width  = w;
+      canvas.height = h;
+    }
+  }
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(syncSize).observe(canvas);
+  }
+  syncSize();
+
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+  v_texCoord = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+  const fs = `precision highp float;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+
+// Simplex-style 2D noise
+vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
+
+float snoise(vec2 v) {
+  const vec4 C = vec4(0.211324865405187,  // (3.0-sqrt(3.0))/6.0
+                      0.366025403784439,  // 0.5*(sqrt(3.0)-1.0)
+                     -0.577350269189626,  // -1.0 + 2.0 * C.x
+                      0.024390243902439); // 1.0 / 41.0
+  vec2 i  = floor(v + dot(v, C.yy) );
+  vec2 x0 = v -   i + dot(i, C.xx);
+  vec2 i1;
+  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+  i = mod289(i);
+  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+        + i.x + vec3(0.0, i1.x, 1.0 ));
+  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+  m = m*m ;
+  m = m*m ;
+  vec3 x = 2.0 * fract(p * C.www) - 1.0;
+  vec3 h = abs(x) - 0.5;
+  vec3 ox = floor(x + 0.5);
+  vec3 a0 = x - ox;
+  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+  vec3 g;
+  g.x  = a0.x  * x0.x  + h.x  * x0.y;
+  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
+}
+
+void main() {
+    vec2 st = gl_FragCoord.xy / u_resolution.xy;
+    vec2 mouse = u_mouse / u_resolution.xy;
+    float aspect = u_resolution.x / u_resolution.y;
+    vec2 p = st;
+    p.x *= aspect;
+    
+    float t = u_time * 0.35;
+    
+    // Interactive mouse distortion
+    float distToMouse = distance(st, mouse);
+    vec2 mouseInfluence = (st - mouse) * exp(-distToMouse * 4.0) * 0.15;
+    p += mouseInfluence;
+    
+    // Domain warping for organic liquid botany folds
+    float q = snoise(p * 2.2 + vec2(t * 0.2, t * 0.15));
+    float r = snoise(p * 3.5 + vec2(q, t * 0.25));
+    float f = snoise(p * 1.8 + vec2(r * 1.2, -t * 0.3));
+    
+    // Civic emerald + deep forest lush tones from design system
+    vec3 cDeepForest = vec3(0.04, 0.18, 0.11); // #0a2e1c
+    vec3 cEmerald    = vec3(0.055, 0.384, 0.271); // #0e6245 primary
+    vec3 cLeafLush   = vec3(0.09, 0.52, 0.34); // vibrant foliage
+    vec3 cGoldenSun  = vec3(0.95, 0.79, 0.18); // saffron gold accent
+    vec3 cMintShine  = vec3(0.42, 0.85, 0.65);
+    
+    // Layered color blend
+    vec3 col = mix(cDeepForest, cEmerald, smoothstep(-0.6, 0.6, f));
+    col = mix(col, cLeafLush, smoothstep(-0.2, 0.8, r));
+    
+    // Subtle caustic / sunlight ripple
+    float caustics = pow(max(0.0, snoise(p * 6.0 + vec2(-t * 0.5, t * 0.4))), 2.5);
+    col += cMintShine * caustics * 0.35;
+    
+    // Golden warm highlight accents responding to motion
+    float goldSpeck = pow(max(0.0, snoise(p * 4.0 + vec2(t*0.3, -t*0.2))), 3.5);
+    col = mix(col, cGoldenSun, goldSpeck * 0.4);
+    
+    // Vignette on edges
+    float vig = smoothstep(1.2, 0.2, length(st - 0.5));
+    col *= vig * 0.85 + 0.15;
+    
+    gl_FragColor = vec4(col, 1.0);
+}`;
+  function cs(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const pos = gl.getAttribLocation(prog, 'a_position');
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uRes = gl.getUniformLocation(prog, 'u_resolution');
+  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+  // u_mouse is in pixel coordinates matching u_resolution (ShaderToy convention).
+  // Shaders that need normalized coords should use: u_mouse / u_resolution.
+  let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+  window.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      const nx = (event.clientX - rect.left) / rect.width;
+      const ny = 1.0 - (event.clientY - rect.top) / rect.height;
+      mouse.x = nx * canvas.width;
+      mouse.y = ny * canvas.height;
+    }
+  });
+
+  function render(t) {
+    if (typeof ResizeObserver === 'undefined') syncSize();
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    if (uTime) gl.uniform1f(uTime, t * 0.001);
+    if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+    if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  render(0);
+})();
+</script>
+</div>
+<!-- STITCH_SHADER_END:ANIMATION_36 -->
+<!-- Subtle vignette overlay to ensure pristine contrast -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/30 pointer-events-none"></div>
+</div>
+<!-- Top Right Mini-Navigation (Faithful to Reference header menu) -->
+<header class="relative z-20 flex items-center justify-end">
+<nav class="flex items-center gap-4 sm:gap-6 text-[11px] font-semibold uppercase tracking-wider text-white/80">
+<a class="hover:text-white transition duration-150" href="#about">About Us</a>
+<a class="text-white font-bold transition duration-150 border-b border-saffron-400 pb-0.5" href="#showcase">Showcase</a>
+<a class="hover:text-white transition duration-150" href="#schemes">Letters</a>
+<a class="hover:text-white transition duration-150" href="#contact">Contact</a>
+<a class="hover:text-white transition duration-150" href="#blog">Blog</a>
+</nav>
+</header>
+<!-- Center: Floating 3D Frosted Glass Emblem Badge (Matching reference centered square tile) -->
+<div class="relative z-20 my-auto py-8 flex items-center justify-center perspective-container">
+<div class="tilt-card glass-surface w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 rounded-3xl p-6 sm:p-8 flex flex-col justify-between shadow-2xl relative group cursor-pointer" data-purpose="glassmorphic-badge" id="interactive-tilt-card" style="transform: rotateX(0deg) rotateY(0deg) translateZ(0px);"><!-- Top Corner Reference Accent Dots & Indicators -->
+<div class="flex items-center justify-between w-full">
+  <div class="w-2.5 h-2.5 rounded-full bg-white/70 shadow-sm"></div>
+  <div class="flex items-center gap-1.5 opacity-60">
+    <span class="w-1.5 h-1.5 rounded-full bg-white/60"></span>
+    <span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+  </div>
+</div>
+
+<!-- Center Emblem: Stylized Scheme AI Civic Sprout Icon & Brand Mark -->
+<div class="my-auto flex flex-col items-center justify-center relative">
+  <div class="absolute w-36 h-36 bg-emerald-400/20 rounded-full blur-2xl pointer-events-none"></div>
+  
+  <!-- Large Stylized Civic Leaf Mark inspired by Reference 'a' motif -->
+  <div class="relative flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-200">
+    <!-- Soft Ambient Glow Base -->
+    <div class="w-24 h-24 rounded-3xl bg-white/10 border border-white/30 backdrop-blur-md flex items-center justify-center shadow-2xl relative overflow-hidden">
+      <!-- Saffron / Gold Leaf Accents -->
+      <div class="absolute -top-1 -right-1 w-10 h-10 bg-[#ffd600] rounded-full blur-sm opacity-80"></div>
+      <svg class="w-14 h-14 text-white drop-shadow-md relative z-10" viewBox="0 0 48 48" fill="none">
+        <!-- Stylized Bold 'S' / Shield Leaf Emblem -->
+        <path d="M24 6C14.059 6 6 14.059 6 24C6 33.941 14.059 42 24 42C33.941 42 42 33.941 42 24C42 14.059 33.941 6 24 6Z" fill="currentColor" fill-opacity="0.08"></path>
+        <path d="M24 8C19 14 17 21 19 28C21 35 28 39 34 38C40 37 42 30 40 24C38 18 31 10 24 8Z" fill="#ffd600"></path>
+        <path d="M14 36C18 36 26 31 28 23C30 15 25 10 20 12C15 14 11 20 12 28C13 33 14 36 14 36Z" fill="white"></path>
+        <circle cx="24" cy="24" r="4" fill="#06291d"></circle>
+      </svg>
+    </div>
+    <span class="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full bg-[#ffd600] text-black font-black text-[9px] uppercase tracking-wider shadow-sm">
+      AI
+    </span>
+  </div>
+
+  <!-- Clean Brand Wordmark & Minimal Subtitle -->
+  <div class="text-center mt-1">
+    <h2 class="text-2xl font-black text-white tracking-tight drop-shadow-sm">Scheme AI</h2>
+    <p class="mt-1 text-xs font-semibold text-emerald-100/90 tracking-wide">Sovereign Citizen Welfare Gateway</p>
+  </div>
+</div>
+
+<!-- Bottom Reference Micro Lines -->
+<div class="flex items-center justify-between w-full pt-1 opacity-70">
+  <span class="text-[9px] uppercase tracking-widest text-white/70 font-bold">Govt. of India</span>
+  <div class="flex flex-col gap-1 items-end">
+    <div class="w-5 h-0.5 bg-white/60 rounded-full"></div>
+    <div class="w-3 h-0.5 bg-white/40 rounded-full"></div>
+  </div>
+</div></div>
+</div>
+<!-- Bottom Controller: Pagination Indicators & Next/Prev Controls (Faithful to Reference) -->
+<footer class="relative z-20 flex items-center justify-between text-xs text-white pt-4">
+<!-- Active Slide Dot / Counter -->
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-white shadow-xs"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+<span class="w-1.5 h-1.5 rounded-full bg-white/40"></span>
+<span class="text-[10px] font-medium tracking-widest text-white/70 ml-2">01 / 04 CITIZEN SERVICES</span>
+</div>
+<!-- Previous / Next Action Pills -->
+<div class="flex items-center gap-2">
+<button class="px-4 py-2 rounded-md glass-pill text-[10px] font-bold uppercase tracking-wider text-white hover:bg-white/25 active:scale-95 transition" type="button">
+              Previous
+            </button>
+<button class="px-4 py-2 rounded-md glass-pill text-[10px] font-bold uppercase tracking-wider text-white hover:bg-white/25 active:scale-95 transition" type="button">
+              Next
+            </button>
+</div>
+</footer>
+</section>
+<!-- END: RightBotanicalCanvasSection -->
+<!-- BEGIN: InteractiveSeamDividerButton -->
+<!-- Floating Circular Coral Toggle/Play Button Placed Directly On The Split Seam -->
+<aside aria-label="Interactive Portal Toggle" class="absolute left-[46%] top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 hidden lg:flex items-center justify-center pointer-events-auto">
+<!-- Breathing Pulse Ping Ring -->
+<span class="absolute w-12 h-12 rounded-full bg-[#ff2d55] opacity-75 animate-ping"></span>
+<!-- Main Button Surface -->
+<button aria-label="Toggle Portal View" class="pulse-seam relative w-12 h-12 rounded-full bg-gradient-to-tr from-[#e02447] to-[#ff2d55] text-white flex items-center justify-center shadow-[0_8px_20px_rgba(255,45,85,0.45)] hover:scale-110 active:scale-95 transition-transform duration-200 focus:outline-none" id="seam-toggle-btn" type="button">
+<!-- Play / Arrowhead Icon pointing right -->
+<svg class="w-4 h-4 translate-x-0.5 fill-current text-white" viewBox="0 0 24 24">
+<path d="M8 5v14l11-7z"></path>
+</svg>
+</button>
+</aside>
+<!-- END: InteractiveSeamDividerButton -->
+</div>
+</main>
+<!-- END: MainPortalWrapper -->
+<!-- BEGIN: Scripts -->
+<!-- 3D Interactive Mouse Parallax & Tilt Logic -->
+<script data-purpose="parallax-card-tilt">
+    (function initTilt() {
+      const card = document.getElementById('interactive-tilt-card');
+      const container = document.querySelector('[data-purpose="botanical-showcase"]');
+      if (!card || !container) return;
+
+      let bounds = container.getBoundingClientRect();
+
+      window.addEventListener('resize', () => {
+        bounds = container.getBoundingClientRect();
+      });
+
+      container.addEventListener('mousemove', (e) => {
+        const mouseX = e.clientX - bounds.left;
+        const mouseY = e.clientY - bounds.top;
+
+        const xPct = (mouseX / bounds.width) - 0.5;
+        const yPct = (mouseY / bounds.height) - 0.5;
+
+        // Subtle 3D tilt
+        const rotateY = xPct * 18; 
+        const rotateX = -yPct * 18;
+
+        card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+      });
+
+      container.addEventListener('mouseleave', () => {
+        card.style.transform = 'rotateX(0deg) rotateY(0deg) translateZ(0px)';
+      });
+    })();
+  </script>
+<!-- Interactive Tab Switcher & Seam Action -->
+<script data-purpose="tab-and-seam-interactivity">
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabs = [
+        document.getElementById('tab-aadhaar'),
+        document.getElementById('tab-credentials'),
+        document.getElementById('tab-sso')
+      ];
+
+      tabs.forEach((tab) => {
+        if (!tab) return;
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => {
+            t.classList.remove('bg-white', 'text-emerald-900', 'shadow-xs', 'font-bold');
+            t.classList.add('text-slate-600');
+            t.setAttribute('aria-selected', 'false');
+          });
+          tab.classList.add('bg-white', 'text-emerald-900', 'shadow-xs', 'font-bold');
+          tab.classList.remove('text-slate-600');
+          tab.setAttribute('aria-selected', 'true');
+        });
+      });
+
+      // Seam button click wave feedback
+      const seamBtn = document.getElementById('seam-toggle-btn');
+      if (seamBtn) {
+        seamBtn.addEventListener('click', () => {
+          seamBtn.classList.add('scale-125');
+          setTimeout(() => seamBtn.classList.remove('scale-125'), 200);
+        });
+      }
+    });
+  </script>
+<!-- END: Scripts -->
+
+
+
+
+
+
+</body></html>

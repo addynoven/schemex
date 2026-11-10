@@ -1,23 +1,31 @@
-# Auto-detect available CPU cores (defaults to 16 on this machine, fallback to 4)
-NUM_CORES ?= $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
+# Scheme Navigator — Next.js/TypeScript stack
+# The app's live dependencies are cloud services (Aiven Postgres, Cloudinary, Firebase,
+# Groq/Gemini) configured via web/.env.local — same env as the Vercel deployment.
+# Docker infra below is optional (only needed if you point DATABASE_URL at local Postgres).
 
-.PHONY: help dev start dev-frontend dev-web db-up db-down up down clean lint
+.PHONY: help dev start full-dev dev-web db-up db-down up down lint clean
 
 help:
-	@echo "🏛️ Scheme Navigator — Developer Commands"
-	@echo "--------------------------------------------------"
-	@echo "  make dev                 : Start PostgreSQL/MinIO and the Next.js app"
-	@echo "  make start               : Alias for make dev"
-	@echo "  make dev-web             : Run Next.js frontend only (port 3000)"
-	@echo "  make dev-frontend        : Alias for make dev-web"
-	@echo "  make db-up               : Start PostgreSQL + MinIO services with Docker"
-	@echo "  make db-down             : Stop Docker database & S3 services"
-	@echo "  make up                  : Start entire stack inside Docker containers"
-	@echo "  make down                : Stop all Docker stack services"
-	@echo "  make lint                : Format & typecheck codebase"
-	@echo "  make clean               : Clean temporary cache & pytest artifacts"
+	@echo "🏛️ Scheme Navigator — Developer Commands (Next.js/TypeScript stack)"
+	@echo "------------------------------------------------------------------"
+	@echo "  make dev      : Next.js dev server :3000 (uses cloud services from .env.local)"
+	@echo "  make start    : Alias for make dev"
+	@echo "  make full-dev : Also start Docker Postgres/MinIO first (optional local infra)"
+	@echo "  make dev-web  : Next.js dev server only (port 3000)"
+	@echo "  make db-up    : Start Docker PostgreSQL + MinIO"
+	@echo "  make db-down  : Stop Docker PostgreSQL + MinIO"
+	@echo "  make up       : Start the full stack in Docker (web in production mode)"
+	@echo "  make down     : Stop all Docker services"
+	@echo "  make lint     : oxlint the web app"
+	@echo "  make clean    : Remove Next.js build/dev caches"
 
 dev:
+	cd web && pnpm dev
+
+start:
+	$(MAKE) dev
+
+full-dev:
 	docker compose up -d postgres minio minio-createbuckets
 	cd web && pnpm dev
 
@@ -25,10 +33,7 @@ start:
 	$(MAKE) dev
 
 dev-web:
-	cd web && npm run dev
-
-dev-frontend:
-	cd web && npm run dev
+	cd web && pnpm dev
 
 db-up:
 	docker compose up -d postgres minio minio-createbuckets
@@ -42,11 +47,8 @@ up:
 down:
 	docker compose down
 
-clean:
-	rm -rf .pytest_cache .coverage htmlcov __pycache__ */__pycache__ */*/__pycache__ app/**/__pycache__
-	rm -rf frontend/dist
-
 lint:
 	cd web && pnpm lint
 
-
+clean:
+	rm -rf web/.next web/tsconfig.tsbuildinfo web/coverage

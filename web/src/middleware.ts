@@ -8,7 +8,6 @@ export function middleware(request: NextRequest) {
   if (
     pathname.startsWith('/api') ||
     pathname.startsWith('/login') ||
-    pathname.startsWith('/register') ||
     pathname.startsWith('/privacy') ||
     pathname.startsWith('/delete-account') ||
     pathname.startsWith('/_next') ||

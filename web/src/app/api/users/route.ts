@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const email = body.email ? String(body.email).trim().toLowerCase() : null;
-    const phone = body.phone || `+9199${Date.now().toString().slice(-8)}`;
+    const phone = body.phone || null;
     const role = body.role || 'citizen';
     const isVerified = Boolean(body.is_verified);
     const citizenUid = body.citizen_uid || `CIT-${Date.now().toString().slice(-6)}`;

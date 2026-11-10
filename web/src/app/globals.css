@@ -1,27 +1,51 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 5.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 5.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --background: 210 40% 98%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 158 75% 22%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 158 75% 22%;
     --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 156 30% 4%;
+    --foreground: 210 40% 98%;
+    --card: 156 25% 7%;
+    --card-foreground: 210 40% 98%;
+    --popover: 156 25% 7%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 158 65% 35%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 156 20% 11%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 156 20% 11%;
+    --muted-foreground: 156 15% 65%;
+    --accent: 156 20% 11%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 156 20% 15%;
+    --input: 156 20% 15%;
+    --ring: 158 65% 35%;
   }
 }
 
@@ -32,6 +56,12 @@ body {
   color: #0f172a;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.dark body {
+  background-color: #070e0a;
+  color: #f1f5f9;
 }
 
 /* Civic admin surface: matches the mobile emerald, slate, and saffron system. */
@@ -175,4 +205,47 @@ body {
 
 .civic-citizen [class*='hover\\:bg-blue-500']:hover {
   background-color: var(--civic-emerald-dark) !important;
+}
+
+/* Dark mode sovereign overrides for civic-citizen and universal surfaces */
+.dark .civic-citizen,
+.dark .civic-admin {
+  --civic-canvas: #070e0a;
+  --civic-surface: #0c1812;
+  --civic-border: #1a3326;
+  --civic-text: #f8fafc;
+  --civic-muted: #94a3b8;
+  background-color: var(--civic-canvas) !important;
+  color: var(--civic-text) !important;
+}
+
+.dark .civic-citizen [class*='bg-white'],
+.dark .civic-admin [class*='bg-white'] {
+  background-color: #0c1812 !important;
+}
+
+.dark .civic-citizen [class*='bg-[#F8FAFC]'],
+.dark .civic-admin [class*='bg-[#F8FAFC]'] {
+  background-color: #070e0a !important;
+}
+
+.dark .civic-citizen [class*='border-slate-200'],
+.dark .civic-admin [class*='border-slate-200'] {
+  border-color: #1a3326 !important;
+}
+
+.dark .civic-citizen input,
+.dark .civic-citizen select,
+.dark .civic-citizen textarea,
+.dark .civic-admin input,
+.dark .civic-admin select,
+.dark .civic-admin textarea {
+  background: #0c1812 !important;
+  border-color: #1a3326 !important;
+  color: #f8fafc !important;
+}
+
+.dark .civic-citizen input::placeholder,
+.dark .civic-admin input::placeholder {
+  color: #64748b !important;
 }

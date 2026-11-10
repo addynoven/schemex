@@ -44,13 +44,13 @@ export function ChatMessageList({
         if (isUser) {
           return (
             <div key={m.id || idx} className="flex flex-col items-end gap-1 max-w-xl self-end min-w-0">
-              <div className="bg-[#A4F1B2] text-[#131B2E] px-4 py-3 rounded-2xl rounded-br-none shadow-xs border border-[#1F6C3A]/20 break-words max-w-full min-w-0">
+              <div className="bg-[#A4F1B2] dark:bg-emerald-900/60 text-[#131B2E] dark:text-emerald-100 px-4 py-3 rounded-2xl rounded-br-none shadow-xs border border-[#1F6C3A]/20 dark:border-emerald-700/40 break-words max-w-full min-w-0">
                 <p className="font-medium text-sm leading-relaxed whitespace-pre-wrap break-words">
                   "{m.content}"
                 </p>
               </div>
-              <div className="flex items-center gap-1.5 px-1 text-slate-500 min-w-0">
-                <Mic className="h-3 w-3 text-[#1F6C3A] shrink-0" />
+              <div className="flex items-center gap-1.5 px-1 text-slate-500 dark:text-slate-400 min-w-0">
+                <Mic className="h-3 w-3 text-[#1F6C3A] dark:text-emerald-400 shrink-0" />
                 <span className="font-mono text-[10px] font-bold uppercase truncate">
                   {new Date(m.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Citizen Query
                 </span>
@@ -62,23 +62,25 @@ export function ChatMessageList({
         return (
           <div key={m.id || idx} className="flex flex-col items-start gap-2 max-w-2xl self-start w-full min-w-0">
             <div className={`p-4 sm:p-5 rounded-2xl rounded-bl-none shadow-sm border w-full flex flex-col gap-3 min-w-0 overflow-hidden ${
-              isError ? 'bg-rose-50 border-rose-200' : 'bg-white border-slate-200/80 text-slate-900'
+              isError
+                ? 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900/50'
+                : 'bg-white dark:bg-[#0c1812] border-slate-200/80 dark:border-emerald-950/80 text-slate-900 dark:text-slate-100'
             }`}>
 
-              <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2 flex-wrap sm:flex-nowrap">
+              <div className="flex items-center justify-between gap-2 border-b border-slate-100 dark:border-emerald-950/60 pb-2 flex-wrap sm:flex-nowrap">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className={`h-6 w-6 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
                     isError ? 'bg-rose-600 text-white' : 'bg-[#0E6245] text-white'
                   }`}>
                     {isError ? <AlertTriangle className="h-3.5 w-3.5" /> : 'AI'}
                   </span>
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate">
+                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">
                     {isError ? 'System Alert' : 'Verified Welfare Advisor'}
                   </span>
                 </div>
 
                 {m.memory_trace && (
-                  <span className="px-2 py-0.5 rounded-full bg-[#E2E7FF] text-[#0E6245] font-bold text-[10px] flex items-center gap-1 shrink-0">
+                  <span className="px-2 py-0.5 rounded-full bg-[#E2E7FF] dark:bg-emerald-950/80 text-[#0E6245] dark:text-emerald-300 font-bold text-[10px] flex items-center gap-1 shrink-0">
                     <Brain className="h-3 w-3" />
                     {m.memory_trace.semantic_memory?.recalled_facts_count || 3} Contexts
                   </span>

@@ -215,7 +215,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
 
       {/* Modern Floating Pill Composer */}
       <div
-        className={`relative rounded-3xl bg-white border border-slate-200 shadow-md transition-all px-3 py-2 flex items-center gap-2 focus-within:border-[#0E6245] focus-within:ring-2 focus-within:ring-[#0E6245]/20`}
+        className={`relative rounded-3xl bg-white dark:bg-[#0c1812] border border-slate-200 dark:border-emerald-950/80 shadow-md dark:shadow-xl transition-all px-3 py-2 flex items-center gap-2 focus-within:border-[#0E6245] dark:focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-[#0E6245]/20`}
       >
         {/* Attach Button (Left) */}
         <button
@@ -223,10 +223,10 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
           onClick={() => {
             window.location.href = '/vault'
           }}
-          className="h-10 w-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center shrink-0 transition-colors cursor-pointer"
+          className="h-10 w-10 rounded-full bg-slate-100 dark:bg-[#15291f] hover:bg-slate-200 dark:hover:bg-[#1c3629] text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0 transition-colors cursor-pointer"
           title="Attach document or open vault"
         >
-          <Plus className="h-5 w-5 text-slate-600" />
+          <Plus className="h-5 w-5 text-slate-600 dark:text-slate-400" />
         </button>
 
         {/* Main Text Area */}
@@ -238,7 +238,7 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={isStreaming}
-          className="flex-1 bg-transparent border-0 resize-none py-2.5 px-2 text-sm text-slate-900 placeholder:text-slate-400 font-medium focus:outline-none max-h-40 leading-relaxed disabled:opacity-50"
+          className="flex-1 bg-transparent border-0 resize-none py-2.5 px-2 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium focus:outline-none max-h-40 leading-relaxed disabled:opacity-50"
         />
 
         {/* Right Actions: Mic & Send */}
@@ -249,12 +249,12 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
               onClick={handleToggleDictation}
               className={`h-10 w-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
                 activeDictating
-                  ? 'bg-rose-100 text-rose-700 border border-rose-300 animate-pulse'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                  ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800 animate-pulse'
+                  : 'bg-slate-100 dark:bg-[#15291f] hover:bg-slate-200 dark:hover:bg-[#1c3629] text-slate-700 dark:text-slate-300'
               }`}
               title={activeDictating ? 'Stop listening' : 'Speak to input text'}
             >
-              {activeDictating ? <MicOff className="h-4 w-4 text-rose-600" /> : <Mic className="h-4 w-4 text-[#0E6245]" />}
+              {activeDictating ? <MicOff className="h-4 w-4 text-rose-600 dark:text-rose-400" /> : <Mic className="h-4 w-4 text-[#0E6245] dark:text-emerald-400" />}
             </button>
           )}
 
@@ -264,13 +264,13 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
             disabled={!canSend}
             className={`h-10 w-10 sm:h-10 sm:w-20 rounded-full flex items-center justify-center gap-1.5 transition-all ${
               canSend
-                ? 'bg-[#0E6245] hover:bg-[#004831] text-white shadow-xs cursor-pointer active:scale-95'
-                : 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-60'
+                ? 'bg-[#0E6245] hover:bg-[#004831] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white shadow-xs cursor-pointer active:scale-95'
+                : 'bg-slate-100 dark:bg-[#15291f] text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-60'
             }`}
             title={canSend ? 'Send message' : 'Type a message to send'}
           >
             {isStreaming ? (
-              <Loader2 className="h-4 w-4 animate-spin text-[#0E6245]" />
+              <Loader2 className="h-4 w-4 animate-spin text-[#0E6245] dark:text-emerald-400" />
             ) : (
               <>
                 <span className="hidden sm:inline text-sm font-bold">Send</span>
@@ -282,10 +282,10 @@ export const ChatComposer: React.FC<ChatComposerProps> = ({
       </div>
 
       {/* Trust & Micro-interaction Subtitle */}
-      <div className="flex items-center justify-between text-[11px] text-slate-500 mt-3 px-2">
-        <span>Press <strong className="text-slate-700 font-semibold">Enter</strong> to send · <strong className="text-slate-700 font-semibold">Shift+Enter</strong> for newline</span>
-        <span className="flex items-center gap-1 text-slate-600 font-medium">
-          <ShieldCheck className="h-3 w-3 text-[#0E6245]" />
+      <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 mt-3 px-2">
+        <span>Press <strong className="text-slate-700 dark:text-slate-300 font-semibold">Enter</strong> to send · <strong className="text-slate-700 dark:text-slate-300 font-semibold">Shift+Enter</strong> for newline</span>
+        <span className="flex items-center gap-1 text-slate-600 dark:text-slate-400 font-medium">
+          <ShieldCheck className="h-3 w-3 text-[#0E6245] dark:text-emerald-400" />
           Protected under DPDPA 2023
         </span>
       </div>

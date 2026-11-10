@@ -61,3 +61,4 @@ web/.vercel/
 .pnpm-store
 web/.pnpm-store
 web/.pnpm-store.bak
+.taste-skill/

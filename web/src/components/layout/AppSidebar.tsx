@@ -64,28 +64,28 @@ export function AppSidebar({
       label: 'Chat (AI Advisor)',
       icon: <MessageSquare className="h-5 w-5" />,
       isActive: isChatRoute,
-      badge: <span className="px-2 py-0.5 rounded-full bg-[#A4F1B2] text-[#24703E] font-bold text-[11px]">Live</span>,
+      badge: <span className="px-2 py-0.5 rounded-full bg-[#A4F1B2] dark:bg-emerald-950/80 text-[#24703E] dark:text-emerald-300 font-bold text-[11px]">Live</span>,
     },
     {
       href: '/schemes',
       label: 'Schemes',
       icon: <Compass className="h-5 w-5" />,
       isActive: pathname?.startsWith('/schemes'),
-      badge: <span className="px-2 py-0.5 rounded-full bg-[#E2E7FF] text-[#131B2E] font-mono font-bold text-[11px]">4148+</span>,
+      badge: <span className="px-2 py-0.5 rounded-full bg-[#E2E7FF] dark:bg-emerald-900/50 text-[#131B2E] dark:text-emerald-200 font-mono font-bold text-[11px]">4148+</span>,
     },
     {
       href: '/check',
       label: 'Check (Wizard)',
       icon: <Sparkles className="h-5 w-5" />,
       isActive: pathname === '/check' || pathname === '/results',
-      badge: <span className="px-2 py-0.5 rounded-full bg-[#A4F1B2] text-[#24703E] font-bold text-[11px]">Fast</span>,
+      badge: <span className="px-2 py-0.5 rounded-full bg-[#A4F1B2] dark:bg-emerald-950/80 text-[#24703E] dark:text-emerald-300 font-bold text-[11px]">Fast</span>,
     },
     {
       href: '/vault',
       label: 'Vault (Readiness)',
       icon: <FolderLock className="h-5 w-5" />,
       isActive: pathname === '/vault',
-      badge: <span className="px-2 py-0.5 rounded-full bg-[#E2E7FF] text-[#131B2E] font-bold text-[11px]">Docs</span>,
+      badge: <span className="px-2 py-0.5 rounded-full bg-[#E2E7FF] dark:bg-emerald-900/50 text-[#131B2E] dark:text-emerald-200 font-bold text-[11px]">Docs</span>,
     },
   ]
 
@@ -105,11 +105,11 @@ export function AppSidebar({
   ]
 
   return (
-    <aside className="w-72 h-screen bg-white z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)] font-sans fixed lg:static left-0 top-0 border-r border-slate-200">
+    <aside className="w-72 h-screen bg-white dark:bg-[#0a140f] z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)] dark:shadow-[0_1px_12px_rgba(0,0,0,0.5)] font-sans fixed lg:static left-0 top-0 border-r border-slate-200 dark:border-emerald-950/60 transition-colors duration-150">
       <div className="flex flex-col flex-1 overflow-y-auto scrollbar-none">
 
         {/* Brand Header */}
-        <div className="h-16 px-4 flex items-center gap-2.5 bg-white shrink-0">
+        <div className="h-16 px-4 flex items-center gap-2.5 bg-white dark:bg-[#0a140f] shrink-0 border-b border-transparent dark:border-emerald-950/40">
           <img
             alt="Scheme AI Logo"
             src="/icon.png"
@@ -119,19 +119,19 @@ export function AppSidebar({
             }}
           />
           <div className="flex flex-col min-w-0">
-            <span className="font-black text-[#0E6245] text-base tracking-tight truncate">
+            <span className="font-black text-[#0E6245] dark:text-emerald-400 text-base tracking-tight truncate">
               Scheme AI
             </span>
-            <span className="font-bold text-[11px] text-slate-500 truncate">
+            <span className="font-bold text-[11px] text-slate-500 dark:text-slate-400 truncate">
               Citizen Welfare Navigator
             </span>
           </div>
         </div>
 
         {/* Triple Color Band Decorator */}
-        <div className="h-1 w-full bg-[#E2E7FF] flex shrink-0">
+        <div className="h-1 w-full bg-[#E2E7FF] dark:bg-emerald-950/60 flex shrink-0">
           <div className="w-1/3 bg-[#8F3E0C]"></div>
-          <div className="w-1/3 bg-white"></div>
+          <div className="w-1/3 bg-white dark:bg-slate-300"></div>
           <div className="w-1/3 bg-[#0E6245]"></div>
         </div>
 
@@ -140,7 +140,7 @@ export function AppSidebar({
 
           {/* Civic Services */}
           <div className="shrink-0">
-            <div className="font-bold text-[11px] uppercase tracking-wider text-slate-500 px-2 pb-1">
+            <div className="font-bold text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 px-2 pb-1">
               Civic Services
             </div>
             <nav className="flex flex-col gap-1">
@@ -152,11 +152,11 @@ export function AppSidebar({
                   className={`flex items-center justify-between px-4 py-2.5 rounded-xl transition-all ${
                     item.isActive
                       ? 'bg-[#0E6245] text-white font-bold shadow-xs'
-                      : 'text-slate-600 hover:bg-[#F2F3FF] hover:text-slate-900 font-semibold'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-[#F2F3FF] dark:hover:bg-[#112219] hover:text-slate-900 dark:hover:text-white font-semibold'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className={item.isActive ? 'text-white' : 'text-slate-500'}>
+                    <span className={item.isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'}>
                       {item.icon}
                     </span>
                     <span className="text-[13px]">{item.label}</span>
@@ -169,7 +169,7 @@ export function AppSidebar({
 
           {/* Account & Assistance */}
           <div className="shrink-0">
-            <div className="font-bold text-[11px] uppercase tracking-wider text-slate-500 px-2 pt-2 pb-1">
+            <div className="font-bold text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 px-2 pt-2 pb-1">
               Account & Assistance
             </div>
             <nav className="flex flex-col gap-1">
@@ -181,10 +181,10 @@ export function AppSidebar({
                   className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${
                     item.isActive
                       ? 'bg-[#0E6245] text-white font-bold shadow-xs'
-                      : 'text-slate-600 hover:bg-[#F2F3FF] hover:text-slate-900 font-semibold'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-[#F2F3FF] dark:hover:bg-[#112219] hover:text-slate-900 dark:hover:text-white font-semibold'
                   }`}
                 >
-                  <span className={item.isActive ? 'text-white' : 'text-slate-500'}>
+                  <span className={item.isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'}>
                     {item.icon}
                   </span>
                   <span className="text-[13px]">{item.label}</span>
@@ -193,7 +193,7 @@ export function AppSidebar({
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex items-center gap-3 px-4 py-2 rounded-xl text-rose-600 hover:bg-rose-50 font-semibold transition-all text-left w-full cursor-pointer"
+                className="flex items-center gap-3 px-4 py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-semibold transition-all text-left w-full cursor-pointer"
               >
                 <LogOut className="h-4 w-4" />
                 <span className="text-[13px]">Sign Out</span>
@@ -203,12 +203,12 @@ export function AppSidebar({
 
           {/* Consultation History (If active) - Expands to fill available space */}
           {sessions.length > 0 && (
-            <div className="pt-2 border-t border-slate-200 flex flex-col flex-1 min-h-0">
+            <div className="pt-2 border-t border-slate-200 dark:border-emerald-950/60 flex flex-col flex-1 min-h-0">
               <div className="flex items-center justify-between px-2 pb-2 shrink-0">
-                <span className="font-bold text-[11px] uppercase tracking-wider text-slate-500">
+                <span className="font-bold text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   Recent Queries
                 </span>
-                <span className="font-mono text-[10px] text-[#0E6245] font-bold">
+                <span className="font-mono text-[10px] text-[#0E6245] dark:text-emerald-400 font-bold">
                   {sessions.length} Recorded
                 </span>
               </div>
@@ -228,22 +228,22 @@ export function AppSidebar({
                       }}
                       className={`text-left p-2.5 rounded-xl transition-all flex flex-col gap-1 shrink-0 ${
                         isSelected
-                          ? 'bg-[#F2F3FF] border-l-4 border-[#0E6245]'
-                          : 'hover:bg-[#F2F3FF]'
+                          ? 'bg-[#F2F3FF] dark:bg-[#112219] border-l-4 border-[#0E6245] dark:border-emerald-400'
+                          : 'hover:bg-[#F2F3FF] dark:hover:bg-[#112219]'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <span className={`text-xs font-bold line-clamp-1 ${isSelected ? 'text-slate-900' : 'text-slate-700'}`}>
+                        <span className={`text-xs font-bold line-clamp-1 ${isSelected ? 'text-slate-900 dark:text-white' : 'text-slate-700 dark:text-slate-300'}`}>
                           {s.title || `Consultation #${s.id}`}
                         </span>
-                        {isSelected && <span className="h-1.5 w-1.5 rounded-full bg-[#1F6C3A] shrink-0 mt-1 animate-pulse" />}
+                        {isSelected && <span className="h-1.5 w-1.5 rounded-full bg-[#1F6C3A] dark:bg-emerald-400 shrink-0 mt-1 animate-pulse" />}
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="font-mono text-[9px] text-slate-500">
+                        <span className="font-mono text-[9px] text-slate-500 dark:text-slate-400">
                           {isSelected ? 'Active Now' : 'Archived'}
                         </span>
                         <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
-                          isSelected ? 'bg-[#A4F1B2] text-[#24703E]' : 'bg-[#E2E7FF] text-slate-600'
+                          isSelected ? 'bg-[#A4F1B2] dark:bg-emerald-950/80 text-[#24703E] dark:text-emerald-300' : 'bg-[#E2E7FF] dark:bg-emerald-900/40 text-slate-600 dark:text-slate-300'
                         }`}>
                           {isSelected ? 'Active' : 'Completed'}
                         </span>
@@ -260,7 +260,7 @@ export function AppSidebar({
 
       {/* New Consultation Fixed Button Area */}
       {onNewSession && (
-        <div className="p-4 border-t border-slate-200 bg-slate-50">
+        <div className="p-4 border-t border-slate-200 dark:border-emerald-950/60 bg-slate-50 dark:bg-[#070e0a]">
           <button
             onClick={() => {
               onNewSession();

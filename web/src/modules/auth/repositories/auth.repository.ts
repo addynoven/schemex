@@ -35,6 +35,7 @@ export const authRepository = {
     avatarUrl?: string
     authProvider: 'email' | 'google'
     password?: string
+    idToken?: string
   }): Promise<UserMeResponse> {
     const cleanEmail = params.email.trim().toLowerCase()
     const password = params.password || 'SecurePass123!'
@@ -43,7 +44,12 @@ export const authRepository = {
     let loginRes = await request<AuthTokenResponse>(`/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: cleanEmail, password, auth_provider: params.authProvider }),
+      body: JSON.stringify({
+        email: cleanEmail,
+        password,
+        auth_provider: params.authProvider,
+        id_token: params.idToken,
+      }),
     })
 
     if (!loginRes.ok) {
@@ -53,7 +59,7 @@ export const authRepository = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: cleanEmail,
-          phone: params.phone || '+919876543210',
+          phone: params.phone || undefined,
           password,
         }),
       }).catch(() => {})
@@ -61,7 +67,12 @@ export const authRepository = {
       loginRes = await request<AuthTokenResponse>(`/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: cleanEmail, password, auth_provider: params.authProvider }),
+        body: JSON.stringify({
+          email: cleanEmail,
+          password,
+          auth_provider: params.authProvider,
+          id_token: params.idToken,
+        }),
       })
     }
 
@@ -164,6 +175,7 @@ export const authRepository = {
     try {
       const credential = await signInWithPopup(firebaseAuth, googleAuthProvider)
       const fbUser = credential.user
+      const idToken = await fbUser.getIdToken()
 
       return await this.syncUserToPostgres({
         email: fbUser.email || `citizen.google@example.com`,
@@ -172,15 +184,12 @@ export const authRepository = {
         avatarUrl: fbUser.photoURL || undefined,
         authProvider: 'google',
         password: 'SecurePass123!',
+        idToken,
       })
     } catch (err) {
-      // Fallback
-      return await this.syncUserToPostgres({
-        email: 'citizen.google@example.com',
-        fullName: 'Google Citizen',
-        authProvider: 'google',
-        password: 'SecurePass123!',
-      })
+      // Google-only auth: a failed popup must surface, never fake a session
+      console.error('Firebase Google sign-in failed:', err)
+      throw new Error('Google sign-in failed. Please try again.')
     }
   },
 

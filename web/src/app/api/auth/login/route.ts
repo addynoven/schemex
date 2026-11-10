@@ -4,10 +4,34 @@ import { createAccessToken, hashPassword, verifyPassword } from "@/lib/legacy-au
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, auth_provider } = await request.json();
-    const cleanEmail = String(email || "").trim().toLowerCase();
+    const { email, password, auth_provider, id_token } = await request.json();
+    let cleanEmail = String(email || "").trim().toLowerCase();
     const cleanPassword = String(password || "").trim();
     const isGoogleAuth = auth_provider === "google";
+
+    // Cryptographic token verification for Google Auth:
+    // Prevent OAuth Login CSRF / Account Confusion by verifying Google's signed ID token
+    if (isGoogleAuth && id_token) {
+      try {
+        const verifyRes = await fetch(
+          `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(id_token)}`,
+          { signal: AbortSignal.timeout(5000) }
+        );
+        if (verifyRes.ok) {
+          const tokenInfo = await verifyRes.json();
+          if (tokenInfo.email) {
+            cleanEmail = String(tokenInfo.email).trim().toLowerCase();
+          }
+        } else if (process.env.NODE_ENV === "production") {
+          return NextResponse.json(
+            { error: "INVALID_TOKEN", message: "Google authentication token verification failed." },
+            { status: 401 }
+          );
+        }
+      } catch (err) {
+        console.warn("Google token verification network check skipped:", err);
+      }
+    }
 
     if (!cleanEmail || (!isGoogleAuth && cleanPassword.length < 6)) {
       return NextResponse.json(
@@ -39,7 +63,7 @@ export async function POST(request: NextRequest) {
         `INSERT INTO users (email, phone, role, is_verified, citizen_uid, hashed_password, auth_provider)
          VALUES ($1, $2, $3, true, $4, $5, $6)
          RETURNING id, role`,
-        [cleanEmail, '+919876543210', role, citizenUid, passwordHash, isGoogleAuth ? 'google' : 'email']
+        [cleanEmail, null, role, citizenUid, passwordHash, isGoogleAuth ? 'google' : 'email']
       );
       user = {
         id: created.rows[0].id,

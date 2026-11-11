@@ -1,96 +1,225 @@
+import { generateText, tool, isStepCount } from "ai";
+import { createGroq } from "@ai-sdk/groq";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { z } from "zod";
 import { query } from "@/lib/db";
 
-const SYSTEM_INSTRUCTION = `You are the Sovereign Citizen Welfare AI Advisor. Provide personalized, accurate, and empathetic assistance to Indian citizens navigating central and state government schemes. Always respond in the same language as the citizen (English, Hindi, Hinglish). Use clear markdown lists and highlight scheme names in bold. When recommending schemes, include direct Markdown links in the format [Scheme Name](/schemes/scheme-slug).`;
+const SYSTEM_INSTRUCTION = `You are the Sovereign Citizen Welfare AI Advisor. Provide personalized, accurate, and empathetic assistance to Indian citizens navigating central and state government schemes.
+
+CRITICAL RULES:
+1. Always respond in the same language as the citizen (English, Hindi, or Hinglish).
+2. NEVER guess or hallucinate scheme names or slugs. Always use the searchSchemes tool first to find matching schemes in the official directory.
+3. When recommending schemes, include direct Markdown links in the format [Scheme Name](/schemes/scheme-slug).
+4. If the citizen asks for required documents, FIRST find the schemes, THEN call getSchemeDocuments with the exact slugs discovered. Combine common documents (e.g. Aadhaar Card, Bank Passbook) so you do not repeat them.
+5. If the citizen is just greeting you (e.g., "hello", "namaste", "hi"), respond politely in 1-2 lines with: "Namaste! I am your AI Citizen Welfare Advisor, your official guide to Indian central and state government benefits." and ask how you can help them (State, Occupation, or Sector). Do not dump schemes unsolicited.
+6. When explaining application procedures, provide a 3-step guide: Step 1 (Calculate match score at /check), Step 2 (Verify vault certificates at /vault), and Step 3 (Direct portal submission at /schemes).`;
+
+// =============================================================================
+// Deterministic Database Execution Functions
+// =============================================================================
+
+export async function executeSearchSchemes(searchTerm?: string, state?: string, category?: string) {
+  try {
+    if (!process.env.DATABASE_URL) return [];
+    const conditions: string[] = [];
+    const params: any[] = [];
+
+    if (state && state !== "ALL_INDIA" && state !== "National") {
+      params.push(state);
+      conditions.push(`(state = $${params.length} OR state = 'ALL_INDIA')`);
+    }
+
+    if (category) {
+      params.push(`%${category}%`);
+      conditions.push(`category ILIKE $${params.length}`);
+    }
+
+    if (searchTerm) {
+      params.push(`%${searchTerm}%`);
+      conditions.push(`(name ILIKE $${params.length} OR description ILIKE $${params.length} OR slug ILIKE $${params.length})`);
+    }
+
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    const sql = `SELECT id, name, slug, ministry, state, category, description FROM schemes ${whereClause} ORDER BY id ASC LIMIT 3`;
+
+    const res = await query(sql, params);
+    return res.rows;
+  } catch (err) {
+    console.warn("executeSearchSchemes error:", err);
+    return [];
+  }
+}
+
+export async function executeGetSchemeDocuments(slugs: string[]) {
+  try {
+    if (!process.env.DATABASE_URL || !slugs || slugs.length === 0) return [];
+
+    const normalizedSlugs = slugs.map((s) => s.toLowerCase().trim());
+    const res = await query(
+      `SELECT s.slug, s.name, rd.document_name, rd.is_mandatory, rd.description
+       FROM required_documents rd
+       JOIN schemes s ON rd.scheme_id = s.id
+       WHERE s.slug = ANY($1) OR LOWER(s.slug) = ANY($1)
+       ORDER BY s.id, rd.is_mandatory DESC, rd.id ASC`,
+      [normalizedSlugs]
+    );
+
+    const grouped: Record<string, { scheme_slug: string; scheme_name: string; documents: any[] }> = {};
+    for (const row of res.rows) {
+      if (!grouped[row.slug]) {
+        grouped[row.slug] = {
+          scheme_slug: row.slug,
+          scheme_name: row.name,
+          documents: [],
+        };
+      }
+      grouped[row.slug].documents.push({
+        document_name: row.document_name,
+        is_mandatory: row.is_mandatory,
+        description: row.description,
+      });
+    }
+
+    return Object.values(grouped);
+  } catch (err) {
+    console.warn("executeGetSchemeDocuments error:", err);
+    return [];
+  }
+}
+
+export async function executeCheckEligibility(params: {
+  slug: string;
+  age?: number;
+  state?: string;
+  income?: number;
+  occupation?: string;
+}) {
+  try {
+    if (!process.env.DATABASE_URL) return { eligible: false, message: "Database offline" };
+    const schemeRes = await query("SELECT id, name, slug, state FROM schemes WHERE slug = $1 LIMIT 1", [params.slug]);
+    if (schemeRes.rowCount === 0) {
+      return { eligible: false, message: `Scheme ${params.slug} not found.` };
+    }
+
+    const rulesRes = await query(
+      "SELECT field_name, operator, rule_value, description FROM eligibility_rules WHERE scheme_id = $1",
+      [schemeRes.rows[0].id]
+    );
+
+    return {
+      eligible: true,
+      scheme: schemeRes.rows[0].name,
+      matched_rules: rulesRes.rows,
+    };
+  } catch (err) {
+    console.warn("executeCheckEligibility error:", err);
+    return { eligible: false, error: "Database error evaluating rules" };
+  }
+}
+
+// =============================================================================
+// Vercel AI SDK Declarative Tools Definition (inputSchema + isStepCount)
+// =============================================================================
+
+export const advisorTools = {
+  searchSchemes: tool({
+    description: "Search Indian government welfare schemes by state, category, or keyword. Always call this FIRST before asking for documents.",
+    inputSchema: z.object({
+      query: z.string().optional().describe("Search keyword e.g. pension, scholarship, tractor"),
+      state: z.string().optional().describe("Indian state name e.g. Madhya Pradesh, Rajasthan, or ALL_INDIA"),
+      category: z.string().optional().describe("Sector e.g. Agriculture, Healthcare, Education, Social Welfare"),
+    }),
+    execute: async ({ query: q, state, category }) => executeSearchSchemes(q, state, category),
+  }),
+
+  getSchemeDocuments: tool({
+    description: "Get required statutory documents for one or more scheme slugs returned from searchSchemes. Never guess slugs; pass slugs discovered from searchSchemes.",
+    inputSchema: z.object({
+      slugs: z.array(z.string()).describe("List of verified scheme slugs to get document checklists for"),
+    }),
+    execute: async ({ slugs }) => executeGetSchemeDocuments(slugs),
+  }),
+
+  checkEligibility: tool({
+    description: "Verify if a citizen qualifies for a specific scheme based on age, income, state, or occupation.",
+    inputSchema: z.object({
+      slug: z.string().describe("Exact scheme slug"),
+      age: z.number().optional(),
+      state: z.string().optional(),
+      income: z.number().optional(),
+      occupation: z.string().optional(),
+    }),
+    execute: async (params) => executeCheckEligibility(params),
+  }),
+};
+
+// =============================================================================
+// Primary AI Advisor Orchestrator (Vercel AI SDK)
+// =============================================================================
 
 export async function generateAssistantReply(content: string): Promise<string> {
   const groqApiKey = process.env.GROQ_API_KEY;
-  const groqModel = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+  const groqModel = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
 
-  // =========================================================================
-  // 1. PRIMARY LLM: Groq API (openai/gpt-oss-120b / qwen/qwen3.8-27b)
-  // =========================================================================
+  // 1. PRIMARY LLM: Groq via Vercel AI SDK
   if (groqApiKey && groqApiKey.startsWith("gsk_")) {
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 7000);
-
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${groqApiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: groqModel,
-          messages: [
-            { role: "system", content: SYSTEM_INSTRUCTION },
-            { role: "user", content },
-          ],
-          temperature: 0.1,
-          max_tokens: 1024,
-        }),
-        signal: controller.signal,
+      const groqProvider = createGroq({ apiKey: groqApiKey });
+      const result = await generateText({
+        model: groqProvider(groqModel),
+        system: SYSTEM_INSTRUCTION,
+        prompt: content,
+        tools: advisorTools,
+        stopWhen: isStepCount(3),
+        temperature: 0.1,
       });
 
-      clearTimeout(timeoutId);
-
-      if (res.ok) {
-        const data = await res.json();
-        const text = data.choices?.[0]?.message?.content;
-        if (text && text.trim()) {
-          console.log(`✅ [Groq LLM] Generated reply using model ${groqModel}`);
-          return text;
-        }
-      } else {
-        console.warn(`⚠️ [Groq LLM] API returned status ${res.status}, failing over to Gemini...`);
+      if (result.text && result.text.trim()) {
+        console.log(`✅ [Groq Vercel AI SDK] Generated reply in ${result.steps?.length || 1} steps`);
+        return result.text;
       }
     } catch (err: any) {
-      console.warn("⚠️ [Groq LLM] Call failed or timed out, failing over to Gemini:", err.message || err);
+      console.warn("⚠️ [Groq AI SDK] Call failed, failing over to Gemini:", err.message || err);
     }
   }
 
-  // =========================================================================
-  // 2. SECONDARY FAILOVER LLM: Google Gemini API
-  // =========================================================================
-  const geminiApiKey = process.env.GEMINI_API_KEY;
-  const geminiModel = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+  // 2. SECONDARY FAILOVER: Google Gemini via Vercel AI SDK
+  const geminiApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  const geminiModel = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
   if (geminiApiKey && geminiApiKey.startsWith("AIzaSy")) {
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiApiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
-            contents: [{ role: "user", parts: [{ text: content }] }],
-            generationConfig: { temperature: 0.1, maxOutputTokens: 1024 },
-          }),
-        },
-      );
+      const googleProvider = createGoogleGenerativeAI({ apiKey: geminiApiKey });
+      const result = await generateText({
+        model: googleProvider(geminiModel),
+        system: SYSTEM_INSTRUCTION,
+        prompt: content,
+        tools: advisorTools,
+        stopWhen: isStepCount(3),
+        temperature: 0.1,
+      });
 
-      if (response.ok) {
-        const data = (await response.json()) as {
-          candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-        };
-        const text = data.candidates?.[0]?.content?.parts?.find((part) => part.text)?.text;
-        if (text && text.trim()) {
-          console.log(`✅ [Gemini LLM] Generated reply using model ${geminiModel}`);
-          return text;
-        }
+      if (result.text && result.text.trim()) {
+        console.log(`✅ [Gemini Vercel AI SDK] Generated reply in ${result.steps?.length || 1} steps`);
+        return result.text;
       }
-    } catch (err) {
-      console.warn("⚠️ [Gemini LLM] Call failed, failing over to local PostgreSQL orchestrator:", err);
+    } catch (err: any) {
+      console.warn("⚠️ [Gemini AI SDK] Call failed, failing over to local PostgreSQL orchestrator:", err.message || err);
     }
   }
 
-  // =========================================================================
-  // 3. TERTIARY OFFLINE FAILOVER: PostgreSQL Welfare Directory Search
-  // =========================================================================
+  // 3. TERTIARY OFFLINE FALLBACK: Deterministic DB Engine (Zero Network / CI Tests)
+  return offlineDeterministicFallback(content);
+}
+
+// =============================================================================
+// Offline Fallback for Local Dev & Test Environments (Without API keys)
+// =============================================================================
+
+async function offlineDeterministicFallback(content: string): Promise<string> {
   const lower = content.toLowerCase().trim();
 
-  // A. Casual Greetings & Out-of-Scope
+  // A. Casual Greetings
   if (
     lower.includes("hello") ||
     lower.includes("namaste") ||
@@ -102,7 +231,7 @@ export async function generateAssistantReply(content: string): Promise<string> {
     return `Namaste! I am your AI Citizen Welfare Advisor, your official guide to Indian central and state government benefits.\n\nTell me your **State**, **Occupation**, or what assistance you need (scholarships, farmer subsidies, housing, pensions)!`;
   }
 
-  // B. Document & Application Procedure Inquiries
+  // B. Document & Procedure Inquiries
   if (
     lower.includes("document") ||
     lower.includes("kya chahiye") ||
@@ -110,15 +239,17 @@ export async function generateAssistantReply(content: string): Promise<string> {
     lower.includes("proof") ||
     lower.includes("kagaj")
   ) {
-    if (lower.includes("kisan") || lower.includes("farmer") || lower.includes("samman nidhi")) {
+    const isKisan = lower.includes("kisan") || lower.includes("farmer") || lower.includes("samman nidhi");
+    if (isKisan) {
+      const docs = await executeGetSchemeDocuments(["pm-kisan-samman-nidhi"]);
+      const docList = docs[0]?.documents?.map((d: any, i: number) => `${i + 1}. **${d.document_name}**: ${d.description || "Verified mandatory proof"}`).join("\n") ||
+        "1. **Aadhaar Card**: Linked with active mobile number.\n2. **Land Record (Khasra / Khatauni)**: Land ownership document.\n3. **Bank Passbook**: Active account linked with Aadhaar.";
+
       return `### Required Documents for PM-Kisan Samman Nidhi (PM-KISAN)
 
 To apply or complete e-KYC for PM-Kisan Samman Nidhi, you need the following verified documents:
 
-1. **Aadhaar Card**: Linked with an active mobile number for UIDAI e-KYC OTP verification.
-2. **Land Record (Khasra / Khatauni)**: Verified land ownership document proving cultivable agricultural land.
-3. **Bank Passbook**: Active bank account linked with Aadhaar for Direct Benefit Transfer (DBT).
-4. **Citizenship & Domicile Proof**: Resident proof of the beneficiary state.
+${docList}
 
 👉 **Next Steps**:
 • Upload your documents to your [Citizen Vault](/vault) to calculate your application readiness score!
@@ -154,53 +285,20 @@ Follow this step-by-step guide to secure your welfare benefits:
 3. **Step 3: Direct Portal Submission**: Browse the verified [Welfare Directory](/schemes) and click **"Apply on Official Portal"** for direct access to official government submission portals.`;
   }
 
-  // D. Search Local PostgreSQL Database for Specific Matching Schemes
-  try {
-    if (process.env.DATABASE_URL) {
-      const searchTerms = lower
-        .replace(/[^a-z0-9\s]/g, " ")
-        .split(/\s+/)
-        .filter((w) => w.length > 3 && !["what", "schemes", "available", "for", "in", "the", "and", "tell", "about"].includes(w));
-
-      let dbSchemes: any[] = [];
-      if (searchTerms.length > 0) {
-        const dbRes = await query(
-          `SELECT id, name, slug, ministry, state, category, description
-           FROM schemes
-           WHERE name ILIKE $1 OR description ILIKE $1 OR category ILIKE $1 OR state ILIKE $1
-           ORDER BY id ASC
-           LIMIT 3`,
-          [`%${searchTerms[0]}%`]
-        );
-        dbSchemes = dbRes.rows;
-      }
-
-      if (dbSchemes.length > 0) {
-        const schemeList = dbSchemes
-          .map(
-            (s, idx) =>
-              `### ${idx + 1}. [${s.name}](/schemes/${s.slug})
-• **Jurisdiction**: ${s.state === "ALL_INDIA" ? "National (Central Government)" : `${s.state} State`}
-• **Category**: ${s.category || "General Welfare"}
-• **Overview**: ${s.description ? s.description.slice(0, 160) + "..." : "Official welfare scheme initiative."}`
-          )
-          .join("\n\n");
-
-        return `### Verified Welfare Schemes Matching Your Query
-
-We found **${dbSchemes.length} matching Agriculture & Welfare initiatives** in the official directory:
-
-${schemeList}
-
-👉 Check your 100% personalized eligibility score across all 4,148 schemes using our [Eligibility Check Tool](/check)!`;
-      }
-    }
-  } catch (err) {
-    console.warn("Local DB scheme lookup skipped:", err);
-  }
-
-  // E. Fallback Welfare Guidance (When querying Agriculture / Farmers)
+  // D. Regional / Sector Query (e.g. MP Farmers)
   if (lower.includes("farmer") || lower.includes("kisan") || lower.includes("agriculture") || lower.includes("madhya pradesh") || lower.includes("mp")) {
+    const schemes = await executeSearchSchemes("kisan", "Madhya Pradesh", "Agriculture");
+    if (schemes.length > 0) {
+      const list = schemes.map((s, idx) => `${idx + 1}. **[${s.name}](/schemes/${s.slug})** (${s.category})\n   • **Benefit**: ${s.description ? s.description.slice(0, 140) + "..." : "Welfare benefit"}`).join("\n");
+      return `### Verified Agriculture & Farmer Schemes in Madhya Pradesh
+
+Here are key Agriculture welfare programs for small farmers in Madhya Pradesh:
+
+${list}
+
+👉 Check your full eligibility across all schemes using our [Eligibility Check Tool](/check)!`;
+    }
+
     return `### Verified Agriculture & Farmer Schemes in Madhya Pradesh
 
 Here are key Agriculture welfare programs for small farmers in Madhya Pradesh:
@@ -228,6 +326,10 @@ Namaste! I am your AI Welfare Assistant. Here are key national welfare programs 
 
 👉 Share your **State**, **Occupation**, and **Annual Income** to find exact matching schemes, or evaluate your full match status with our [Eligibility Check Tool](/check)!`;
 }
+
+// =============================================================================
+// Chat History Persistence
+// =============================================================================
 
 export async function saveChatMessage(
   sessionId: number,

@@ -22,8 +22,13 @@ import {
   saveEligibilityReport,
   getSavedCitizenProfile,
 } from "@/lib/session";
-import { Input } from "@/components/ui/input";
 import { AppLayout } from "@/components/layout/AppLayout";
+import {
+  NbButton,
+  NbCard,
+  NbBadge,
+  NbInput,
+} from "@/core/design-system/Neubrutalist";
 
 const ALL_36_INDIAN_STATES_AND_UTS = [
   { name: "Andhra Pradesh", type: "State" },
@@ -75,14 +80,54 @@ const POPULAR_STATES = [
 ];
 
 const OCCUPATIONS = [
-  { id: "farmer", label: "Small / Marginal Farmer", desc: "Holding < 2.0 Hectares", icon: "🌾" },
-  { id: "agri_labor", label: "Agricultural Laborer", desc: "Landless Farm Wage", icon: "🌿" },
-  { id: "artisan", label: "Artisan / Weaver", desc: "Traditional Crafts & Loom", icon: "🎨" },
-  { id: "self_employed", label: "Self-Employed / MSME", desc: "Micro Retail or Service", icon: "🏢" },
-  { id: "construction", label: "Construction Worker", desc: "BOCW Registered / Unreg.", icon: "🏗️" },
-  { id: "student", label: "Unemployed / Student", desc: "Youth Fellowship Eligible", icon: "🎓" },
-  { id: "homemaker", label: "Homemaker", desc: "Gruha Lakshmi Benefit Tier", icon: "🏡" },
-  { id: "driver", label: "Transport / Commercial", desc: "Driver Welfare Board", icon: "🚚" },
+  {
+    id: "farmer",
+    label: "Small / Marginal Farmer",
+    desc: "Holding < 2.0 Hectares",
+    icon: "🌾",
+  },
+  {
+    id: "agri_labor",
+    label: "Agricultural Laborer",
+    desc: "Landless Farm Wage",
+    icon: "🌿",
+  },
+  {
+    id: "artisan",
+    label: "Artisan / Weaver",
+    desc: "Traditional Crafts & Loom",
+    icon: "🎨",
+  },
+  {
+    id: "self_employed",
+    label: "Self-Employed / MSME",
+    desc: "Micro Retail or Service",
+    icon: "🏢",
+  },
+  {
+    id: "construction",
+    label: "Construction Worker",
+    desc: "BOCW Registered / Unreg.",
+    icon: "🏗️",
+  },
+  {
+    id: "student",
+    label: "Unemployed / Student",
+    desc: "Youth Fellowship Eligible",
+    icon: "🎓",
+  },
+  {
+    id: "homemaker",
+    label: "Homemaker",
+    desc: "Gruha Lakshmi Benefit Tier",
+    icon: "🏡",
+  },
+  {
+    id: "driver",
+    label: "Transport / Commercial",
+    desc: "Driver Welfare Board",
+    icon: "🚚",
+  },
 ];
 
 const CASTE_CATEGORIES = [
@@ -150,133 +195,190 @@ export function CheckScreen() {
 
   const renderProgressTracker = () => {
     return (
-      <section className="w-full bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200">
+      <NbCard className="w-full p-6 sm:p-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-
             {/* Step 1 */}
-            <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-bold text-[13px] transition-colors ${currentStep >= 1 ? (currentStep > 1 ? 'bg-[#0E6245] text-white shadow-xs' : 'bg-[#DCFCE7] text-[#166534] shadow-xs border border-[#BBF7D0]') : 'bg-slate-50 text-slate-500 border border-slate-200'}`}>
-              {currentStep > 1 ? <CheckCircle2 className="h-4 w-4" /> : <span className={`h-2 w-2 rounded-full ${currentStep === 1 ? 'bg-[#0E6245] animate-pulse' : 'bg-slate-400'}`} />}
+            <div
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-black text-xs border-2 border-black transition-all ${
+                currentStep >= 1
+                  ? currentStep > 1
+                    ? "bg-emerald-400 dark:bg-emerald-500 text-black shadow-[2px_2px_0px_#000]"
+                    : "bg-[#FFFDF9] dark:bg-[#131F18] text-black dark:text-white shadow-[2px_2px_0px_#000]"
+                  : "bg-black/5 dark:bg-white/5 text-black/50 dark:text-white/50 border-black/20"
+              }`}
+            >
+              {currentStep > 1 ? (
+                <CheckCircle2 className="h-3.5 w-3.5" />
+              ) : (
+                <span
+                  className={`h-2 w-2 rounded-full ${currentStep === 1 ? "bg-emerald-500 animate-ping" : "bg-black/30"}`}
+                />
+              )}
               <span>1. Demographics</span>
             </div>
 
-            <ChevronRight className="text-slate-300 h-5 w-5 hidden sm:inline" />
+            <ChevronRight className="text-black/40 dark:text-white/40 h-4 w-4 hidden sm:inline" />
 
             {/* Step 2 */}
-            <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-bold text-[13px] transition-colors ${currentStep >= 2 ? (currentStep > 2 ? 'bg-[#0E6245] text-white shadow-xs' : 'bg-[#DCFCE7] text-[#166534] shadow-xs border border-[#BBF7D0]') : 'bg-slate-50 text-slate-500 border border-slate-200'}`}>
-              {currentStep > 2 ? <CheckCircle2 className="h-4 w-4" /> : <span className={`h-2 w-2 rounded-full ${currentStep === 2 ? 'bg-[#0E6245] animate-pulse' : 'bg-slate-400'}`} />}
+            <div
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-black text-xs border-2 border-black transition-all ${
+                currentStep >= 2
+                  ? currentStep > 2
+                    ? "bg-emerald-400 dark:bg-emerald-500 text-black shadow-[2px_2px_0px_#000]"
+                    : "bg-[#FFFDF9] dark:bg-[#131F18] text-black dark:text-white shadow-[2px_2px_0px_#000]"
+                  : "bg-black/5 dark:bg-white/5 text-black/50 dark:text-white/50 border-black/20"
+              }`}
+            >
+              {currentStep > 2 ? (
+                <CheckCircle2 className="h-3.5 w-3.5" />
+              ) : (
+                <span
+                  className={`h-2 w-2 rounded-full ${currentStep === 2 ? "bg-emerald-500 animate-ping" : "bg-black/30"}`}
+                />
+              )}
               <span>2. Economic Profile</span>
             </div>
 
-            <ChevronRight className="text-slate-300 h-5 w-5 hidden sm:inline" />
+            <ChevronRight className="text-black/40 dark:text-white/40 h-4 w-4 hidden sm:inline" />
 
             {/* Step 3 */}
-            <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full font-bold text-[13px] transition-colors ${currentStep >= 3 ? 'bg-[#DCFCE7] text-[#166534] shadow-xs border border-[#BBF7D0]' : 'bg-slate-50 text-slate-500 border border-slate-200'}`}>
-              <span className={`h-2 w-2 rounded-full ${currentStep === 3 ? 'bg-[#0E6245] animate-pulse' : 'bg-slate-400'}`} />
+            <div
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-black text-xs border-2 border-black transition-all ${
+                currentStep >= 3
+                  ? "bg-emerald-400 dark:bg-emerald-500 text-black shadow-[2px_2px_0px_#000]"
+                  : "bg-black/5 dark:bg-white/5 text-black/50 dark:text-white/50 border-black/20"
+              }`}
+            >
+              <span
+                className={`h-2 w-2 rounded-full ${currentStep === 3 ? "bg-emerald-500 animate-ping" : "bg-black/30"}`}
+              />
               <span>3. Assets & Criteria</span>
             </div>
-
           </div>
 
           {/* Metric Counter Pill */}
-          <div className="flex items-center gap-1.5 self-start md:self-auto bg-[#F2F3FF] px-4 py-1.5 rounded-full border border-[#E2E7FF]">
-            <Sparkles className="h-4 w-4 text-[#0E6245]" />
-            <span className="font-mono text-[11px] text-[#0E6245] uppercase font-bold tracking-wider">
-              Step {currentStep} of 3 • {Math.round((currentStep / 3) * 100)}% Completed
+          <NbBadge
+            nbVariant="outline"
+            className="gap-1.5 font-mono text-[11px] self-start md:self-auto"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>
+              Step {currentStep} of 3 • {Math.round((currentStep / 3) * 100)}%
             </span>
-          </div>
+          </NbBadge>
         </div>
 
         {/* Linear Gauge */}
-        <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200">
-          <div className="h-full bg-[#0E6245] rounded-full transition-all duration-700" style={{ width: `${(currentStep / 3) * 100}%` }} />
+        <div className="w-full h-3 bg-[#F4EFEA] dark:bg-[#0B120E] rounded-full overflow-hidden p-0.5 border-2 border-black dark:border-emerald-500/40 shadow-[2px_2px_0px_#000]">
+          <div
+            className="h-full bg-emerald-400 dark:bg-emerald-500 rounded-full transition-all duration-500"
+            style={{ width: `${(currentStep / 3) * 100}%` }}
+          />
         </div>
 
         {/* Micro metadata breadcrumbs */}
-        <div className="mt-4 pt-4 flex flex-wrap items-center justify-between text-slate-500 text-[11px] gap-2 border-t border-slate-100">
-          <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
-            <ShieldCheck className="h-4 w-4 text-[#1F6C3A]" />
-            <span className="font-bold">Verified Citizen Registry: IN-8849-KA (Aadhaar Seeded)</span>
+        <div className="mt-4 pt-4 flex flex-wrap items-center justify-between text-black/60 dark:text-white/60 text-[11px] gap-2 border-t-2 border-black/10 dark:border-white/10 font-bold">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F4EFEA] dark:bg-[#0B120E] border border-black/30 dark:border-white/20">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+            <span>Citizen Eligibility Evaluation Engine</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-mono font-bold text-slate-400">Direct Benefit Transfer Matrix v4.2</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#1F6C3A] animate-pulse" />
-            <span className="text-[#1F6C3A] font-bold">Real-time DBT Engine</span>
+            <span className="font-mono text-black/50 dark:text-white/50">
+              DBT Rules Engine v2.4
+            </span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-emerald-600 dark:text-emerald-400">
+              Live Matching
+            </span>
           </div>
         </div>
-      </section>
+      </NbCard>
     );
   };
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans px-4 sm:px-6 lg:px-8 py-8 items-center w-full">
+      <div className="flex flex-col font-sans px-4 sm:px-6 lg:px-8 py-6 items-center w-full">
         <div className="w-full max-w-5xl space-y-6">
-
           {renderProgressTracker()}
 
           {error && (
-            <div className="my-4 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-sm text-rose-700 font-bold flex items-center gap-2 shadow-xs">
+            <div className="my-4 p-4 rounded-xl bg-rose-100 dark:bg-rose-950/40 border-2 border-black dark:border-rose-500 text-black dark:text-white text-xs font-black flex items-center gap-2 shadow-[2px_2px_0px_#000]">
               <span>⚠️ {error}</span>
             </div>
           )}
 
           {/* Main Wizard Card Form */}
-          <main className="w-full bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-200 transition-all duration-300">
-
+          <NbCard className="w-full p-6 sm:p-10 transition-all duration-300">
             {/* STEP 1: DEMOGRAPHICS */}
             {currentStep === 1 && (
               <div className="animate-in fade-in duration-200 flex flex-col gap-8">
                 {/* Section Header */}
                 <div className="space-y-2 mb-2">
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="px-2.5 py-0.5 rounded-md bg-[#DCFCE7] text-[#166534] font-bold text-[11px] uppercase tracking-wider border border-[#BBF7D0]">
-                      Baseline Assessment
+                    <NbBadge nbVariant="emerald">Baseline Assessment</NbBadge>
+                    <span className="font-mono text-[11px] text-black/50 dark:text-white/50 font-bold">
+                      BASE-2024-A
                     </span>
-                    <span className="font-mono text-[11px] text-slate-500 font-bold">BASE-2024-A</span>
                   </div>
-                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                  <h2 className="text-2xl sm:text-3xl font-black text-black dark:text-white tracking-tight">
                     Step 1: Demographics & Location
                   </h2>
-                  <p className="text-sm text-slate-600 max-w-2xl font-medium leading-relaxed">
-                    This data is used to match you against age, gender, and state-specific welfare quotas.
+                  <p className="text-sm text-black/70 dark:text-white/70 max-w-2xl font-medium leading-relaxed">
+                    This data is used to match you against age, gender, and
+                    state-specific welfare quotas.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {/* Age Slider & Input */}
                   <div className="flex flex-col gap-3">
-                    <label className="text-xs font-bold text-slate-900 flex items-center justify-between uppercase tracking-wider">
+                    <label className="text-xs font-black text-black dark:text-white flex items-center justify-between uppercase tracking-wider">
                       <span className="flex items-center gap-1.5">
-                        <User className="h-4 w-4 text-[#0E6245]" /> Age (Years) *
+                        <User className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />{" "}
+                        Age (Years) *
                       </span>
-                      <span className="text-xs font-black text-[#0E6245] bg-[#DCFCE7] px-2 py-0.5 rounded-lg border border-[#BBF7D0] font-mono">
+                      <NbBadge
+                        nbVariant="emerald"
+                        className="font-mono text-xs"
+                      >
                         {formData.age} yrs
-                      </span>
+                      </NbBadge>
                     </label>
-                    <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <div className="flex items-center gap-4 bg-[#F4EFEA] dark:bg-[#0B120E] p-4 rounded-xl border-2 border-black dark:border-emerald-500/40 shadow-[2px_2px_0px_#000]">
                       <input
                         type="range"
                         min="1"
                         max="100"
                         value={formData.age || 28}
-                        onChange={(e) => setFormData({ ...formData, age: Number(e.target.value) })}
-                        className="w-full accent-[#0E6245] cursor-pointer"
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            age: Number(e.target.value),
+                          })
+                        }
+                        className="w-full accent-emerald-500 cursor-pointer"
                       />
                       <input
                         type="number"
                         min="1"
                         max="100"
                         value={formData.age || 28}
-                        onChange={(e) => setFormData({ ...formData, age: Number(e.target.value) })}
-                        className="w-16 px-2.5 py-2.5 rounded-xl bg-white border border-slate-200 text-sm text-center text-slate-900 font-extrabold focus:outline-none focus:border-[#0E6245] shadow-xs"
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            age: Number(e.target.value),
+                          })
+                        }
+                        className="w-16 px-2.5 py-2 rounded-lg bg-[#FFFDF9] dark:bg-[#131F18] border-2 border-black dark:border-emerald-500 text-sm text-center text-black dark:text-white font-black focus:outline-none shadow-[2px_2px_0px_#000]"
                       />
                     </div>
                   </div>
 
                   {/* Gender Pills */}
                   <div className="flex flex-col gap-3">
-                    <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                    <label className="text-xs font-black text-black dark:text-white uppercase tracking-wider">
                       Gender Identity *
                     </label>
                     <div className="grid grid-cols-3 gap-3">
@@ -285,16 +387,20 @@ export function CheckScreen() {
                         { id: "Female", label: "Female 👩" },
                         { id: "Other", label: "Other ⚧" },
                       ].map((g) => {
-                        const isSelected = (formData.gender || "").toLowerCase() === g.id.toLowerCase();
+                        const isSelected =
+                          (formData.gender || "").toLowerCase() ===
+                          g.id.toLowerCase();
                         return (
                           <button
                             type="button"
                             key={g.id}
-                            onClick={() => setFormData({ ...formData, gender: g.id })}
-                            className={`py-4 px-2 rounded-2xl text-xs font-extrabold border transition-all cursor-pointer ${
+                            onClick={() =>
+                              setFormData({ ...formData, gender: g.id })
+                            }
+                            className={`py-3.5 px-2 rounded-xl text-xs font-black border-2 border-black transition-all cursor-pointer ${
                               isSelected
-                                ? "bg-[#0E6245] border-[#0E6245] text-white shadow-md"
-                                : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300"
+                                ? "bg-emerald-400 dark:bg-emerald-500 text-black shadow-[3px_3px_0px_#000] translate-x-[-1px] translate-y-[-1px]"
+                                : "bg-[#F4EFEA] dark:bg-[#0B120E] text-black dark:text-white shadow-[2px_2px_0px_#000] hover:bg-[#FFFDF9]"
                             }`}
                           >
                             {g.label}
@@ -306,50 +412,72 @@ export function CheckScreen() {
 
                   {/* State Selection */}
                   <div className="flex flex-col gap-3">
-                    <label className="text-xs font-bold text-slate-900 flex items-center justify-between uppercase tracking-wider">
+                    <label className="text-xs font-black text-black dark:text-white flex items-center justify-between uppercase tracking-wider">
                       <span className="flex items-center gap-1.5">
-                        <MapPin className="h-4 w-4 text-[#0E6245]" /> State / Union Territory *
+                        <MapPin className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />{" "}
+                        State / Union Territory *
                       </span>
                     </label>
                     <div className="relative">
                       <select
                         value={formData.state || "Uttar Pradesh"}
-                        onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                        className="w-full px-4 py-4 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-extrabold text-slate-900 focus:outline-none focus:border-[#0E6245] transition-all appearance-none cursor-pointer shadow-xs"
+                        onChange={(e) =>
+                          setFormData({ ...formData, state: e.target.value })
+                        }
+                        className="w-full px-4 py-3.5 rounded-xl bg-[#FFFDF9] dark:bg-[#131F18] border-2 border-black dark:border-emerald-500 text-xs font-black text-black dark:text-white focus:outline-none transition-all appearance-none cursor-pointer shadow-[2px_2px_0px_#000]"
                       >
-                        <optgroup label="🏛️ 28 Indian States" className="bg-white text-slate-900 font-bold">
-                          {ALL_36_INDIAN_STATES_AND_UTS.filter((s) => s.type === "State").map((s) => (
-                            <option key={s.name} value={s.name}>{s.name}</option>
+                        <optgroup
+                          label="🏛️ 28 Indian States"
+                          className="bg-[#FFFDF9] dark:bg-[#131F18] text-black dark:text-white font-bold"
+                        >
+                          {ALL_36_INDIAN_STATES_AND_UTS.filter(
+                            (s) => s.type === "State",
+                          ).map((s) => (
+                            <option key={s.name} value={s.name}>
+                              {s.name}
+                            </option>
                           ))}
                         </optgroup>
-                        <optgroup label="🇮🇳 8 Union Territories" className="bg-white text-slate-900 font-bold">
-                          {ALL_36_INDIAN_STATES_AND_UTS.filter((s) => s.type === "UT").map((s) => (
-                            <option key={s.name} value={s.name}>{s.name} (UT)</option>
+                        <optgroup
+                          label="🇮🇳 8 Union Territories"
+                          className="bg-[#FFFDF9] dark:bg-[#131F18] text-black dark:text-white font-bold"
+                        >
+                          {ALL_36_INDIAN_STATES_AND_UTS.filter(
+                            (s) => s.type === "UT",
+                          ).map((s) => (
+                            <option key={s.name} value={s.name}>
+                              {s.name} (UT)
+                            </option>
                           ))}
                         </optgroup>
                       </select>
-                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-black dark:text-white pointer-events-none" />
                     </div>
                   </div>
 
                   {/* District Selection */}
                   <div className="flex flex-col gap-3">
-                    <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                      District Name <span className="text-slate-400 font-normal lowercase">(Optional)</span>
+                    <label className="text-xs font-black text-black dark:text-white uppercase tracking-wider">
+                      District Name{" "}
+                      <span className="text-black/50 dark:text-white/50 font-normal lowercase">
+                        (Optional)
+                      </span>
                     </label>
-                    <Input
+                    <NbInput
                       type="text"
                       placeholder="e.g. Hassan, Lucknow, Pune"
                       value={formData.district || ""}
-                      onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                      className="h-[52px] rounded-2xl bg-slate-50 border-slate-200 text-sm font-bold shadow-xs px-4 focus:border-[#0E6245]"
+                      onChange={(e) =>
+                        setFormData({ ...formData, district: e.target.value })
+                      }
+                      className="h-11 text-xs"
                     />
                   </div>
                 </div>
 
                 {/* Quick Select Popular States */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none pt-2 border-t border-slate-100">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0 mr-2">
+                <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none pt-2 border-t-2 border-black/10 dark:border-white/10">
+                  <span className="text-[11px] font-black text-black/60 dark:text-white/60 uppercase tracking-wider shrink-0 mr-2">
                     Quick Select:
                   </span>
                   {POPULAR_STATES.map((st) => {
@@ -359,10 +487,10 @@ export function CheckScreen() {
                         type="button"
                         key={st}
                         onClick={() => setFormData({ ...formData, state: st })}
-                        className={`px-3.5 py-1.5 rounded-xl text-[11px] font-bold border whitespace-nowrap transition-all cursor-pointer ${
+                        className={`px-3 py-1 rounded-lg text-xs font-black border-2 border-black whitespace-nowrap transition-all cursor-pointer ${
                           isSelected
-                            ? "bg-[#0E6245] border-[#0E6245] text-white"
-                            : "bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100"
+                            ? "bg-emerald-400 text-black shadow-[2px_2px_0px_#000]"
+                            : "bg-[#F4EFEA] dark:bg-[#0B120E] text-black dark:text-white shadow-[1px_1px_0px_#000] hover:bg-[#FFFDF9]"
                         }`}
                       >
                         {st}
@@ -372,15 +500,16 @@ export function CheckScreen() {
                 </div>
 
                 {/* Next Button Container */}
-                <div className="pt-6 border-t border-slate-100 flex justify-end">
-                  <button
+                <div className="pt-6 border-t-2 border-black/10 dark:border-white/10 flex justify-end">
+                  <NbButton
                     type="button"
+                    nbVariant="primary"
                     onClick={() => setCurrentStep(2)}
-                    className="w-full sm:w-auto py-3.5 px-8 rounded-xl bg-[#0E6245] hover:bg-[#004831] text-white font-bold text-sm shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    className="w-full sm:w-auto gap-2"
                   >
                     <span>Next: Economic Profile</span>
                     <ArrowRight className="h-4 w-4" />
-                  </button>
+                  </NbButton>
                 </div>
               </div>
             )}
@@ -391,16 +520,20 @@ export function CheckScreen() {
                 {/* Section Header */}
                 <div className="space-y-2 mb-2">
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="px-2.5 py-0.5 rounded-md bg-[#DCFCE7] text-[#166534] font-bold text-[11px] uppercase tracking-wider border border-[#BBF7D0]">
+                    <NbBadge nbVariant="emerald">
                       Social Sector Assessment
+                    </NbBadge>
+                    <span className="font-mono text-[11px] text-black/50 dark:text-white/50 font-bold">
+                      SEC-2024-C
                     </span>
-                    <span className="font-mono text-[11px] text-slate-500 font-bold">SEC-2024-C</span>
                   </div>
-                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                  <h2 className="text-2xl sm:text-3xl font-black text-black dark:text-white tracking-tight">
                     Step 2: Economic Profile & Household Structure
                   </h2>
-                  <p className="text-sm text-slate-600 max-w-2xl font-medium leading-relaxed">
-                    This data calibrates targeted subsidy thresholds, income ceilings, and social welfare brackets under central DBT schemes.
+                  <p className="text-sm text-black/70 dark:text-white/70 max-w-2xl font-medium leading-relaxed">
+                    This data calibrates targeted subsidy thresholds, income
+                    ceilings, and social welfare brackets under central DBT
+                    schemes.
                   </p>
                 </div>
 
@@ -408,8 +541,9 @@ export function CheckScreen() {
                   {/* Occupation Grid (Bento Style) */}
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center justify-between">
-                      <label className="text-sm font-black text-slate-900 flex items-center gap-2 uppercase tracking-wider">
-                        <Briefcase className="h-5 w-5 text-[#0E6245]" /> Primary Household Occupation
+                      <label className="text-sm font-black text-black dark:text-white flex items-center gap-2 uppercase tracking-wider">
+                        <Briefcase className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />{" "}
+                        Primary Household Occupation
                       </label>
                     </div>
 
@@ -420,26 +554,32 @@ export function CheckScreen() {
                           <button
                             type="button"
                             key={occ.id}
-                            onClick={() => setFormData({ ...formData, occupation: occ.id })}
-                            className={`text-left relative p-4 rounded-2xl transition-all duration-200 flex flex-col justify-between h-36 cursor-pointer ${
+                            onClick={() =>
+                              setFormData({ ...formData, occupation: occ.id })
+                            }
+                            className={`text-left relative p-4 rounded-xl transition-all duration-150 flex flex-col justify-between h-36 cursor-pointer border-2 border-black ${
                               isSelected
-                                ? "bg-[#DCFCE7] text-[#131B2E] border-2 border-[#16A34A] shadow-md"
-                                : "bg-slate-50 text-slate-900 border-2 border-slate-200 hover:bg-slate-100 hover:border-[#0E6245]/40 shadow-xs"
+                                ? "bg-emerald-400 dark:bg-emerald-500 text-black shadow-[3px_3px_0px_#000] translate-x-[-1px] translate-y-[-1px]"
+                                : "bg-[#FFFDF9] dark:bg-[#131F18] text-black dark:text-white shadow-[2px_2px_0px_#000] hover:bg-[#F4EFEA]"
                             }`}
                           >
                             <div className="flex items-start justify-between w-full">
-                              <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${isSelected ? 'bg-white shadow-xs' : 'bg-white border border-slate-200'}`}>
+                              <div className="w-10 h-10 rounded-lg bg-[#F4EFEA] dark:bg-[#0B120E] border-2 border-black flex items-center justify-center text-xl shadow-[1px_1px_0px_#000]">
                                 {occ.icon}
                               </div>
                               {isSelected && (
-                                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#0E6245] text-white shadow-sm">
-                                  <Check className="h-4 w-4" />
+                                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-black text-white shadow-xs">
+                                  <Check className="h-3.5 w-3.5" />
                                 </span>
                               )}
                             </div>
                             <div className="mt-2">
-                              <p className="text-[13px] font-black leading-snug">{occ.label}</p>
-                              <p className={`text-[11px] font-semibold mt-0.5 ${isSelected ? 'text-[#166534]' : 'text-slate-500'}`}>{occ.desc}</p>
+                              <p className="text-xs font-black leading-snug">
+                                {occ.label}
+                              </p>
+                              <p className="text-[10px] font-bold text-black/60 dark:text-white/60 mt-0.5">
+                                {occ.desc}
+                              </p>
                             </div>
                           </button>
                         );
@@ -450,7 +590,7 @@ export function CheckScreen() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Social Category */}
                     <div className="flex flex-col gap-4">
-                      <label className="text-sm font-black text-slate-900 uppercase tracking-wider">
+                      <label className="text-xs font-black text-black dark:text-white uppercase tracking-wider">
                         Social Category / Quota
                       </label>
                       <div className="flex flex-col gap-2.5">
@@ -460,15 +600,22 @@ export function CheckScreen() {
                             <button
                               type="button"
                               key={c.id}
-                              onClick={() => setFormData({ ...formData, caste_category: c.id })}
-                              className={`px-4 py-3.5 rounded-xl text-[13px] font-bold border-2 transition-all cursor-pointer text-left flex items-center justify-between ${
+                              onClick={() =>
+                                setFormData({
+                                  ...formData,
+                                  caste_category: c.id,
+                                })
+                              }
+                              className={`px-4 py-3 rounded-xl text-xs font-black border-2 border-black transition-all cursor-pointer text-left flex items-center justify-between ${
                                 isSelected
-                                  ? "bg-[#0E6245] border-[#0E6245] text-white shadow-md"
-                                  : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300"
+                                  ? "bg-emerald-400 dark:bg-emerald-500 text-black shadow-[3px_3px_0px_#000] translate-x-[-1px] translate-y-[-1px]"
+                                  : "bg-[#FFFDF9] dark:bg-[#131F18] text-black dark:text-white shadow-[2px_2px_0px_#000] hover:bg-[#F4EFEA]"
                               }`}
                             >
                               <span>{c.label}</span>
-                              {isSelected && <CheckCircle2 className="h-4 w-4 text-[#A4F1B2]" />}
+                              {isSelected && (
+                                <CheckCircle2 className="h-4 w-4 text-black" />
+                              )}
                             </button>
                           );
                         })}
@@ -478,35 +625,49 @@ export function CheckScreen() {
                     {/* Annual Income */}
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <label className="text-sm font-black text-slate-900 flex items-center gap-1.5 uppercase tracking-wider">
-                          <IndianRupee className="h-5 w-5 text-[#0E6245]" /> Annual Household Income
+                        <label className="text-xs font-black text-black dark:text-white flex items-center gap-1.5 uppercase tracking-wider">
+                          <IndianRupee className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />{" "}
+                          Annual Household Income
                         </label>
                       </div>
 
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-black text-slate-500">₹</span>
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base font-black text-black/60 dark:text-white/60">
+                          ₹
+                        </span>
                         <input
                           type="number"
                           min="0"
                           step="5000"
                           value={formData.annual_income || 0}
-                          onChange={(e) => setFormData({ ...formData, annual_income: Number(e.target.value) })}
-                          className="w-full h-14 pl-10 pr-4 bg-slate-50 rounded-2xl border-2 border-slate-200 text-xl font-black text-slate-900 focus:outline-none focus:border-[#0E6245] shadow-xs"
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              annual_income: Number(e.target.value),
+                            })
+                          }
+                          className="w-full h-12 pl-10 pr-4 bg-[#FFFDF9] dark:bg-[#131F18] rounded-xl border-2 border-black dark:border-emerald-500 text-lg font-black text-black dark:text-white focus:outline-none shadow-[2px_2px_0px_#000]"
                         />
                       </div>
 
-                      <div className="flex flex-wrap gap-2 pt-2">
+                      <div className="flex flex-wrap gap-2 pt-1">
                         {INCOME_PRESETS.map((preset) => {
-                          const isSelected = formData.annual_income === preset.value;
+                          const isSelected =
+                            formData.annual_income === preset.value;
                           return (
                             <button
                               type="button"
                               key={preset.label}
-                              onClick={() => setFormData({ ...formData, annual_income: preset.value })}
-                              className={`px-3.5 py-2 rounded-xl text-xs font-bold border-2 transition-all cursor-pointer ${
+                              onClick={() =>
+                                setFormData({
+                                  ...formData,
+                                  annual_income: preset.value,
+                                })
+                              }
+                              className={`px-3 py-1.5 rounded-lg text-xs font-black border-2 border-black transition-all cursor-pointer ${
                                 isSelected
-                                  ? "bg-[#DCFCE7] border-[#16A34A] text-[#166534]"
-                                  : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300"
+                                  ? "bg-emerald-400 text-black shadow-[2px_2px_0px_#000]"
+                                  : "bg-[#F4EFEA] dark:bg-[#0B120E] text-black dark:text-white shadow-[1px_1px_0px_#000] hover:bg-[#FFFDF9]"
                               }`}
                             >
                               {preset.label}
@@ -519,24 +680,26 @@ export function CheckScreen() {
                 </div>
 
                 {/* Prev / Next Buttons */}
-                <div className="flex items-center justify-between gap-4 pt-6 border-t border-slate-100">
-                  <button
+                <div className="flex items-center justify-between gap-4 pt-6 border-t-2 border-black/10 dark:border-white/10">
+                  <NbButton
                     type="button"
+                    nbVariant="outline"
                     onClick={() => setCurrentStep(1)}
-                    className="px-6 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-bold border border-slate-200 transition-all cursor-pointer flex items-center gap-2"
+                    className="gap-2"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    <span className="hidden sm:inline">Back</span>
-                  </button>
+                    <span>Back</span>
+                  </NbButton>
 
-                  <button
+                  <NbButton
                     type="button"
+                    nbVariant="primary"
                     onClick={() => setCurrentStep(3)}
-                    className="flex-1 max-w-sm py-3.5 px-6 rounded-xl bg-[#0E6245] hover:bg-[#004831] text-white font-black text-sm shadow-md active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    className="gap-2"
                   >
                     <span>Next: Assets & Criteria</span>
                     <ArrowRight className="h-4 w-4" />
-                  </button>
+                  </NbButton>
                 </div>
               </div>
             )}
@@ -547,108 +710,148 @@ export function CheckScreen() {
                 {/* Section Header */}
                 <div className="space-y-2 mb-2">
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="px-2.5 py-0.5 rounded-md bg-[#DCFCE7] text-[#166534] font-bold text-[11px] uppercase tracking-wider border border-[#BBF7D0]">
+                    <NbBadge nbVariant="emerald">
                       Statutory Validations
+                    </NbBadge>
+                    <span className="font-mono text-[11px] text-black/50 dark:text-white/50 font-bold">
+                      VAL-2024-Z
                     </span>
-                    <span className="font-mono text-[11px] text-slate-500 font-bold">VAL-2024-Z</span>
                   </div>
-                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                  <h2 className="text-2xl sm:text-3xl font-black text-black dark:text-white tracking-tight">
                     Step 3: Assets & Specific Criteria
                   </h2>
-                  <p className="text-sm text-slate-600 max-w-2xl font-medium leading-relaxed">
-                    Final attributes required to definitively cross-reference eligibility across all 4,162 cataloged initiatives.
+                  <p className="text-sm text-black/70 dark:text-white/70 max-w-2xl font-medium leading-relaxed">
+                    Final attributes required to definitively cross-reference
+                    eligibility across all cataloged initiatives.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Land Ownership */}
-                  <div className={`p-6 rounded-2xl border-2 transition-all ${formData.has_land ? 'bg-[#F0FDF4] border-[#16A34A]' : 'bg-slate-50 border-slate-200'}`}>
+                  <div
+                    className={`p-5 rounded-xl border-2 border-black transition-all shadow-[2px_2px_0px_#000] ${formData.has_land ? "bg-emerald-100 dark:bg-emerald-950/40" : "bg-[#F4EFEA] dark:bg-[#0B120E]"}`}
+                  >
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-sm font-black text-slate-900 block mb-1">
+                        <span className="text-xs font-black text-black dark:text-white block mb-1">
                           Agricultural Land Ownership
                         </span>
-                        <span className="text-xs text-slate-500 font-medium">
+                        <span className="text-[11px] text-black/60 dark:text-white/60 font-medium">
                           Do you own cultivable agricultural land? (PM-Kisan, KCC)
                         </span>
                       </div>
 
                       <button
                         type="button"
-                        onClick={() => setFormData({ ...formData, has_land: !formData.has_land })}
-                        className={`w-14 h-8 rounded-full transition-colors p-1 cursor-pointer flex items-center shadow-inner ${
-                          formData.has_land ? "bg-[#0E6245] justify-end" : "bg-slate-300 justify-start"
+                        onClick={() =>
+                          setFormData({
+                            ...formData,
+                            has_land: !formData.has_land,
+                          })
+                        }
+                        className={`w-12 h-7 rounded-full border-2 border-black transition-colors p-0.5 cursor-pointer flex items-center shadow-[1px_1px_0px_#000] ${
+                          formData.has_land
+                            ? "bg-emerald-400 justify-end"
+                            : "bg-black/20 justify-start"
                         }`}
                       >
-                        <span className="h-6 w-6 rounded-full bg-white shadow-sm flex items-center justify-center">
-                          {formData.has_land && <Check className="h-4 w-4 text-[#0E6245]" />}
+                        <span className="h-5 w-5 rounded-full bg-white border border-black shadow-xs flex items-center justify-center">
+                          {formData.has_land && (
+                            <Check className="h-3 w-3 text-black" />
+                          )}
                         </span>
                       </button>
                     </div>
                   </div>
 
                   {/* Disability PwD Status */}
-                  <div className={`p-6 rounded-2xl border-2 transition-all ${formData.is_differently_abled ? 'bg-[#FEF3C7] border-[#F59E0B]' : 'bg-slate-50 border-slate-200'}`}>
+                  <div
+                    className={`p-5 rounded-xl border-2 border-black transition-all shadow-[2px_2px_0px_#000] ${formData.is_differently_abled ? "bg-amber-100 dark:bg-amber-950/40" : "bg-[#F4EFEA] dark:bg-[#0B120E]"}`}
+                  >
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-sm font-black text-slate-900 block mb-1">
+                        <span className="text-xs font-black text-black dark:text-white block mb-1">
                           Person with Disability (Divyangjan)
                         </span>
-                        <span className="text-xs text-slate-500 font-medium">
-                          Is beneficiary a person with benchmark disability (&gt;= 40%)?
+                        <span className="text-[11px] text-black/60 dark:text-white/60 font-medium">
+                          Do you hold a UDID card or 40%+ disability certificate?
                         </span>
                       </div>
 
                       <button
                         type="button"
-                        onClick={() => setFormData({ ...formData, is_differently_abled: !formData.is_differently_abled })}
-                        className={`w-14 h-8 rounded-full transition-colors p-1 cursor-pointer flex items-center shadow-inner ${
-                          formData.is_differently_abled ? "bg-[#D97706] justify-end" : "bg-slate-300 justify-start"
+                        onClick={() =>
+                          setFormData({
+                            ...formData,
+                            is_differently_abled:
+                              !formData.is_differently_abled,
+                          })
+                        }
+                        className={`w-12 h-7 rounded-full border-2 border-black transition-colors p-0.5 cursor-pointer flex items-center shadow-[1px_1px_0px_#000] ${
+                          formData.is_differently_abled
+                            ? "bg-amber-400 justify-end"
+                            : "bg-black/20 justify-start"
                         }`}
                       >
-                        <span className="h-6 w-6 rounded-full bg-white shadow-sm flex items-center justify-center">
-                          {formData.is_differently_abled && <Check className="h-4 w-4 text-[#D97706]" />}
+                        <span className="h-5 w-5 rounded-full bg-white border border-black shadow-xs flex items-center justify-center">
+                          {formData.is_differently_abled && (
+                            <Check className="h-3 w-3 text-black" />
+                          )}
                         </span>
                       </button>
                     </div>
                   </div>
 
                   {/* Marital Status */}
-                  <div className="p-6 rounded-2xl bg-slate-50 border-2 border-slate-200 space-y-3">
-                    <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  <div className="p-5 rounded-xl bg-[#F4EFEA] dark:bg-[#0B120E] border-2 border-black dark:border-emerald-500/40 space-y-2 shadow-[2px_2px_0px_#000]">
+                    <label className="text-xs font-black uppercase tracking-wider text-black dark:text-white">
                       Marital Status
                     </label>
                     <select
                       value={formData.marital_status || "Married"}
-                      onChange={(e) => setFormData({ ...formData, marital_status: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-sm font-black text-slate-900 focus:outline-none focus:border-[#0E6245] focus:ring-2 focus:ring-[#0E6245]/20 cursor-pointer shadow-xs"
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          marital_status: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2.5 rounded-lg bg-[#FFFDF9] dark:bg-[#131F18] border-2 border-black dark:border-emerald-500 text-xs font-black text-black dark:text-white focus:outline-none cursor-pointer shadow-[2px_2px_0px_#000]"
                     >
                       <option value="Married">Married (विवाहित)</option>
-                      <option value="Single">Single / Unmarried (अविवाहित)</option>
-                      <option value="Widowed / Single Mother">Widowed / Single Mother (विधवा)</option>
+                      <option value="Single">
+                        Single / Unmarried (अविवाहित)
+                      </option>
+                      <option value="Widowed / Single Mother">
+                        Widowed / Single Mother (विधवा)
+                      </option>
                     </select>
                   </div>
 
                   {/* Residence Area */}
-                  <div className="p-6 rounded-2xl bg-slate-50 border-2 border-slate-200 space-y-3">
-                    <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  <div className="p-5 rounded-xl bg-[#F4EFEA] dark:bg-[#0B120E] border-2 border-black dark:border-emerald-500/40 space-y-2 shadow-[2px_2px_0px_#000]">
+                    <label className="text-xs font-black uppercase tracking-wider text-black dark:text-white">
                       Residence Area Designation
                     </label>
                     <div className="grid grid-cols-2 gap-3">
                       {["Rural", "Urban"].map((area) => {
-                        const isSel = (formData.residence_area || "Rural") === area;
+                        const isSel =
+                          (formData.residence_area || "Rural") === area;
                         return (
                           <button
                             type="button"
                             key={area}
-                            onClick={() => setFormData({ ...formData, residence_area: area })}
-                            className={`py-3 px-3 rounded-xl text-sm font-black border-2 transition-all cursor-pointer shadow-xs ${
+                            onClick={() =>
+                              setFormData({ ...formData, residence_area: area })
+                            }
+                            className={`py-2.5 px-3 rounded-lg text-xs font-black border-2 border-black transition-all cursor-pointer ${
                               isSel
-                                ? "bg-[#0E6245] border-[#0E6245] text-white"
-                                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
+                                ? "bg-emerald-400 dark:bg-emerald-500 text-black shadow-[2px_2px_0px_#000]"
+                                : "bg-[#FFFDF9] dark:bg-[#131F18] text-black dark:text-white shadow-[1px_1px_0px_#000] hover:bg-[#F4EFEA]"
                             }`}
                           >
-                            {area === "Rural" ? "🌾 Rural / Gramin" : "🏙️ Urban / Nagar"}
+                            {area === "Rural"
+                              ? "🌾 Rural / Gramin"
+                              : "🏙️ Urban / Nagar"}
                           </button>
                         );
                       })}
@@ -657,39 +860,41 @@ export function CheckScreen() {
                 </div>
 
                 {/* Prev & Final Submit Button */}
-                <div className="flex items-center justify-between gap-4 pt-6 border-t border-slate-100">
-                  <button
+                <div className="flex items-center justify-between gap-4 pt-6 border-t-2 border-black/10 dark:border-white/10">
+                  <NbButton
                     type="button"
+                    nbVariant="outline"
                     onClick={() => setCurrentStep(2)}
-                    className="px-6 py-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-bold border border-slate-200 transition-all cursor-pointer flex items-center gap-2"
+                    className="gap-2"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    <span className="hidden sm:inline">Back</span>
-                  </button>
+                    <span>Back</span>
+                  </NbButton>
 
-                  <button
+                  <NbButton
                     type="button"
+                    nbVariant="primary"
                     onClick={() => handleSubmit()}
                     disabled={loading}
-                    className="flex-1 py-4 px-6 rounded-xl bg-[#0E6245] hover:bg-[#004831] text-white font-black text-sm sm:text-base shadow-md active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="flex-1 py-4 px-6 text-sm sm:text-base gap-2"
                   >
                     {loading ? (
                       <span className="flex items-center gap-2">
-                        <span className="h-5 w-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                        Evaluating across 4,162 schemes...
+                        <span className="h-4 w-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                        Evaluating across cataloged schemes...
                       </span>
                     ) : (
                       <>
-                        <Sparkles className="h-5 w-5 text-amber-300" />
+                        <Sparkles className="h-4 w-4" />
                         <span>Evaluate My Scheme Eligibility (Instant)</span>
-                        <ArrowRight className="h-5 w-5 ml-1 hidden sm:inline" />
+                        <ArrowRight className="h-4 w-4 ml-1 hidden sm:inline" />
                       </>
                     )}
-                  </button>
+                  </NbButton>
                 </div>
               </div>
             )}
-          </main>
+          </NbCard>
         </div>
       </div>
     </AppLayout>

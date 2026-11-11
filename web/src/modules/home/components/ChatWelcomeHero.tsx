@@ -1,52 +1,93 @@
 'use client'
 
-import { Bot, Sparkles } from 'lucide-react'
+import React from 'react'
+import { ArrowUpRight } from 'lucide-react'
+import {
+  NbWindow,
+  NbWindowHeader,
+  NbWindowTitle,
+  NbWindowClose,
+  NbWindowContent,
+  NbBadge,
+  NbCard,
+} from '@/core/design-system/Neubrutalist'
 
 interface ChatWelcomeHeroProps {
-  userName: string
+  userName?: string
   onSelectSuggestion: (text: string) => void
 }
 
-const SUGGESTIONS = [
-  'What schemes are available for small farmers in MP?',
-  'Check eligibility for Ladli Behna Yojana',
-  'How do I apply for PM Awas Yojana?',
-  'Are there education scholarships for OBC students?',
+const CITIZEN_SUGGESTIONS = [
+  {
+    category: 'Farmer Support',
+    query: 'What schemes are available for small farmers in MP?',
+  },
+  {
+    category: 'Direct Benefit Transfer',
+    query: 'Check eligibility criteria for Ladli Behna Yojana',
+  },
+  {
+    category: 'Housing & Shelter',
+    query: 'How do I apply for PM Awas Yojana subsidy?',
+  },
+  {
+    category: 'Higher Education',
+    query: 'Are there scholarship schemes for OBC students?',
+  },
 ]
 
 export function ChatWelcomeHero({ userName, onSelectSuggestion }: ChatWelcomeHeroProps) {
+  const cleanName = userName && userName !== 'Citizen' ? userName.split(' ')[0] : null
+
   return (
-    <div className="flex flex-col items-center justify-center text-center p-6 sm:p-12 space-y-6 max-w-2xl mx-auto flex-1 animate-in fade-in duration-500 font-sans">
-      <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#DCFCE7] dark:bg-emerald-950/80 border border-[#BBF7D0] dark:border-emerald-800/50 rounded-3xl text-[#0E6245] dark:text-emerald-400 shadow-2xs flex items-center justify-center">
-        <Bot className="h-8 w-8 sm:h-10 sm:w-10 text-[#0E6245] dark:text-emerald-400" />
-      </div>
+    <div className="flex flex-col items-center justify-center text-center px-2 py-8 sm:py-12 max-w-2xl mx-auto flex-1 font-sans animate-in fade-in duration-300">
+      {/* Neubrutalist Main Window Card */}
+      <NbWindow className="w-full max-w-xl text-left mb-6">
+        <NbWindowHeader>
+          <NbWindowTitle>:: Welfare Navigator</NbWindowTitle>
+          <NbWindowClose />
+        </NbWindowHeader>
 
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-[#112219] border border-slate-200 dark:border-emerald-900/40 text-slate-700 dark:text-emerald-300 text-[11px] font-bold">
-          <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-          <span>Multilingual Civic Synthesis</span>
+        <NbWindowContent>
+          <h2 className="text-2xl sm:text-3xl font-black text-black dark:text-white tracking-tight leading-snug mb-2">
+            {cleanName ? `Hello, ${cleanName}.` : 'Hello, Citizen.'}
+          </h2>
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4 leading-relaxed">
+            Autonomous Welfare Entitlement Advisor. Check eligibility, calculate DBT subsidies, and unlock 4,160+ verified central and state schemes.
+          </p>
+
+          {/* Neubrutal Tag Chips */}
+          <div className="flex flex-wrap gap-2 pt-1">
+            <NbBadge nbVariant="rose">Farmer Support</NbBadge>
+            <NbBadge nbVariant="emerald">DBT Subsidies</NbBadge>
+            <NbBadge nbVariant="amber">Housing</NbBadge>
+            <NbBadge nbVariant="sky">Higher Education</NbBadge>
+          </div>
+        </NbWindowContent>
+      </NbWindow>
+
+      {/* Structured Query Suggestions */}
+      <div className="w-full max-w-xl">
+        <div className="text-left font-black text-xs uppercase tracking-wider text-black dark:text-emerald-400 mb-2 px-1">
+          :: Prompt Suggestions
         </div>
-        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
-          How can I assist you with government schemes today?
-        </h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 max-w-lg mx-auto font-medium">
-          Ask me in English, Hindi, or Kannada. I can verify your eligibility, find scholarships, check DBT statuses, and analyze required documents.
-        </p>
-      </div>
-
-      <div className="w-full pt-6">
-        <p className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider mb-4">
-          Or try a quick query
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          {SUGGESTIONS.map((s, idx) => (
-            <button
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+          {CITIZEN_SUGGESTIONS.map((s, idx) => (
+            <NbCard
               key={idx}
-              onClick={() => onSelectSuggestion(s)}
-              className="px-4 py-2.5 rounded-xl bg-white dark:bg-[#0c1812] border border-slate-200 dark:border-emerald-950 hover:border-[#0E6245]/40 dark:hover:border-emerald-700/60 hover:bg-[#F0FDF4] dark:hover:bg-[#112219] text-slate-700 dark:text-slate-200 hover:text-[#0E6245] dark:hover:text-emerald-300 text-[13px] font-bold shadow-2xs transition-all active:scale-[0.98] cursor-pointer"
+              onClick={() => onSelectSuggestion(s.query)}
+              className="group p-3.5 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_0px_#000000] dark:hover:shadow-[4px_4px_0px_0px_#10B981] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all duration-120 cursor-pointer text-left flex flex-col justify-between"
             >
-              {s}
-            </button>
+              <div className="flex items-center justify-between gap-2 mb-1.5">
+                <span className="text-[11px] font-black text-black dark:text-emerald-400">
+                  {s.category}
+                </span>
+                <ArrowUpRight className="h-4 w-4 text-black dark:text-emerald-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </div>
+              <p className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-relaxed">
+                {s.query}
+              </p>
+            </NbCard>
           ))}
         </div>
       </div>

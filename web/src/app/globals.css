@@ -52,16 +52,87 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #F4EFEA;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: #111111;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   transition: background-color 150ms ease, color 150ms ease;
 }
 
 .dark body {
-  background-color: #070e0a;
-  color: #f1f5f9;
+  background-color: #0B120E;
+  background-image:
+    linear-gradient(to right, rgba(16, 185, 129, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(16, 185, 129, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: #F8FAFC;
+}
+
+/* Neubrutalism Design System Tokens */
+.nb-window {
+  background-color: #FFFDF9;
+  border: 2px solid #111111;
+  border-radius: 1rem;
+  box-shadow: 4px 4px 0px 0px #111111;
+  transition: all 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dark .nb-window {
+  background-color: #131F18;
+  border-color: #10B981;
+  box-shadow: 4px 4px 0px 0px #059669;
+}
+
+.nb-card {
+  background-color: #FFFDF9;
+  border: 2px solid #111111;
+  border-radius: 0.875rem;
+  box-shadow: 3px 3px 0px 0px #111111;
+  transition: all 150ms ease;
+}
+.dark .nb-card {
+  background-color: #131F18;
+  border-color: #10B981;
+  box-shadow: 3px 3px 0px 0px #059669;
+}
+
+.nb-btn {
+  border: 2px solid #111111;
+  border-radius: 0.75rem;
+  box-shadow: 3px 3px 0px 0px #111111;
+  font-weight: 700;
+  transition: all 120ms ease;
+}
+.nb-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px 0px #111111;
+}
+.nb-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px 0px #111111;
+}
+.dark .nb-btn {
+  border-color: #10B981;
+  box-shadow: 3px 3px 0px 0px #059669;
+}
+.dark .nb-btn:hover {
+  box-shadow: 4px 4px 0px 0px #10B981;
+}
+.dark .nb-btn:active {
+  box-shadow: 1px 1px 0px 0px #059669;
+}
+
+.nb-chip {
+  border: 2px solid #111111;
+  box-shadow: 2px 2px 0px 0px #111111;
+  font-weight: 700;
+}
+.dark .nb-chip {
+  border-color: #10B981;
+  box-shadow: 2px 2px 0px 0px #059669;
 }
 
 /* Civic admin surface: matches the mobile emerald, slate, and saffron system. */

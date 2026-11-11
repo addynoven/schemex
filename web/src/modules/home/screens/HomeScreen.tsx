@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Brain, Sparkles, Languages, Share2 } from 'lucide-react'
+import { Brain } from 'lucide-react'
 import {
   ChatWelcomeHero,
   ChatMessageList,
@@ -13,11 +13,11 @@ import { useAuth } from '@/modules/auth'
 import { DevErrorModal } from '@/core/components/DevErrorModal'
 import { MemoryEnginePanel } from '@/components/MemoryEnginePanel'
 import { AppLayout } from '@/components/layout/AppLayout'
+import { NbButton } from '@/core/design-system/Neubrutalist'
 
 export function HomeScreen({ initialSessionId }: { initialSessionId?: number | string } = {}) {
   const {
     currentSessionId,
-    sessions,
     messages,
     streamBuffer,
     streamCitations,
@@ -56,56 +56,31 @@ export function HomeScreen({ initialSessionId }: { initialSessionId?: number | s
     >
       <div className="flex flex-col h-full overflow-hidden bg-transparent font-sans">
 
-        {/* Chat-specific Header Bar (replaces the old full-screen header) */}
-        <div className="bg-white dark:bg-[#0a140f] px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/70 dark:border-emerald-950/60 shadow-sm shrink-0 transition-colors">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-[#0E6245] flex items-center justify-center text-white shrink-0">
-              <Brain className="h-5 w-5" />
-            </div>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <h1 className="text-sm font-black text-slate-900 dark:text-white">AI Scheme Advisor</h1>
-                <span className="px-2 py-0.5 rounded-full bg-[#A4F1B2] dark:bg-emerald-950/80 text-[#24703E] dark:text-emerald-300 text-[11px] font-bold flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#1F6C3A] dark:bg-emerald-400 animate-pulse" />
-                  Live Assistant
-                </span>
-              </div>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-bold">Multilingual Civic Synthesis • Sovereign Gov-Cloud Node</span>
-            </div>
+        {/* Sub-navigation Context Bar (Neubrutal Window Header) */}
+        <div className="h-11 px-4 sm:px-6 flex items-center justify-between border-b-2 border-black dark:border-emerald-500/80 bg-[#FFFDF9] dark:bg-[#131F18] text-xs shrink-0 transition-colors">
+          <div className="flex items-center gap-2">
+            <span className="font-black text-black dark:text-white">:: Welfare Advisor</span>
+            <span className="text-black dark:text-emerald-500">·</span>
+            <span className="text-slate-600 dark:text-slate-300 font-mono text-[11px] font-bold">4,160+ Schemes Indexed</span>
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Language Toggle Mock */}
-            <div className="bg-[#F2F3FF] dark:bg-[#112219] p-1 rounded-xl flex items-center gap-1 border border-[#E2E7FF] dark:border-emerald-900/40">
-              <Languages className="h-3 w-3 text-slate-500 dark:text-slate-400 ml-1" />
-              <button className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#183325] shadow-xs text-slate-900 dark:text-white font-bold text-[11px] cursor-pointer">
-                English
-              </button>
-              <button className="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold text-[11px] cursor-pointer">
-                हिंदी
-              </button>
-              <button className="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold text-[11px] cursor-pointer">
-                ಕನ್ನಡ
-              </button>
-            </div>
-
-            <button
+            <NbButton
+              type="button"
               onClick={() => openMemoryInspector(null)}
-              className="bg-[#F2F3FF] dark:bg-[#112219] hover:bg-[#E2E7FF] dark:hover:bg-[#183325] text-slate-700 dark:text-slate-200 font-bold text-[11px] px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border border-[#E2E7FF] dark:border-emerald-900/40"
+              nbVariant="secondary"
+              size="sm"
+              className="h-7 px-2.5 text-xs flex items-center gap-1.5"
+              title="Inspect conversation context"
             >
-              <Brain className="h-3.5 w-3.5 text-[#0E6245] dark:text-emerald-400" />
-              <span className="hidden sm:inline">Memory</span>
-            </button>
-
-            <button className="bg-[#F2F3FF] dark:bg-[#112219] hover:bg-[#E2E7FF] dark:hover:bg-[#183325] text-slate-700 dark:text-slate-200 font-bold text-[11px] px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border border-[#E2E7FF] dark:border-emerald-900/40">
-              <Share2 className="h-3.5 w-3.5 text-slate-600 dark:text-slate-300" />
-              <span className="hidden sm:inline">Share</span>
-            </button>
+              <Brain className="h-3.5 w-3.5 text-black dark:text-emerald-400" />
+              <span className="hidden sm:inline">Context Trace</span>
+            </NbButton>
           </div>
         </div>
 
         {/* Chat Timeline / Welcome */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-none bg-slate-50/50 dark:bg-[#070e0a]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-none bg-transparent">
           <div className="max-w-4xl mx-auto">
             {messages.length === 0 && !streamBuffer ? (
               <ChatWelcomeHero userName={userName} onSelectSuggestion={sendQuery} />
@@ -121,7 +96,7 @@ export function HomeScreen({ initialSessionId }: { initialSessionId?: number | s
         </div>
 
         {/* Bottom Composer */}
-        <footer className="p-4 border-t border-slate-200 dark:border-emerald-950/60 bg-white dark:bg-[#0a140f] shrink-0 transition-colors">
+        <footer className="p-4 border-t-2 border-black dark:border-emerald-500/80 bg-[#FFFDF9] dark:bg-[#131F18] shrink-0 transition-colors">
           <div className="max-w-4xl mx-auto">
             <ChatComposer
               input={input}

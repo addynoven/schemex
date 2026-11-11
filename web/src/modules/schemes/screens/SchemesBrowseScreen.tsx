@@ -1,21 +1,15 @@
 'use client'
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Search,
   Building2,
-  MapPin,
-  ChevronLeft,
-  ChevronRight,
   ChevronDown,
   ExternalLink,
-  Sparkles,
-  ShieldCheck,
   BookOpen,
   ArrowRight,
-  ArrowLeft,
   Bookmark,
   X,
   CheckCircle2,
@@ -40,6 +34,12 @@ import {
 } from '@/lib/api'
 import { getCitizenUser } from '@/lib/session'
 import { AppLayout } from '@/components/layout/AppLayout'
+import {
+  NbCard,
+  NbButton,
+  NbBadge,
+  NbInput,
+} from '@/core/design-system/Neubrutalist'
 
 const ALL_INDIAN_STATES = [
   'All India',
@@ -121,8 +121,23 @@ export function SchemesBrowseScreen() {
   // Master-Detail State
   const [selectedSchemeSlug, setSelectedSchemeSlug] = useState<string | null>(null)
   const [detailedScheme, setDetailedScheme] = useState<Scheme | null>(null)
+  const [isDetailLoading, setIsDetailLoading] = useState(false)
   const [detailTab, setDetailTab] = useState<'overview' | 'eligibility' | 'documents' | 'faq'>('overview')
   const [readiness, setReadiness] = useState<SchemeDocumentReadiness | null>(null)
+
+  // In-memory caches for instant 0ms switching without loading flicker
+  const schemeCacheRef = useRef<Map<string, Scheme>>(new Map())
+  const readinessCacheRef = useRef<Map<number, SchemeDocumentReadiness>>(new Map())
+
+  // Prefetch scheme details on hover or focus for instant 0ms display
+  const prefetchScheme = useCallback((slug: string) => {
+    if (schemeCacheRef.current.has(slug)) return
+    getSchemeBySlug(slug)
+      .then((data) => {
+        schemeCacheRef.current.set(slug, data)
+      })
+      .catch(() => {})
+  }, [])
 
   // Saved Schemes & Tab state
   const [activeTab, setActiveTab] = useState<'all' | 'saved'>('all')
@@ -233,22 +248,64 @@ export function SchemesBrowseScreen() {
     fetchSchemes()
   }, [fetchSchemes])
 
-  // Fetch Detailed Data when a scheme is selected from left column
+  // Fetch Detailed Data when a scheme is selected from left column (cache-first, non-flickering)
   useEffect(() => {
-    if (selectedSchemeSlug) {
-      setDetailedScheme(null)
-      setReadiness(null)
+    if (!selectedSchemeSlug) return
 
-      getSchemeBySlug(selectedSchemeSlug)
-        .then((data) => {
-          setDetailedScheme(data)
-          if (currentUser?.id) {
-            getSchemeDocumentReadiness(data.id)
-              .then((readData) => setReadiness(readData))
-              .catch(() => {})
-          }
-        })
-        .catch(() => {})
+    let cancelled = false
+
+    // 1. Instant Cache Hit: 0ms transition without touching loading state
+    if (schemeCacheRef.current.has(selectedSchemeSlug)) {
+      const cached = schemeCacheRef.current.get(selectedSchemeSlug)!
+      setDetailedScheme(cached)
+      setIsDetailLoading(false)
+
+      if (currentUser?.id && cached.id) {
+        if (readinessCacheRef.current.has(cached.id)) {
+          setReadiness(readinessCacheRef.current.get(cached.id)!)
+        } else {
+          getSchemeDocumentReadiness(cached.id)
+            .then((readData) => {
+              if (!cancelled) {
+                readinessCacheRef.current.set(cached.id, readData)
+                setReadiness(readData)
+              }
+            })
+            .catch(() => {})
+        }
+      }
+      return
+    }
+
+    // 2. Cache Miss: Keep previous scheme visible on screen (NO setDetailedScheme(null))!
+    setIsDetailLoading(true)
+
+    getSchemeBySlug(selectedSchemeSlug)
+      .then((data) => {
+        if (cancelled) return
+        schemeCacheRef.current.set(selectedSchemeSlug, data)
+        setDetailedScheme(data)
+        setIsDetailLoading(false)
+
+        if (currentUser?.id) {
+          getSchemeDocumentReadiness(data.id)
+            .then((readData) => {
+              if (!cancelled) {
+                readinessCacheRef.current.set(data.id, readData)
+                setReadiness(readData)
+              }
+            })
+            .catch(() => {})
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setIsDetailLoading(false)
+        }
+      })
+
+    return () => {
+      cancelled = true
     }
   }, [selectedSchemeSlug, currentUser?.id])
 
@@ -273,70 +330,74 @@ export function SchemesBrowseScreen() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans">
+      <div className="min-h-screen bg-transparent text-slate-900 dark:text-slate-100 flex flex-col font-sans">
 
-        {/* Toast Notification (Step 5 Simulation) */}
-        <div className={`fixed bottom-6 right-8 z-50 flex items-center gap-3 bg-[#0E6245] text-white px-5 py-4 rounded-xl shadow-xl transition-all duration-300 transform ${toastMessage ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
-          <CheckCircle2 className="h-6 w-6 text-[#A4F1B2]" />
+        {/* Toast Notification */}
+        <div className={`fixed bottom-6 right-8 z-50 flex items-center gap-3 bg-emerald-400 text-black border-2 border-black px-5 py-4 rounded-xl shadow-[4px_4px_0px_0px_#000000] transition-all duration-300 transform ${toastMessage ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'}`}>
+          <CheckCircle2 className="h-6 w-6 text-black" />
           <div className="flex flex-col">
-            <span className="text-sm font-bold">{toastMessage}</span>
-            <span className="text-[11px] text-emerald-100 font-medium">Added to your quick vault for offline tracking</span>
+            <span className="text-sm font-black">{toastMessage}</span>
+            <span className="text-[11px] font-bold text-slate-900">Added to your quick vault for offline tracking</span>
           </div>
-          <button onClick={() => setToastMessage(null)} className="ml-2 text-emerald-200 hover:text-white transition-colors cursor-pointer">
+          <button onClick={() => setToastMessage(null)} className="ml-2 text-black hover:scale-110 transition-transform cursor-pointer">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Top Hero / Guided Discovery Banner */}
-        <section className="p-6 lg:p-8 bg-white shadow-sm flex flex-col gap-6 shrink-0 z-10 border-b border-slate-200">
+        <section className="p-6 lg:p-8 bg-[#FFFDF9] dark:bg-[#131F18] border-b-2 border-black dark:border-emerald-500/80 flex flex-col gap-6 shrink-0 z-10 transition-colors">
           <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6 max-w-[1400px] mx-auto w-full">
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full bg-[#E2E7FF] text-[#131B2E] text-[11px] font-bold uppercase tracking-wider">National Direct Benefit Portal</span>
-                <span className="text-slate-300">•</span>
-                <span className="font-mono text-[11px] text-slate-500 font-bold">Live DBT Synchronized</span>
+                <span className="px-2.5 py-0.5 rounded-md bg-emerald-400 text-black border-2 border-black text-[11px] font-black uppercase tracking-wider shadow-[2px_2px_0px_0px_#000000]">
+                  :: National Direct Benefit Portal
+                </span>
+                <span className="text-black dark:text-emerald-500 font-bold">•</span>
+                <span className="font-mono text-[11px] text-slate-700 dark:text-emerald-400 font-black">
+                  4,162 Schemes Synchronized
+                </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-black dark:text-white tracking-tight">
                 Schemes — Browse & Discover Hub
               </h1>
-              <p className="text-sm text-slate-600 max-w-2xl font-medium leading-relaxed">
+              <p className="text-sm text-slate-700 dark:text-slate-300 max-w-2xl font-semibold leading-relaxed">
                 Search, filter, evaluate statutory eligibility, and bookmark citizen welfare initiatives from 4,160+ central and state government ministries.
               </p>
             </div>
 
             {/* Quick Metrics Counter Group */}
             <div className="flex items-center gap-3 self-start xl:self-auto">
-              <div className="flex flex-col px-4 py-2.5 rounded-xl bg-[#F2F3FF] border border-[#E2E7FF]">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Schemes</span>
-                <span className="text-xl font-black text-[#0E6245] font-mono">4,162</span>
+              <div className="flex flex-col px-4 py-2.5 rounded-xl bg-[#F4EFEA] dark:bg-[#0B120E] border-2 border-black dark:border-emerald-500 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#059669]">
+                <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-wider">Total Schemes</span>
+                <span className="text-xl font-black text-black dark:text-white font-mono">4,162</span>
               </div>
-              <div className="flex flex-col px-4 py-2.5 rounded-xl bg-[#F2F3FF] border border-[#E2E7FF]">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Filtered Matches</span>
-                <span className="text-xl font-black text-[#1F6C3A] font-mono">{total}</span>
+              <div className="flex flex-col px-4 py-2.5 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 border-2 border-black dark:border-emerald-500 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#059669]">
+                <span className="text-[10px] font-black text-emerald-800 dark:text-emerald-300 uppercase tracking-wider">Filtered Matches</span>
+                <span className="text-xl font-black text-black dark:text-white font-mono">{total}</span>
               </div>
-              <div className="flex flex-col px-4 py-2.5 rounded-xl bg-[#F2F3FF] border border-[#E2E7FF]">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">My Saved</span>
-                <span className="text-xl font-black text-[#8F3E0C] font-mono">{savedSlugs.size}</span>
+              <div className="flex flex-col px-4 py-2.5 rounded-xl bg-amber-100 dark:bg-amber-950/60 border-2 border-black dark:border-emerald-500 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#059669]">
+                <span className="text-[10px] font-black text-amber-800 dark:text-amber-300 uppercase tracking-wider">My Saved</span>
+                <span className="text-xl font-black text-black dark:text-white font-mono">{savedSlugs.size}</span>
               </div>
             </div>
           </div>
         </section>
 
         {/* Filter & Controls Toolbar */}
-        <section className="px-6 lg:px-8 py-4 bg-white shadow-sm border-b border-slate-200 flex flex-col gap-4 shrink-0 z-10">
+        <section className="px-6 lg:px-8 py-4 bg-[#FFFDF9] dark:bg-[#131F18] border-b-2 border-black dark:border-emerald-500/80 flex flex-col gap-4 shrink-0 z-10 transition-colors">
           <div className="max-w-[1400px] mx-auto w-full flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
 
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
-              <input
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-600 dark:text-emerald-400 pointer-events-none z-10" />
+              <NbInput
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by scheme name, ministry, target demographic or benefit..."
-                className="w-full h-12 pl-12 pr-10 rounded-xl bg-[#F8FAFC] text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#0E6245] border border-slate-200 transition-all font-medium"
+                className="pl-11 h-12"
               />
               {search && (
-                <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 flex items-center justify-center cursor-pointer">
+                <button onClick={() => setSearch('')} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-black dark:text-white hover:scale-110 flex items-center justify-center cursor-pointer z-10">
                   <X className="h-5 w-5" />
                 </button>
               )}
@@ -347,7 +408,7 @@ export function SchemesBrowseScreen() {
                 <select
                   value={jurisdiction}
                   onChange={(e) => { setJurisdiction(e.target.value); setPage(1); }}
-                  className="w-full h-12 pl-4 pr-10 rounded-xl bg-[#F8FAFC] text-[13px] font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0E6245] appearance-none cursor-pointer border border-slate-200 transition-all"
+                  className="w-full h-12 pl-4 pr-10 rounded-xl bg-[#FFFDF9] dark:bg-[#0B120E] text-sm font-bold text-black dark:text-white focus:outline-none appearance-none cursor-pointer border-2 border-black dark:border-emerald-500 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#059669] transition-all"
                 >
                   {ALL_INDIAN_STATES.map((s) => (
                     <option key={s} value={s}>
@@ -355,14 +416,14 @@ export function SchemesBrowseScreen() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-black dark:text-emerald-400 pointer-events-none" />
               </div>
 
               <div className="relative min-w-[190px]">
                 <select
                   value={sortBy}
                   onChange={(e) => { setSortBy(e.target.value); setPage(1); }}
-                  className="w-full h-12 pl-4 pr-10 rounded-xl bg-[#F8FAFC] text-[13px] font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0E6245] appearance-none cursor-pointer border border-slate-200 transition-all"
+                  className="w-full h-12 pl-4 pr-10 rounded-xl bg-[#FFFDF9] dark:bg-[#0B120E] text-sm font-bold text-black dark:text-white focus:outline-none appearance-none cursor-pointer border-2 border-black dark:border-emerald-500 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#059669] transition-all"
                 >
                   {SORT_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -370,27 +431,31 @@ export function SchemesBrowseScreen() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-black dark:text-emerald-400 pointer-events-none" />
               </div>
 
-              <div className="flex items-center p-1 bg-[#F8FAFC] rounded-xl border border-slate-200">
+              <div className="flex items-center p-1 bg-[#F4EFEA] dark:bg-[#0B120E] rounded-xl border-2 border-black dark:border-emerald-500 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#059669]">
                 <button
                   onClick={() => setActiveTab('all')}
-                  className={`px-4 py-2 rounded-lg text-[13px] font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                    activeTab === 'all' ? 'bg-white text-[#0E6245] shadow-sm' : 'text-slate-500 hover:text-slate-900'
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-2 cursor-pointer ${
+                    activeTab === 'all'
+                      ? 'bg-emerald-400 text-black border-2 border-black shadow-[1.5px_1.5px_0px_0px_#000000]'
+                      : 'text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white'
                   }`}
                 >
                   <span>All Schemes</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('saved')}
-                  className={`px-4 py-2 rounded-lg text-[13px] font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                    activeTab === 'saved' ? 'bg-white text-[#0E6245] shadow-sm' : 'text-slate-500 hover:text-slate-900'
+                  className={`px-3.5 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-2 cursor-pointer ${
+                    activeTab === 'saved'
+                      ? 'bg-emerald-400 text-black border-2 border-black shadow-[1.5px_1.5px_0px_0px_#000000]'
+                      : 'text-slate-700 dark:text-slate-300 hover:text-black dark:hover:text-white'
                   }`}
                 >
-                  <Bookmark className="h-4 w-4 text-amber-600" />
+                  <Bookmark className="h-3.5 w-3.5 text-black" />
                   <span>Saved</span>
-                  <span className="px-1.5 py-0.5 rounded-full bg-[#E2E7FF] text-[#0E6245] font-mono text-[10px]">{savedSlugs.size}</span>
+                  <span className="px-1.5 py-0.5 rounded-md bg-black text-white font-mono text-[10px]">{savedSlugs.size}</span>
                 </button>
               </div>
             </div>
@@ -404,10 +469,10 @@ export function SchemesBrowseScreen() {
                 <button
                   key={cat.id}
                   onClick={() => { setCategory(cat.id); setPage(1); }}
-                  className={`px-4 py-2 rounded-xl text-[13px] font-bold whitespace-nowrap flex items-center gap-2 transition-all cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-xl text-xs font-black whitespace-nowrap flex items-center gap-2 transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-[#0E6245] text-white shadow-sm'
-                      : 'bg-[#F8FAFC] text-slate-700 hover:bg-[#F2F3FF] border border-slate-200'
+                      ? 'bg-emerald-400 dark:bg-emerald-500 text-black border-2 border-black shadow-[2px_2px_0px_0px_#000000] translate-x-[-1px] translate-y-[-1px]'
+                      : 'bg-[#F4EFEA] dark:bg-[#0B120E] text-black dark:text-slate-300 border-2 border-black dark:border-emerald-500/80 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 shadow-[1px_1px_0px_0px_#000000]'
                   }`}
                 >
                   {cat.icon}
@@ -424,27 +489,27 @@ export function SchemesBrowseScreen() {
           {/* LEFT COLUMN: Scheme Discovery & Browse List */}
           <div className="lg:col-span-5 flex flex-col gap-4">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-black text-slate-900 flex items-center gap-2">
-                Schemes Catalog
-                <span className="px-2 py-0.5 rounded-full bg-[#0E6245] text-white text-[11px] font-bold">{total}</span>
+              <h2 className="text-lg font-black text-black dark:text-white flex items-center gap-2">
+                :: Schemes Catalog
+                <span className="px-2 py-0.5 rounded-md bg-emerald-400 text-black border-2 border-black font-black text-xs shadow-[1.5px_1.5px_0px_0px_#000000]">{total}</span>
               </h2>
-              <span className="text-[11px] text-slate-500 font-bold">Click card to preview details</span>
+              <span className="text-[11px] text-slate-700 dark:text-slate-300 font-bold">Click card to preview details</span>
             </div>
 
             {loading ? (
               <div className="flex flex-col gap-4">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="p-5 rounded-2xl bg-white border border-slate-200 animate-pulse h-40" />
+                  <div key={i} className="p-5 rounded-2xl bg-[#FFFDF9] dark:bg-[#131F18] border-2 border-black dark:border-emerald-500/80 shadow-[3px_3px_0px_0px_#000000] animate-pulse h-40" />
                 ))}
               </div>
             ) : displayedSchemes.length === 0 ? (
-              <div className="p-12 text-center rounded-3xl bg-white border border-slate-200">
-                <BookOpen className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-                <h3 className="text-base font-bold text-slate-900">No matching schemes found</h3>
-                <button onClick={handleResetFilters} className="mt-4 px-4 py-2 bg-[#0E6245] text-white rounded-xl text-xs font-bold cursor-pointer">
+              <NbCard className="p-12 text-center flex flex-col items-center">
+                <BookOpen className="h-10 w-10 text-black dark:text-emerald-400 mx-auto mb-3" />
+                <h3 className="text-base font-black text-black dark:text-white">No matching schemes found</h3>
+                <NbButton onClick={handleResetFilters} nbVariant="primary" className="mt-4">
                   Reset All Filters
-                </button>
-              </div>
+                </NbButton>
+              </NbCard>
             ) : (
               <div className="flex flex-col gap-4">
                 {displayedSchemes.map((scheme) => {
@@ -452,60 +517,64 @@ export function SchemesBrowseScreen() {
                   const isSaved = savedSlugs.has(scheme.slug)
 
                   return (
-                    <article
+                    <NbCard
                       key={scheme.id}
                       onClick={() => setSelectedSchemeSlug(scheme.slug)}
-                      className={`group cursor-pointer p-4 sm:p-5 rounded-2xl shadow-sm transition-all flex flex-col gap-3 relative min-w-0 overflow-hidden ${
+                      onMouseEnter={() => prefetchScheme(scheme.slug)}
+                      onFocus={() => prefetchScheme(scheme.slug)}
+                      className={`group cursor-pointer p-4 sm:p-5 flex flex-col gap-3 relative min-w-0 overflow-hidden transition-all ${
                         isSelected
-                          ? 'bg-gradient-to-r from-white to-[#F2F3FF] border-2 border-[#0E6245] shadow-md'
-                          : 'bg-white border border-slate-200 hover:border-[#0E6245]/40 hover:shadow-md'
+                          ? 'border-2 border-black dark:border-emerald-400 bg-emerald-100/70 dark:bg-emerald-950/70 shadow-[4px_4px_0px_0px_#000000] dark:shadow-[4px_4px_0px_0px_#10B981]'
+                          : 'hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_0px_#000000] dark:hover:shadow-[4px_4px_0px_0px_#10B981]'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3 min-w-0">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isSelected ? 'bg-[#A4F1B2] text-[#1F6C3A]' : 'bg-[#F2F3FF] text-[#0E6245]'}`}>
+                          <div className={`w-10 h-10 rounded-xl border-2 border-black flex items-center justify-center shrink-0 shadow-[1.5px_1.5px_0px_0px_#000000] ${isSelected ? 'bg-emerald-400 text-black' : 'bg-[#F4EFEA] text-black'}`}>
                             <Leaf className="h-5 w-5" />
                           </div>
                           <div className="flex flex-col min-w-0 flex-1">
-                            <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 shrink-0">
-                                {scheme.state === 'ALL_INDIA' ? 'National Scheme' : scheme.state}
-                              </span>
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F2F3FF] text-[#0E6245] border border-[#E2E7FF] shrink-0">
+                            <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                              <NbBadge nbVariant="outline" className="text-[10px]">
+                                {scheme.state === 'ALL_INDIA' ? 'National' : scheme.state}
+                              </NbBadge>
+                              <NbBadge nbVariant="emerald" className="text-[10px]">
                                 {scheme.category || 'General'}
-                              </span>
+                              </NbBadge>
                             </div>
-                            <h3 className={`text-base font-black truncate transition-colors ${isSelected ? 'text-[#0E6245]' : 'text-slate-900 group-hover:text-[#0E6245]'}`}>
+                            <h3 className="text-base font-black truncate text-black dark:text-white transition-colors">
                               {scheme.name}
                             </h3>
-                            <span className="text-[11px] text-slate-500 font-bold truncate mt-0.5 block max-w-full">
+                            <span className="text-[11px] text-slate-700 dark:text-slate-300 font-bold truncate mt-0.5 block max-w-full">
                               {scheme.ministry || 'Government of India'}
                             </span>
                           </div>
                         </div>
                         <button
                           onClick={(e) => toggleBookmark(e, scheme.slug)}
-                          className={`p-2 rounded-xl transition-colors shrink-0 z-10 ${isSaved ? 'text-amber-600 bg-amber-50 hover:bg-amber-100' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-100'}`}
+                          className={`p-2 rounded-xl border-2 border-black transition-all shrink-0 z-10 shadow-[2px_2px_0px_0px_#000000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none ${
+                            isSaved ? 'text-black bg-amber-400' : 'text-black dark:text-white bg-[#F4EFEA] dark:bg-[#0B120E]'
+                          }`}
                           title={isSaved ? "Saved" : "Save Scheme"}
                         >
-                          <Bookmark className="h-5 w-5" fill={isSaved ? "currentColor" : "none"} />
+                          <Bookmark className="h-4 w-4" fill={isSaved ? "currentColor" : "none"} />
                         </button>
                       </div>
 
-                      <div className={`p-3 rounded-xl flex items-center justify-between ${isSelected ? 'bg-white/60' : 'bg-slate-50'}`}>
+                      <div className="p-3 rounded-xl border border-black dark:border-emerald-500/60 bg-[#F4EFEA] dark:bg-[#0B120E] flex items-center justify-between">
                         <div className="flex flex-col min-w-0">
-                          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Primary Benefit</span>
-                          <span className="text-sm font-black text-[#0E6245] font-mono truncate">
+                          <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-0.5">Primary Benefit</span>
+                          <span className="text-sm font-black text-black dark:text-white font-mono truncate">
                             Assistance
                           </span>
                         </div>
                         <div className="text-right flex flex-col items-end shrink-0">
-                          <span className="text-[10px] font-bold text-[#1F6C3A] bg-[#DCFCE7] px-2 py-0.5 rounded border border-[#BBF7D0]">
+                          <span className="text-[10px] font-black text-black bg-emerald-400 px-2.5 py-0.5 rounded-md border border-black">
                             Verify Match
                           </span>
                         </div>
                       </div>
-                    </article>
+                    </NbCard>
                   )
                 })}
               </div>
@@ -513,25 +582,27 @@ export function SchemesBrowseScreen() {
 
             {/* Pagination Footer */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between pt-4 mt-2 border-t border-slate-200">
-                <button
+              <div className="flex items-center justify-between pt-4 mt-2 border-t-2 border-black dark:border-emerald-500/80">
+                <NbButton
                   onClick={() => setPage(p => Math.max(p - 1, 1))}
                   disabled={page <= 1 || loading}
-                  className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold disabled:opacity-50 cursor-pointer hover:bg-slate-50"
+                  nbVariant="outline"
+                  size="sm"
                 >
                   Previous
-                </button>
+                </NbButton>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-bold text-slate-900 bg-slate-100 px-3 py-1.5 rounded-lg">{page}</span>
-                  <span className="text-xs text-slate-500 font-bold">of {totalPages}</span>
+                  <span className="text-xs font-black text-black dark:text-white bg-emerald-400 border-2 border-black px-3 py-1 rounded-lg shadow-[1.5px_1.5px_0px_0px_#000000]">{page}</span>
+                  <span className="text-xs text-slate-700 dark:text-slate-300 font-bold">of {totalPages}</span>
                 </div>
-                <button
+                <NbButton
                   onClick={() => setPage(p => Math.min(p + 1, totalPages))}
                   disabled={page >= totalPages || loading}
-                  className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold disabled:opacity-50 cursor-pointer hover:bg-slate-50"
+                  nbVariant="outline"
+                  size="sm"
                 >
                   Next
-                </button>
+                </NbButton>
               </div>
             )}
           </div>
@@ -539,52 +610,61 @@ export function SchemesBrowseScreen() {
           {/* RIGHT COLUMN: Scheme Detailed Inspector */}
           <div className="lg:col-span-7 flex flex-col gap-6 sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-1 scrollbar-none pb-8">
             {!detailedScheme ? (
-              <div className="bg-white rounded-3xl p-12 border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center min-h-[500px]">
-                <Compass className="h-16 w-16 text-slate-200 mb-4" />
-                <h3 className="text-xl font-black text-slate-900 mb-2">Select a scheme to view details</h3>
-                <p className="text-sm text-slate-500 font-medium max-w-sm">
+              <NbCard className="p-12 flex flex-col items-center justify-center text-center min-h-[450px]">
+                <Compass className="h-16 w-16 text-black dark:text-emerald-400 mb-4" />
+                <h3 className="text-xl font-black text-black dark:text-white mb-2">Select a scheme to view details</h3>
+                <p className="text-sm text-slate-700 dark:text-slate-300 font-semibold max-w-sm">
                   Click on any scheme card from the catalog on the left to inspect its eligibility rules, benefits, and required documents.
                 </p>
-              </div>
+              </NbCard>
             ) : (
-              <section className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 flex flex-col gap-6 relative overflow-hidden animate-in fade-in duration-300">
+              <NbCard className={`p-6 sm:p-8 flex flex-col gap-6 relative overflow-hidden transition-opacity duration-200 ${isDetailLoading ? 'opacity-85' : 'opacity-100'}`}>
+                {/* Non-intrusive hairline progress indicator */}
+                {isDetailLoading && (
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-black/10 dark:bg-white/10 overflow-hidden z-30">
+                    <div className="h-full bg-emerald-500 animate-pulse w-full" />
+                  </div>
+                )}
 
                 {/* Header Ribbon */}
-                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div className="flex items-center justify-between pb-4 border-b-2 border-black dark:border-emerald-500/80">
                   <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 rounded-md bg-[#0E6245] text-white text-[10px] font-bold uppercase tracking-wider">
+                    <NbBadge nbVariant="emerald">
                       {detailedScheme.state === 'ALL_INDIA' ? 'Central Government' : detailedScheme.state}
-                    </span>
-                    <span className="px-3 py-1 rounded-md bg-[#DCFCE7] text-[#166534] text-[10px] font-bold flex items-center gap-1 border border-[#BBF7D0]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A]" /> Verified Official
-                    </span>
+                    </NbBadge>
+                    <NbBadge nbVariant="outline">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block mr-1" />
+                      Verified Official
+                    </NbBadge>
+                    {isDetailLoading && (
+                      <span className="text-[10px] font-mono font-bold text-slate-500 dark:text-slate-400 animate-pulse">
+                        Updating...
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
-                    <button
+                    <NbButton
                       onClick={(e) => toggleBookmark(e, detailedScheme.slug)}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer border ${
-                        savedSlugs.has(detailedScheme.slug)
-                          ? 'bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]'
-                          : 'bg-slate-50 hover:bg-slate-100 text-[#0E6245] border-slate-200'
-                      }`}
+                      nbVariant={savedSlugs.has(detailedScheme.slug) ? 'secondary' : 'outline'}
+                      size="sm"
+                      className="gap-1.5"
                     >
                       <Bookmark className="h-4 w-4 shrink-0" fill={savedSlugs.has(detailedScheme.slug) ? "currentColor" : "none"} />
-                      <span className="hidden sm:inline">{savedSlugs.has(detailedScheme.slug) ? 'Saved in Vault' : 'Save Scheme'}</span>
-                    </button>
+                      <span>{savedSlugs.has(detailedScheme.slug) ? 'Saved' : 'Save Scheme'}</span>
+                    </NbButton>
                   </div>
                 </div>
 
                 {/* Scheme Hero Graphic Card */}
-                <div className="relative w-full rounded-2xl overflow-hidden bg-[#004831] flex flex-col justify-end p-6 min-h-[180px] border border-[#0E6245]">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-[#004831] via-[#0E6245] to-[#1F6C3A] opacity-90" />
+                <div className="relative w-full rounded-2xl overflow-hidden bg-[#004831] border-2 border-black flex flex-col justify-end p-6 min-h-[160px] shadow-[3px_3px_0px_0px_#000000]">
                   <div className="relative z-10 flex flex-col gap-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#A4F1B2] font-mono">
-                      DIRECT BENEFIT TRANSFER • DBT-ID
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-300 font-mono">
+                      DIRECT BENEFIT TRANSFER • DBT VERIFIED
                     </span>
                     <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
                       {detailedScheme.name}
                     </h2>
-                    <p className="text-xs text-[#DCFCE7] font-medium max-w-xl">
+                    <p className="text-xs text-emerald-100 font-bold max-w-xl">
                       {detailedScheme.ministry || 'Government of India'}
                     </p>
                   </div>
@@ -592,40 +672,60 @@ export function SchemesBrowseScreen() {
 
                 {/* Key Benefit Highlights */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-slate-200 flex flex-col justify-between">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Primary Benefit</span>
+                  <div className="p-4 rounded-xl bg-[#F4EFEA] dark:bg-[#0B120E] border-2 border-black dark:border-emerald-500/80 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#059669] flex flex-col justify-between">
+                    <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">Primary Benefit</span>
                     <div>
-                      <span className="text-lg font-black text-[#0E6245] font-mono">Assistance</span>
+                      <span className="text-lg font-black text-black dark:text-white font-mono">Assistance</span>
                     </div>
                   </div>
-                  <div className="p-5 rounded-2xl bg-[#F8FAFC] border border-slate-200 flex flex-col justify-between">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Eligibility Status</span>
+                  <div className="p-4 rounded-xl bg-[#F4EFEA] dark:bg-[#0B120E] border-2 border-black dark:border-emerald-500/80 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#059669] flex flex-col justify-between">
+                    <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">Eligibility Status</span>
                     <div>
-                      <Link href={`/check?target_scheme=${detailedScheme.slug}`} className="text-lg font-black text-[#1F6C3A] hover:underline flex items-center gap-1.5">
+                      <Link href={`/check?target_scheme=${detailedScheme.slug}`} className="text-base font-black text-black dark:text-emerald-400 hover:underline flex items-center gap-1.5">
                         Check My Match <ArrowRight className="h-4 w-4 shrink-0" />
                       </Link>
                     </div>
                   </div>
                 </div>
 
-                {/* Segmented Tab Navigation (Cleaned borders & track lines) */}
-                <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-2xl border border-slate-200">
-                  <button onClick={() => setDetailTab('overview')} className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${detailTab === 'overview' ? 'bg-white text-[#0E6245] shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}>Overview</button>
-                  <button onClick={() => setDetailTab('eligibility')} className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${detailTab === 'eligibility' ? 'bg-white text-[#0E6245] shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}>Eligibility Criteria</button>
-                  <button onClick={() => setDetailTab('documents')} className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center justify-center gap-1.5 ${detailTab === 'documents' ? 'bg-white text-[#0E6245] shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}>
-                    Required Docs {readiness && <span className="bg-[#DCFCE7] text-[#166534] px-1.5 rounded-sm">{readiness.readiness_percentage}%</span>}
-                  </button>
+                {/* Segmented Tab Navigation */}
+                <div className="flex items-center gap-1.5 p-1.5 bg-[#F4EFEA] dark:bg-[#0B120E] rounded-2xl border-2 border-black dark:border-emerald-500 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#059669]">
+                  <NbButton
+                    onClick={() => setDetailTab('overview')}
+                    nbVariant={detailTab === 'overview' ? 'activeTab' : 'ghost'}
+                    size="sm"
+                    className="flex-1"
+                  >
+                    Overview
+                  </NbButton>
+                  <NbButton
+                    onClick={() => setDetailTab('eligibility')}
+                    nbVariant={detailTab === 'eligibility' ? 'activeTab' : 'ghost'}
+                    size="sm"
+                    className="flex-1"
+                  >
+                    Eligibility
+                  </NbButton>
+                  <NbButton
+                    onClick={() => setDetailTab('documents')}
+                    nbVariant={detailTab === 'documents' ? 'activeTab' : 'ghost'}
+                    size="sm"
+                    className="flex-1 gap-1.5"
+                  >
+                    <span>Required Docs</span>
+                    {readiness && <span className="bg-black text-white px-1.5 py-0.2 rounded-md font-mono text-[10px]">{readiness.readiness_percentage}%</span>}
+                  </NbButton>
                 </div>
 
                 {/* Tab Content Panels */}
-                <div className="min-h-[220px]">
+                <div className="min-h-[200px]">
 
                   {/* Overview Panel */}
                   {detailTab === 'overview' && (
-                    <div className="flex flex-col gap-6 animate-in fade-in duration-200">
+                    <div className="flex flex-col gap-4 animate-in fade-in duration-200">
                       <div className="space-y-2">
-                        <h3 className="text-base font-black text-slate-900">About the Scheme</h3>
-                        <p className="text-sm text-slate-600 leading-relaxed font-medium whitespace-pre-wrap">
+                        <h3 className="text-base font-black text-black dark:text-white">:: About the Scheme</h3>
+                        <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-semibold whitespace-pre-wrap">
                           {detailedScheme.description || 'No detailed description available.'}
                         </p>
                       </div>
@@ -635,19 +735,21 @@ export function SchemesBrowseScreen() {
                   {/* Eligibility Panel */}
                   {detailTab === 'eligibility' && (
                     <div className="flex flex-col gap-4 animate-in fade-in duration-200">
-                      <h3 className="text-base font-black text-slate-900 mb-2">Eligibility Matrix & Restrictions</h3>
+                      <h3 className="text-base font-black text-black dark:text-white">:: Eligibility Matrix & Restrictions</h3>
                       <div className="flex flex-col gap-3">
                         {!detailedScheme.eligibility_rules || detailedScheme.eligibility_rules.length === 0 ? (
-                          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-600 font-medium">Universal scheme with no restrictive rules.</div>
+                          <div className="p-4 rounded-xl border-2 border-black dark:border-emerald-500 bg-[#F4EFEA] dark:bg-[#0B120E] text-sm text-black dark:text-white font-bold">
+                            Universal scheme with no restrictive rules.
+                          </div>
                         ) : (
                           detailedScheme.eligibility_rules.map((rule) => (
-                            <div key={rule.id} className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200">
-                              <CheckCircle2 className="h-5 w-5 text-[#16A34A] shrink-0 mt-0.5" />
+                            <div key={rule.id} className="flex items-start gap-3 p-4 rounded-xl border-2 border-black dark:border-emerald-500/80 bg-[#FFFDF9] dark:bg-[#0B120E] shadow-[2px_2px_0px_0px_#000000]">
+                              <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                               <div className="flex flex-col gap-1">
-                                <span className="text-sm font-bold text-slate-900 capitalize">
+                                <span className="text-sm font-black text-black dark:text-white capitalize">
                                   {rule.field_name || rule.field}: {rule.operator === 'eq' ? '=' : rule.operator} {rule.rule_value || rule.value}
                                 </span>
-                                {rule.description && <span className="text-xs text-slate-500 font-medium">{rule.description}</span>}
+                                {rule.description && <span className="text-xs text-slate-700 dark:text-slate-300 font-semibold">{rule.description}</span>}
                               </div>
                             </div>
                           ))
@@ -659,26 +761,28 @@ export function SchemesBrowseScreen() {
                   {/* Documents Panel */}
                   {detailTab === 'documents' && (
                     <div className="flex flex-col gap-4 animate-in fade-in duration-200">
-                      <h3 className="text-base font-black text-slate-900 mb-2">Statutory Document Readiness</h3>
+                      <h3 className="text-base font-black text-black dark:text-white">:: Statutory Document Readiness</h3>
                       <div className="flex flex-col gap-3">
                         {!detailedScheme.required_documents || detailedScheme.required_documents.length === 0 ? (
-                          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-600 font-medium">No documents explicitly listed.</div>
+                          <div className="p-4 rounded-xl border-2 border-black dark:border-emerald-500 bg-[#F4EFEA] dark:bg-[#0B120E] text-sm text-black dark:text-white font-bold">
+                            No documents explicitly listed.
+                          </div>
                         ) : (
                           detailedScheme.required_documents.map((doc) => {
                             const isAvailable = readiness?.checklist.find(c => c.document_name === doc.document_name)?.status === 'available'
                             return (
-                              <div key={doc.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200 gap-4">
+                              <div key={doc.id} className="flex items-center justify-between p-4 rounded-xl border-2 border-black dark:border-emerald-500/80 bg-[#FFFDF9] dark:bg-[#0B120E] shadow-[2px_2px_0px_0px_#000000] gap-4">
                                 <div className="flex items-center gap-3">
-                                  <FolderLock className={`h-5 w-5 ${isAvailable ? 'text-[#0E6245]' : 'text-slate-400'}`} />
+                                  <FolderLock className={`h-5 w-5 ${isAvailable ? 'text-black dark:text-emerald-400' : 'text-slate-400'}`} />
                                   <div className="flex flex-col">
-                                    <span className="text-sm font-bold text-slate-900">{doc.document_name}</span>
-                                    {doc.description && <span className="text-xs text-slate-500 font-medium">{doc.description}</span>}
+                                    <span className="text-sm font-black text-black dark:text-white">{doc.document_name}</span>
+                                    {doc.description && <span className="text-xs text-slate-700 dark:text-slate-300 font-semibold">{doc.description}</span>}
                                   </div>
                                 </div>
                                 {isAvailable ? (
-                                  <span className="px-2.5 py-1 rounded-full bg-[#DCFCE7] text-[#166534] text-[10px] font-bold whitespace-nowrap border border-[#BBF7D0]">Ready in Vault</span>
+                                  <NbBadge nbVariant="emerald">Ready in Vault</NbBadge>
                                 ) : (
-                                  <span className="px-2.5 py-1 rounded-full bg-slate-200 text-slate-700 text-[10px] font-bold whitespace-nowrap border border-slate-300">Action Needed</span>
+                                  <NbBadge nbVariant="rose">Action Needed</NbBadge>
                                 )}
                               </div>
                             )
@@ -691,18 +795,18 @@ export function SchemesBrowseScreen() {
                 </div>
 
                 {/* Footer Action Terminal */}
-                <div className="mt-4 pt-6 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[11px] font-bold text-slate-400 font-mono">
-                    ID: {detailedScheme.slug.toUpperCase()}
+                <div className="mt-4 pt-6 border-t-2 border-black dark:border-emerald-500/80 flex flex-wrap items-center justify-between gap-3">
+                  <span className="text-[11px] font-black text-slate-700 dark:text-emerald-400 font-mono">
+                    :: ID: {detailedScheme.slug.toUpperCase()}
                   </span>
 
                   <div className="flex items-center gap-3 flex-wrap">
                     <Link
                       href={`/tracking?scheme=${detailedScheme.slug}`}
-                      className="px-4 py-3 rounded-xl bg-[#DCFCE7] hover:bg-[#bbf7d0] text-[#166534] text-xs font-bold border border-[#BBF7D0] transition-colors flex items-center gap-1.5 cursor-pointer"
+                      className="px-4 py-2.5 rounded-xl border-2 border-black bg-emerald-100 hover:bg-emerald-200 text-black text-xs font-black shadow-[2px_2px_0px_0px_#000000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1.5 cursor-pointer"
                     >
                       <FileCheck className="h-4 w-4 shrink-0" />
-                      <span>Track Application Record</span>
+                      <span>Track Record</span>
                     </Link>
 
                     {detailedScheme.application_url && (
@@ -710,7 +814,7 @@ export function SchemesBrowseScreen() {
                         href={detailedScheme.application_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-5 py-3 rounded-xl bg-[#0E6245] hover:bg-[#004831] text-white text-xs font-bold shadow-xs active:scale-95 transition-all flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl border-2 border-black bg-emerald-400 hover:bg-emerald-300 text-black text-xs font-black shadow-[3px_3px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center gap-2"
                       >
                         <span>Apply on Official Portal</span> <ExternalLink className="h-4 w-4 shrink-0" />
                       </a>
@@ -718,7 +822,7 @@ export function SchemesBrowseScreen() {
                   </div>
                 </div>
 
-              </section>
+              </NbCard>
             )}
           </div>
         </div>

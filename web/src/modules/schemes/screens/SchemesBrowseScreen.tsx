@@ -22,7 +22,6 @@ import {
   FileCheck,
 } from 'lucide-react'
 import {
-  getSchemeCategories,
   listSchemesPaginated,
   listSavedSchemes,
   saveScheme,
@@ -618,7 +617,7 @@ export function SchemesBrowseScreen() {
                 </p>
               </NbCard>
             ) : (
-              <NbCard className={`p-6 sm:p-8 flex flex-col gap-6 relative overflow-hidden transition-opacity duration-200 ${isDetailLoading ? 'opacity-85' : 'opacity-100'}`}>
+              <NbCard className={`p-5 sm:p-6 flex flex-col gap-5 relative overflow-hidden shrink-0 transition-opacity duration-200 ${isDetailLoading ? 'opacity-85' : 'opacity-100'}`}>
                 {/* Non-intrusive hairline progress indicator */}
                 {isDetailLoading && (
                   <div className="absolute top-0 left-0 right-0 h-1 bg-black/10 dark:bg-white/10 overflow-hidden z-30">
@@ -627,7 +626,7 @@ export function SchemesBrowseScreen() {
                 )}
 
                 {/* Header Ribbon */}
-                <div className="flex items-center justify-between pb-4 border-b-2 border-black dark:border-emerald-500/80">
+                <div className="flex items-center justify-between pb-3 border-b-2 border-black dark:border-emerald-500/80 shrink-0">
                   <div className="flex items-center gap-2">
                     <NbBadge nbVariant="emerald">
                       {detailedScheme.state === 'ALL_INDIA' ? 'Central Government' : detailedScheme.state}
@@ -656,12 +655,12 @@ export function SchemesBrowseScreen() {
                 </div>
 
                 {/* Scheme Hero Graphic Card */}
-                <div className="relative w-full rounded-2xl overflow-hidden bg-[#004831] border-2 border-black flex flex-col justify-end p-6 min-h-[160px] shadow-[3px_3px_0px_0px_#000000]">
+                <div className="relative w-full rounded-2xl overflow-hidden bg-[#004831] border-2 border-black flex flex-col justify-end p-5 min-h-[140px] shadow-[3px_3px_0px_0px_#000000] shrink-0">
                   <div className="relative z-10 flex flex-col gap-1.5">
                     <span className="text-[10px] font-black uppercase tracking-wider text-emerald-300 font-mono">
                       DIRECT BENEFIT TRANSFER • DBT VERIFIED
                     </span>
-                    <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
+                    <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight leading-tight">
                       {detailedScheme.name}
                     </h2>
                     <p className="text-xs text-emerald-100 font-bold max-w-xl">
@@ -671,17 +670,17 @@ export function SchemesBrowseScreen() {
                 </div>
 
                 {/* Key Benefit Highlights */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl bg-[#F4EFEA] dark:bg-[#0B120E] border-2 border-black dark:border-emerald-500/80 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#059669] flex flex-col justify-between">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 shrink-0">
+                  <div className="p-3.5 rounded-xl bg-[#F4EFEA] dark:bg-[#0B120E] border-2 border-black dark:border-emerald-500/80 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#059669] flex flex-col justify-between">
                     <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">Primary Benefit</span>
                     <div>
-                      <span className="text-lg font-black text-black dark:text-white font-mono">Assistance</span>
+                      <span className="text-base font-black text-black dark:text-white font-mono">Assistance</span>
                     </div>
                   </div>
-                  <div className="p-4 rounded-xl bg-[#F4EFEA] dark:bg-[#0B120E] border-2 border-black dark:border-emerald-500/80 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#059669] flex flex-col justify-between">
+                  <div className="p-3.5 rounded-xl bg-[#F4EFEA] dark:bg-[#0B120E] border-2 border-black dark:border-emerald-500/80 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#059669] flex flex-col justify-between">
                     <span className="text-[10px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1">Eligibility Status</span>
                     <div>
-                      <Link href={`/check?target_scheme=${detailedScheme.slug}`} className="text-base font-black text-black dark:text-emerald-400 hover:underline flex items-center gap-1.5">
+                      <Link href={`/check?target_scheme=${detailedScheme.slug}`} className="text-sm font-black text-black dark:text-emerald-400 hover:underline flex items-center gap-1.5">
                         Check My Match <ArrowRight className="h-4 w-4 shrink-0" />
                       </Link>
                     </div>
@@ -689,7 +688,7 @@ export function SchemesBrowseScreen() {
                 </div>
 
                 {/* Segmented Tab Navigation */}
-                <div className="flex items-center gap-1.5 p-1.5 bg-[#F4EFEA] dark:bg-[#0B120E] rounded-2xl border-2 border-black dark:border-emerald-500 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#059669]">
+                <div className="flex items-center gap-1.5 p-1 bg-[#F4EFEA] dark:bg-[#0B120E] rounded-xl border-2 border-black dark:border-emerald-500 shadow-[2px_2px_0px_0px_#000000] dark:shadow-[2px_2px_0px_0px_#059669] shrink-0">
                   <NbButton
                     onClick={() => setDetailTab('overview')}
                     nbVariant={detailTab === 'overview' ? 'activeTab' : 'ghost'}
@@ -718,11 +717,11 @@ export function SchemesBrowseScreen() {
                 </div>
 
                 {/* Tab Content Panels */}
-                <div className="min-h-[200px]">
+                <div className="flex-1 flex flex-col min-h-[160px]">
 
                   {/* Overview Panel */}
                   {detailTab === 'overview' && (
-                    <div className="flex flex-col gap-4 animate-in fade-in duration-200">
+                    <div className="flex flex-col gap-3 animate-in fade-in duration-200">
                       <div className="space-y-2">
                         <h3 className="text-base font-black text-black dark:text-white">:: About the Scheme</h3>
                         <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-semibold whitespace-pre-wrap">
@@ -734,18 +733,18 @@ export function SchemesBrowseScreen() {
 
                   {/* Eligibility Panel */}
                   {detailTab === 'eligibility' && (
-                    <div className="flex flex-col gap-4 animate-in fade-in duration-200">
+                    <div className="flex flex-col gap-3 animate-in fade-in duration-200">
                       <h3 className="text-base font-black text-black dark:text-white">:: Eligibility Matrix & Restrictions</h3>
-                      <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-2.5">
                         {!detailedScheme.eligibility_rules || detailedScheme.eligibility_rules.length === 0 ? (
                           <div className="p-4 rounded-xl border-2 border-black dark:border-emerald-500 bg-[#F4EFEA] dark:bg-[#0B120E] text-sm text-black dark:text-white font-bold">
                             Universal scheme with no restrictive rules.
                           </div>
                         ) : (
                           detailedScheme.eligibility_rules.map((rule) => (
-                            <div key={rule.id} className="flex items-start gap-3 p-4 rounded-xl border-2 border-black dark:border-emerald-500/80 bg-[#FFFDF9] dark:bg-[#0B120E] shadow-[2px_2px_0px_0px_#000000]">
+                            <div key={rule.id} className="flex items-start gap-3 p-3.5 rounded-xl border-2 border-black dark:border-emerald-500/80 bg-[#FFFDF9] dark:bg-[#0B120E] shadow-[2px_2px_0px_0px_#000000] shrink-0">
                               <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                              <div className="flex flex-col gap-1">
+                              <div className="flex flex-col gap-0.5">
                                 <span className="text-sm font-black text-black dark:text-white capitalize">
                                   {rule.field_name || rule.field}: {rule.operator === 'eq' ? '=' : rule.operator} {rule.rule_value || rule.value}
                                 </span>
@@ -760,9 +759,9 @@ export function SchemesBrowseScreen() {
 
                   {/* Documents Panel */}
                   {detailTab === 'documents' && (
-                    <div className="flex flex-col gap-4 animate-in fade-in duration-200">
+                    <div className="flex flex-col gap-3 animate-in fade-in duration-200">
                       <h3 className="text-base font-black text-black dark:text-white">:: Statutory Document Readiness</h3>
-                      <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-2.5">
                         {!detailedScheme.required_documents || detailedScheme.required_documents.length === 0 ? (
                           <div className="p-4 rounded-xl border-2 border-black dark:border-emerald-500 bg-[#F4EFEA] dark:bg-[#0B120E] text-sm text-black dark:text-white font-bold">
                             No documents explicitly listed.
@@ -771,18 +770,18 @@ export function SchemesBrowseScreen() {
                           detailedScheme.required_documents.map((doc) => {
                             const isAvailable = readiness?.checklist.find(c => c.document_name === doc.document_name)?.status === 'available'
                             return (
-                              <div key={doc.id} className="flex items-center justify-between p-4 rounded-xl border-2 border-black dark:border-emerald-500/80 bg-[#FFFDF9] dark:bg-[#0B120E] shadow-[2px_2px_0px_0px_#000000] gap-4">
+                              <div key={doc.id} className="flex items-center justify-between p-3.5 rounded-xl border-2 border-black dark:border-emerald-500/80 bg-[#FFFDF9] dark:bg-[#0B120E] shadow-[2px_2px_0px_0px_#000000] gap-4 shrink-0">
                                 <div className="flex items-center gap-3">
-                                  <FolderLock className={`h-5 w-5 ${isAvailable ? 'text-black dark:text-emerald-400' : 'text-slate-400'}`} />
+                                  <FolderLock className={`h-5 w-5 shrink-0 ${isAvailable ? 'text-black dark:text-emerald-400' : 'text-slate-400'}`} />
                                   <div className="flex flex-col">
                                     <span className="text-sm font-black text-black dark:text-white">{doc.document_name}</span>
                                     {doc.description && <span className="text-xs text-slate-700 dark:text-slate-300 font-semibold">{doc.description}</span>}
                                   </div>
                                 </div>
                                 {isAvailable ? (
-                                  <NbBadge nbVariant="emerald">Ready in Vault</NbBadge>
+                                  <NbBadge nbVariant="emerald" className="shrink-0">Ready in Vault</NbBadge>
                                 ) : (
-                                  <NbBadge nbVariant="rose">Action Needed</NbBadge>
+                                  <NbBadge nbVariant="rose" className="shrink-0">Action Needed</NbBadge>
                                 )}
                               </div>
                             )
@@ -795,7 +794,7 @@ export function SchemesBrowseScreen() {
                 </div>
 
                 {/* Footer Action Terminal */}
-                <div className="mt-4 pt-6 border-t-2 border-black dark:border-emerald-500/80 flex flex-wrap items-center justify-between gap-3">
+                <div className="mt-2 pt-4 border-t-2 border-black dark:border-emerald-500/80 flex flex-wrap items-center justify-between gap-3 shrink-0">
                   <span className="text-[11px] font-black text-slate-700 dark:text-emerald-400 font-mono">
                     :: ID: {detailedScheme.slug.toUpperCase()}
                   </span>
@@ -803,7 +802,7 @@ export function SchemesBrowseScreen() {
                   <div className="flex items-center gap-3 flex-wrap">
                     <Link
                       href={`/tracking?scheme=${detailedScheme.slug}`}
-                      className="px-4 py-2.5 rounded-xl border-2 border-black bg-emerald-100 hover:bg-emerald-200 text-black text-xs font-black shadow-[2px_2px_0px_0px_#000000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1.5 cursor-pointer"
+                      className="px-4 py-2 rounded-xl border-2 border-black bg-emerald-100 hover:bg-emerald-200 text-black text-xs font-black shadow-[2px_2px_0px_0px_#000000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all flex items-center gap-1.5 cursor-pointer"
                     >
                       <FileCheck className="h-4 w-4 shrink-0" />
                       <span>Track Record</span>
@@ -814,7 +813,7 @@ export function SchemesBrowseScreen() {
                         href={detailedScheme.application_url}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-5 py-2.5 rounded-xl border-2 border-black bg-emerald-400 hover:bg-emerald-300 text-black text-xs font-black shadow-[3px_3px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center gap-2"
+                        className="px-4 py-2 rounded-xl border-2 border-black bg-emerald-400 hover:bg-emerald-300 text-black text-xs font-black shadow-[3px_3px_0px_0px_#000000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all flex items-center gap-2"
                       >
                         <span>Apply on Official Portal</span> <ExternalLink className="h-4 w-4 shrink-0" />
                       </a>

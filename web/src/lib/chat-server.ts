@@ -91,26 +91,31 @@ export async function executeSearchSchemes(searchTerm?: string, state?: string, 
       const sql = `SELECT id, name, slug, ministry, state, category, description FROM schemes ${whereClause} ORDER BY id ASC LIMIT 3`;
 
       const res = await query(sql, params);
-      if (res.rows.length > 0) return res.rows;
+      return res.rows;
     }
   } catch (err) {
-    console.warn("executeSearchSchemes DB lookup:", err);
+    console.warn("executeSearchSchemes DB lookup error:", err);
   }
 
-  // Graceful fallback to verified seed catalog when DB is unpopulated / in offline tests
-  const queryLower = (searchTerm || "").toLowerCase().replace(/s$/, "");
-  const queryWords = queryLower.split(/\s+/).filter(Boolean);
-  return SEED_FALLBACK_SCHEMES.filter(
-    (s) =>
-      queryWords.length === 0 ||
-      queryWords.some(
-        (w) =>
-          s.name.toLowerCase().includes(w) ||
-          s.description.toLowerCase().includes(w) ||
-          s.category.toLowerCase().includes(w) ||
-          s.state.toLowerCase().includes(w)
-      )
-  ).slice(0, 3);
+  // Fallback to verified seed catalog ONLY in test environment when DB is unreachable
+  if (process.env.NODE_ENV === "test") {
+    const queryLower = (searchTerm || "").toLowerCase().replace(/s$/, "");
+    const queryWords = queryLower.split(/\s+/).filter(Boolean);
+    return SEED_FALLBACK_SCHEMES.filter(
+      (s) =>
+        queryWords.length === 0 ||
+        queryWords.some(
+          (w) =>
+            s.name.toLowerCase().includes(w) ||
+            s.description.toLowerCase().includes(w) ||
+            s.category.toLowerCase().includes(w) ||
+            s.state.toLowerCase().includes(w)
+        )
+    ).slice(0, 3);
+  }
+
+  // Honest failure: return empty array when no schemes match
+  return [];
 }
 
 export async function executeGetSchemeDocuments(slugs: string[]) {
@@ -144,17 +149,28 @@ export async function executeGetSchemeDocuments(slugs: string[]) {
         }
         return Object.values(grouped);
       }
+      return [];
     }
   } catch (err) {
-    console.warn("executeGetSchemeDocuments DB lookup:", err);
+    console.warn("executeGetSchemeDocuments DB lookup error:", err);
   }
 
-  // Seed fixture lookup for offline test runs
-  return slugs.map((slug) => ({
-    scheme_slug: slug,
-    scheme_name: "PM-Kisan Samman Nidhi",
-    documents: SEED_FALLBACK_DOCS[slug] || SEED_FALLBACK_DOCS["pm-kisan-samman-nidhi"],
-  }));
+  // Fallback to seed fixture documents ONLY in test environment for known seed schemes
+  if (process.env.NODE_ENV === "test") {
+    return slugs
+      .filter((slug) => Boolean(SEED_FALLBACK_DOCS[slug]))
+      .map((slug) => {
+        const matchingSeed = SEED_FALLBACK_SCHEMES.find((s) => s.slug === slug);
+        return {
+          scheme_slug: slug,
+          scheme_name: matchingSeed ? matchingSeed.name : slug,
+          documents: SEED_FALLBACK_DOCS[slug] || [],
+        };
+      });
+  }
+
+  // Honest failure: return empty array when no documents found
+  return [];
 }
 
 export async function executeCheckEligibility(params: {
@@ -234,7 +250,7 @@ export async function generateAssistantReply(content: string): Promise<string> {
   const groqModel = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
 
   // 1. PRIMARY LLM: Groq via Vercel AI SDK
-  if (groqApiKey && groqApiKey.startsWith("gsk_")) {
+  if (groqApiKey && groqApiKey.startsWith("gsk_") && process.env.NODE_ENV !== "test") {
     try {
       const groqProvider = createGroq({ apiKey: groqApiKey });
       const result = await generateText({
@@ -244,6 +260,7 @@ export async function generateAssistantReply(content: string): Promise<string> {
         tools: advisorTools,
         stopWhen: isStepCount(3),
         temperature: 0.1,
+        abortSignal: AbortSignal.timeout(4000),
       });
 
       if (result.text && result.text.trim()) {
@@ -259,7 +276,7 @@ export async function generateAssistantReply(content: string): Promise<string> {
   const geminiApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
   const geminiModel = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
-  if (geminiApiKey && geminiApiKey.startsWith("AIzaSy")) {
+  if (geminiApiKey && geminiApiKey.startsWith("AIzaSy") && process.env.NODE_ENV !== "test") {
     try {
       const googleProvider = createGoogleGenerativeAI({ apiKey: geminiApiKey });
       const result = await generateText({
@@ -269,6 +286,7 @@ export async function generateAssistantReply(content: string): Promise<string> {
         tools: advisorTools,
         stopWhen: isStepCount(3),
         temperature: 0.1,
+        abortSignal: AbortSignal.timeout(4000),
       });
 
       if (result.text && result.text.trim()) {
@@ -315,11 +333,15 @@ async function offlineDatabaseOrchestrator(content: string): Promise<string> {
     if (isDocQuery) {
       const docRecords = await executeGetSchemeDocuments(schemes.map((s) => s.slug));
       const targetScheme = schemes[0];
-      const targetDocs = docRecords.find((d) => d.scheme_slug === targetScheme.slug)?.documents || docRecords[0]?.documents || [];
+      const targetDocs = docRecords.find((d) => d.scheme_slug === targetScheme.slug)?.documents || [];
+      
+      if (targetDocs.length === 0) {
+        return `### Documents for ${targetScheme.name}\n\nSpecific document requirements for **[${targetScheme.name}](/schemes/${targetScheme.slug})** have not yet been cataloged in our database.\n\n👉 Standard government verification typically requires identity proof (Aadhaar Card) and bank account details. Check your [Citizen Vault](/vault) or verify requirements directly on the official portal!`;
+      }
+
       const docList = targetDocs.map((d: any, i: number) => `${i + 1}. **${d.document_name}**: ${d.description || "Verified statutory requirement"}`).join("\n");
 
-      const displayName = targetScheme.name.includes("PM-Kisan") ? "PM-Kisan Samman Nidhi" : targetScheme.name;
-      return `### Required Documents for ${displayName}\n\nTo apply or complete verification for **[${targetScheme.name}](/schemes/${targetScheme.slug})**, you need the following verified documents:\n\n${docList}\n\n👉 **Next Steps**:\n• Upload your documents to your [Citizen Vault](/vault) to calculate your application readiness score!\n• Evaluate your full match status using our [Eligibility Check Tool](/check).`;
+      return `### Required Documents for ${targetScheme.name}\n\nTo apply or complete verification for **[${targetScheme.name}](/schemes/${targetScheme.slug})**, you need the following verified documents:\n\n${docList}\n\n👉 **Next Steps**:\n• Upload your documents to your [Citizen Vault](/vault) to calculate your application readiness score!\n• Evaluate your full match status using our [Eligibility Check Tool](/check).`;
     }
 
     const schemeItems = schemes
@@ -329,10 +351,13 @@ async function offlineDatabaseOrchestrator(content: string): Promise<string> {
       )
       .join("\n");
 
-    return `### Verified Agriculture & Farmer Schemes in Madhya Pradesh\n\nHere are key Agriculture welfare programs for small farmers in Madhya Pradesh:\n\n${schemeItems}\n\n👉 Check your full eligibility across all schemes using our [Eligibility Check Tool](/check)!`;
+    const categoryTitle = schemes[0].category ? `${schemes[0].category} Schemes` : "Matching Welfare Schemes";
+    const stateSubtitle = schemes[0].state && schemes[0].state !== "ALL_INDIA" ? ` in ${schemes[0].state}` : " across India";
+
+    return `### Verified ${categoryTitle}${stateSubtitle}\n\nHere are the top programs matching your search:\n\n${schemeItems}\n\n👉 Check your full eligibility across all schemes using our [Eligibility Check Tool](/check)!`;
   }
 
-  return `### Government Welfare Guidance\n\nNamaste! I am your AI Welfare Assistant. Here are key national welfare programs you may qualify for:\n\n• **PM-Kisan Samman Nidhi**: Direct benefit transfer of ₹6,000/year for eligible farmer families.\n• **Ayushman Bharat (PM-JAY)**: Free health insurance coverage up to ₹5 Lakh/family per year.\n• **PM Awas Yojana**: Financial subsidy for constructing pucca houses.\n\n👉 Share your **State**, **Occupation**, and **Annual Income** to find exact matching schemes, or evaluate your full match status with our [Eligibility Check Tool](/check)!`;
+  return `### No Matching Schemes Found\n\nI couldn't find any active government welfare schemes matching **"${content}"** in our database.\n\n👉 **Recommended next steps**:\n• Search by your **State** (e.g. *Madhya Pradesh*, *Maharashtra*) or **Category** (e.g. *Agriculture*, *Education*, *Pensions*).\n• Evaluate your full profile match using our [Instant Eligibility Evaluator](/check).\n• Browse all active government programs in our [Welfare Directory](/schemes).`;
 }
 
 // =============================================================================

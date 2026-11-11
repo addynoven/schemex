@@ -18,7 +18,8 @@ describe('Mobile-Aligned Multilingual AI Advisor Agent Suite', () => {
 
   it('Turn 2: Follow-up Document Checklist - returns verified document requirements in Hinglish', async () => {
     const res = await generateAssistantReply('Kisan Samman Nidhi ke liye document kya chahiye?')
-    expect(res).toContain('Required Documents for PM-Kisan')
+    expect(res).toContain('Required Documents for')
+    expect(res).toContain('Kisan Samman Nidhi')
     expect(res).toContain('Aadhaar Card')
     expect(res).toContain('Land Record')
     expect(res).toContain('Bank Passbook')
@@ -34,5 +35,13 @@ describe('Mobile-Aligned Multilingual AI Advisor Agent Suite', () => {
     expect(res).toContain('/check')
     expect(res).toContain('/vault')
     expect(res).toContain('/schemes')
+  })
+
+  it('Turn 4: Zero Matches / Honest Failure - returns transparent guidance without hallucinating PM-Kisan', async () => {
+    const res = await generateAssistantReply('robotics funding in Antarctica')
+    expect(res).toContain('No Matching Schemes Found')
+    expect(res).toContain('robotics funding in Antarctica')
+    expect(res).not.toContain('PM-Kisan')
+    expect(res).not.toContain('Ayushman Bharat')
   })
 })

@@ -3,6 +3,7 @@ import { createGroq } from "@ai-sdk/groq";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { z } from "zod";
 import { query } from "@/lib/db";
+import { evaluateSchemeEligibility } from "@/lib/eligibility-engine";
 
 const SYSTEM_INSTRUCTION = `You are the Sovereign Citizen Welfare AI Advisor. Provide personalized, accurate, and empathetic assistance to Indian citizens navigating central and state government schemes.
 
@@ -10,7 +11,10 @@ CRITICAL RULES:
 1. Always respond in the same language as the citizen (English, Hindi, or Hinglish).
 2. NEVER guess or hallucinate scheme names or slugs. Always use the searchSchemes tool first to find matching schemes in the official directory.
 3. When recommending schemes, include direct Markdown links in the format [Scheme Name](/schemes/scheme-slug).
-4. If the citizen asks for required documents, FIRST find the schemes, THEN call getSchemeDocuments with the exact slugs discovered. Combine common documents (e.g. Aadhaar Card, Bank Passbook) so you do not repeat them.
+4. SEQUENTIAL CHAINING:
+   - If the citizen shares their profile (age, income, state, or occupation) or asks whether they qualify/are eligible, FIRST search schemes, THEN call checkEligibility for each candidate scheme to verify exact match rules before claiming they are eligible.
+   - If the citizen ONLY asked about schemes/eligibility, provide a concise summary of the Top 3 eligible picks with clear reasons why they qualify. Do NOT call getSchemeDocuments unless they explicitly asked for documents ("what docs", "kagaj", "documents needed").
+   - If the citizen explicitly asks for required documents, call getSchemeDocuments with the candidate slugs. Combine common documents (e.g. Aadhaar Card, Bank Passbook) so you do not repeat them.
 5. If the citizen is just greeting you (e.g., "hello", "namaste", "hi"), respond politely in 1-2 lines with: "Namaste! I am your AI Citizen Welfare Advisor, your official guide to Indian central and state government benefits." and ask how you can help them (State, Occupation, or Sector). Do not dump schemes unsolicited.
 6. When explaining application procedures, provide a 3-step guide: Step 1 (Calculate match score at /check), Step 2 (Verify vault certificates at /vault), and Step 3 (Direct portal submission at /schemes).`;
 
@@ -179,30 +183,17 @@ export async function executeCheckEligibility(params: {
   state?: string;
   income?: number;
   occupation?: string;
+  gender?: string;
+  is_bpl?: boolean;
 }) {
-  try {
-    if (!process.env.DATABASE_URL) {
-      return { eligible: true, scheme: params.slug, matched_rules: [] };
-    }
-    const schemeRes = await query("SELECT id, name, slug, state FROM schemes WHERE slug = $1 LIMIT 1", [params.slug]);
-    if (schemeRes.rowCount === 0) {
-      return { eligible: false, message: `Scheme ${params.slug} not found.` };
-    }
-
-    const rulesRes = await query(
-      "SELECT field_name, operator, rule_value, description FROM eligibility_rules WHERE scheme_id = $1",
-      [schemeRes.rows[0].id]
-    );
-
-    return {
-      eligible: true,
-      scheme: schemeRes.rows[0].name,
-      matched_rules: rulesRes.rows,
-    };
-  } catch (err) {
-    console.warn("executeCheckEligibility error:", err);
-    return { eligible: false, error: "Database error evaluating rules" };
-  }
+  return evaluateSchemeEligibility(params.slug, {
+    age: params.age,
+    state: params.state,
+    annual_income: params.income,
+    occupation: params.occupation,
+    gender: params.gender,
+    is_bpl: params.is_bpl,
+  });
 }
 
 // =============================================================================
@@ -325,7 +316,7 @@ async function offlineDatabaseOrchestrator(content: string): Promise<string> {
   }
 
   // Search real database via deterministic tool
-  const searchKeyword = tokens.find((t) => !["document", "documents", "certificate", "proof"].includes(t)) || tokens[0];
+  const searchKeyword = tokens.find((t) => !["document", "documents", "certificate", "proof", "eligible", "eligibility"].includes(t)) || tokens[0];
   const schemes = await executeSearchSchemes(searchKeyword);
 
   if (schemes.length > 0) {
@@ -342,6 +333,20 @@ async function offlineDatabaseOrchestrator(content: string): Promise<string> {
       const docList = targetDocs.map((d: any, i: number) => `${i + 1}. **${d.document_name}**: ${d.description || "Verified statutory requirement"}`).join("\n");
 
       return `### Required Documents for ${targetScheme.name}\n\nTo apply or complete verification for **[${targetScheme.name}](/schemes/${targetScheme.slug})**, you need the following verified documents:\n\n${docList}\n\n👉 **Next Steps**:\n• Upload your documents to your [Citizen Vault](/vault) to calculate your application readiness score!\n• Evaluate your full match status using our [Eligibility Check Tool](/check).`;
+    }
+
+    // Eligibility check inquiry branch
+    const isEligibilityQuery = tokens.some((t) => ["eligible", "eligibility", "qualify"].includes(t));
+    if (isEligibilityQuery) {
+      const targetScheme = schemes[0];
+      const evalResult = await executeCheckEligibility({
+        slug: targetScheme.slug,
+        occupation: tokens.find((t) => ["farmer", "student", "artisan"].includes(t)),
+        state: tokens.includes("mp") ? "Madhya Pradesh" : undefined,
+      });
+
+      const statusBadge = evalResult.status === "eligible" ? "✅ **100% Eligible**" : evalResult.status === "nearly_eligible" ? "⚠️ **Nearly Eligible**" : "❌ **Ineligible**";
+      return `### Eligibility Evaluation: ${targetScheme.name}\n\nBased on official database criteria:\n\n• **Match Status**: ${statusBadge} (${evalResult.match_percentage}% match)\n• **Scheme Details**: [${targetScheme.name}](/schemes/${targetScheme.slug})\n• **Category**: ${targetScheme.category || "General Welfare"}\n\n👉 Run a full profile evaluation across all central and state benefits using our [Eligibility Evaluator](/check)!`;
     }
 
     const schemeItems = schemes

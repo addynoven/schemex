@@ -44,4 +44,12 @@ describe('Mobile-Aligned Multilingual AI Advisor Agent Suite', () => {
     expect(res).not.toContain('PM-Kisan')
     expect(res).not.toContain('Ayushman Bharat')
   })
+
+  it('Turn 5: Direct Eligibility Evaluation - evaluates scheme criteria deterministically', async () => {
+    const res = await generateAssistantReply('Am I eligible for PM-Kisan as a farmer in MP?')
+    expect(res).toContain('Eligibility Evaluation')
+    expect(res).toContain('PM-Kisan')
+    expect(res).toContain('Eligible')
+    expect(res).toContain('/check')
+  })
 })

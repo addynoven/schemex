@@ -38,20 +38,5 @@ export const useDevErrorStore = create<DevErrorState>((set) => ({
 }))
 
 export function captureDevError(error: Partial<DevErrorDetails>) {
-  const fullError: DevErrorDetails = {
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    title: error.title || 'Application Error',
-    errorCode: error.errorCode || 'UNHANDLED_ERROR',
-    httpStatus: error.httpStatus || 500,
-    origin: error.origin || 'Frontend Client',
-    endpoint: error.endpoint,
-    message: error.message || 'An unexpected error occurred',
-    stackTrace: error.stackTrace || (error instanceof Error ? (error as Error).stack : null),
-    solution: error.solution,
-    rawPayload: error.rawPayload,
-    timestamp: new Date().toISOString(),
-  }
-
-  useDevErrorStore.getState().openDevError(fullError)
-  console.error('🚨 [DevError Captured]:', fullError)
+  console.error('🚨 [Application Error]:', error.title, error.message, error)
 }

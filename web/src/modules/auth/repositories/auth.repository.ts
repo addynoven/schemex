@@ -114,9 +114,9 @@ export const authRepository = {
         password: 'SecurePass123!',
         idToken,
       })
-    } catch (err) {
+    } catch (err: any) {
       console.error('Firebase Google sign-in failed:', err)
-      throw new Error('Google sign-in failed. Please try again.')
+      throw err
     }
   },
 

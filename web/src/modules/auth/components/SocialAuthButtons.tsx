@@ -22,10 +22,13 @@ export function SocialAuthButtons() {
     } catch (err: unknown) {
       console.error('Firebase Google login error:', err)
       const errStr = err instanceof Error ? err.message : String(err)
-      if (errStr.includes('popup-closed-by-user') || errStr.includes('cancelled')) {
+      const errCode = (err as any)?.code || ''
+      if (errStr.includes('popup-closed-by-user') || errCode === 'auth/popup-closed-by-user' || errStr.includes('cancelled')) {
         setErrorMessage('Sign-in popup was closed before completion. Please try again.')
+      } else if (errStr.includes('unauthorized-domain') || errCode === 'auth/unauthorized-domain') {
+        setErrorMessage('Domain authorization in progress. Please refresh in a few seconds.')
       } else {
-        setErrorMessage('Unable to connect to Google Auth. Please check your connection and retry.')
+        setErrorMessage(err instanceof Error ? err.message : 'Unable to connect to Google Auth. Please check your connection and retry.')
       }
     } finally {
       setIsLoading(false)

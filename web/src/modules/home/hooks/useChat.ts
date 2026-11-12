@@ -35,12 +35,17 @@ export function useChat(initialSessionIdentifier?: number | string) {
       const data = await homeRepository.listSessions()
       setSessions(data || [])
     } catch (err: any) {
+      // If user is not signed in yet (401), treat as empty list without triggering a DevError modal
+      if (err?.message?.includes("401") || err?.status === 401) {
+        setSessions([])
+        return
+      }
       console.warn('⚠️ [useChat] Failed to load chat sessions:', err?.message || err)
       captureDevError({
         title: 'Chat Sessions Load Failed',
         message: err?.message || 'Unable to retrieve user chat sessions from backend API',
         origin: 'Frontend Client',
-        endpoint: '/api/chat_sessions',
+        endpoint: '/api/chat/sessions',
       })
     }
   }, [setSessions])
@@ -50,7 +55,10 @@ export function useChat(initialSessionIdentifier?: number | string) {
       const user = await homeRepository.getMe()
       if (user?.profile?.full_name) setUserName(user.profile.full_name)
     } catch (err: any) {
-      console.warn('⚠️ [useChat] Failed to load current citizen profile:', err?.message || err)
+      // Unauthenticated state is normal for guests
+      if (!err?.message?.includes("401") && err?.status !== 401) {
+        console.warn('⚠️ [useChat] Failed to load current citizen profile:', err?.message || err)
+      }
     }
   }, [])
 

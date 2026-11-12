@@ -71,10 +71,16 @@ export async function POST(
         }
 
         await saveChatMessage(session.id, "user", cleanContent);
-        const reply = await generateAssistantReply(cleanContent);
-        const assistant = await saveChatMessage(session.id, "assistant", reply);
-        send({ type: "token", token: reply, citations: [] });
-        send({ type: "done", message_id: assistant.id });
+        const reply = await generateAssistantReply(cleanContent, { returnDetails: true });
+        const assistant = await saveChatMessage(session.id, "assistant", reply.content);
+        send({ type: "token", token: reply.content, citations: [] });
+        send({
+          type: "done",
+          message_id: assistant.id,
+          metrics: reply.metrics,
+          provider: reply.provider,
+          is_degraded: reply.isDegraded,
+        });
       } catch (error) {
         console.error("Failed to stream chat message:", error);
         send({ type: "error", message: "Failed to stream chat message" });

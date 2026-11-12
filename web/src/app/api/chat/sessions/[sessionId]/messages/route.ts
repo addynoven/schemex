@@ -66,8 +66,8 @@ export async function POST(
     }
 
     await saveChatMessage(session.id, "user", cleanContent);
-    const reply = await generateAssistantReply(cleanContent);
-    const assistant = await saveChatMessage(session.id, "assistant", reply);
+    const reply = await generateAssistantReply(cleanContent, { returnDetails: true });
+    const assistant = await saveChatMessage(session.id, "assistant", reply.content);
 
     return NextResponse.json({
       id: assistant.id,
@@ -75,6 +75,9 @@ export async function POST(
       content: assistant.content,
       citations: assistant.citations || [],
       created_at: assistant.created_at,
+      metrics: reply.metrics,
+      provider: reply.provider,
+      is_degraded: reply.isDegraded,
     });
   } catch (error) {
     console.error("Failed to send chat message:", error);

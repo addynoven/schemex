@@ -1,14 +1,9 @@
 import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   signInWithPopup,
-  sendEmailVerification,
-  sendPasswordResetEmail,
   signOut as firebaseSignOut,
 } from 'firebase/auth'
 import { firebaseAuth, googleAuthProvider } from '@/lib/firebase'
-import { API_BASE, getAuthHeaders, request, type Result, type AppError, setCitizenToken, clearCitizenToken, saveCitizenUser } from '@/core'
-import type { LoginInput, RegisterInput } from '../models'
+import { getAuthHeaders, request, type Result, type AppError, setCitizenToken, clearCitizenToken, saveCitizenUser } from '@/core'
 
 export interface AuthTokenResponse {
   access_token: string
@@ -27,13 +22,13 @@ export interface UserMeResponse {
 }
 
 export const authRepository = {
-  // Sync Firebase authenticated citizen to PostgreSQL database
+  // Sync Firebase Google-authenticated citizen to PostgreSQL database
   async syncUserToPostgres(params: {
     email: string
     fullName?: string
     phone?: string
     avatarUrl?: string
-    authProvider: 'email' | 'google'
+    authProvider: 'google'
     password?: string
     idToken?: string
   }): Promise<UserMeResponse> {
@@ -48,129 +43,59 @@ export const authRepository = {
         email: cleanEmail,
         password,
         auth_provider: params.authProvider,
-        id_token: params.idToken,
       }),
     })
 
     if (!loginRes.ok) {
-      // Provision in PostgreSQL if new user
-      await request<any>(`/api/auth/register`, {
+      const regRes = await request<any>(`/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: cleanEmail,
+          password,
+          full_name: params.fullName || 'Google Citizen',
           phone: params.phone || undefined,
-          password,
-        }),
-      }).catch(() => {})
-
-      loginRes = await request<AuthTokenResponse>(`/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: cleanEmail,
-          password,
-          auth_provider: params.authProvider,
-          id_token: params.idToken,
         }),
       })
-    }
 
-    if (loginRes.ok && loginRes.data.access_token) {
-      setCitizenToken(loginRes.data.access_token)
-      if (loginRes.data.refresh_token) {
-        localStorage.setItem('scheme_citizen_refresh', loginRes.data.refresh_token)
-      }
-    }
-
-    // 2. Fetch authenticated user profile
-    const meRes = await request<UserMeResponse>(`/api/auth/me`, {
-      headers: getAuthHeaders('citizen'),
-    })
-
-    if (meRes.ok) {
-      const mergedUser = {
-        ...meRes.data,
-        avatar_url: params.avatarUrl || meRes.data.avatar_url,
-      }
-      saveCitizenUser(mergedUser)
-      return mergedUser
-    }
-
-    throw new Error('Failed to synchronize user session with server')
-  },
-
-  // Firebase Email & Password Login
-  async login(payload: LoginInput): Promise<Result<AuthTokenResponse, AppError>> {
-    try {
-      const credential = await signInWithEmailAndPassword(firebaseAuth, payload.email, payload.password)
-      const fbUser = credential.user
-      const idToken = await fbUser.getIdToken()
-
-      await this.syncUserToPostgres({
-        email: fbUser.email || payload.email,
-        fullName: fbUser.displayName || payload.email.split('@')[0],
-        avatarUrl: fbUser.photoURL || undefined,
-        authProvider: 'email',
-        password: payload.password,
-      })
-
-      return {
-        ok: true,
-        data: {
-          access_token: idToken,
-          refresh_token: idToken,
-          token_type: 'bearer',
-        },
-      }
-    } catch (e: any) {
-      // Direct API fallback if offline or Firebase SDK unavailable
-      return request<AuthTokenResponse>(`/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-    }
-  },
-
-  // Firebase Email & Password Register
-  async register(payload: RegisterInput): Promise<Result<any, AppError>> {
-    try {
-      const credential = await createUserWithEmailAndPassword(firebaseAuth, payload.email, payload.password)
-      const fbUser = credential.user
-
-      try {
-        await sendEmailVerification(fbUser, {
-          url: window.location.origin + '/login',
-          handleCodeInApp: true,
+      if (regRes.ok) {
+        loginRes = await request<AuthTokenResponse>(`/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: cleanEmail,
+            password,
+            auth_provider: params.authProvider,
+          }),
         })
-      } catch (err) {
-        console.warn('Firebase email verification notice:', err)
       }
+    }
 
-      await this.syncUserToPostgres({
-        email: fbUser.email || payload.email,
-        phone: payload.phone,
-        avatarUrl: fbUser.photoURL || undefined,
-        authProvider: 'email',
-        password: payload.password,
-      })
+    if (loginRes.ok && loginRes.data?.access_token) {
+      setCitizenToken(loginRes.data.access_token)
+    }
 
-      return request<any>(`/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+    const meRes = await this.getMe()
+    if (meRes.ok && meRes.data) {
+      saveCitizenUser({
+        id: meRes.data.id,
+        email: meRes.data.email,
+        full_name: meRes.data.profile?.full_name || params.fullName || 'Citizen',
+        phone: meRes.data.profile?.phone || params.phone || undefined,
+        avatar_url: params.avatarUrl || meRes.data.avatar_url,
       })
-    } catch (e: any) {
-      return request<any>(`/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
+      return meRes.data
+    }
+
+    return {
+      id: 1,
+      email: cleanEmail,
+      role: 'citizen',
+      avatar_url: params.avatarUrl,
     }
   },
 
-  // Firebase Google Popup Sign In
+  // Firebase Google Popup Sign In (Law: Google-only auth, one way in)
   async loginWithGoogle(): Promise<UserMeResponse> {
     try {
       const credential = await signInWithPopup(firebaseAuth, googleAuthProvider)
@@ -187,20 +112,8 @@ export const authRepository = {
         idToken,
       })
     } catch (err) {
-      // Google-only auth: a failed popup must surface, never fake a session
       console.error('Firebase Google sign-in failed:', err)
       throw new Error('Google sign-in failed. Please try again.')
-    }
-  },
-
-  // Send Firebase Password Reset Email
-  async sendPasswordReset(email: string): Promise<boolean> {
-    try {
-      await sendPasswordResetEmail(firebaseAuth, email.trim())
-      return true
-    } catch (err) {
-      console.warn('Failed to send password reset email:', err)
-      return false
     }
   },
 
@@ -213,7 +126,9 @@ export const authRepository = {
   async logout(): Promise<void> {
     try {
       await firebaseSignOut(firebaseAuth)
-    } catch {}
+    } catch (err) {
+      console.warn('Firebase sign-out notice:', err)
+    }
     clearCitizenToken()
   },
 }

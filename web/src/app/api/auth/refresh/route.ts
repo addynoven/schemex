@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   createAccessToken,
+  createRefreshToken,
   getToken,
   getUserIdFromToken,
 } from "@/lib/legacy-auth";
@@ -20,10 +21,14 @@ export async function POST(request: NextRequest) {
     );
     if (result.rowCount === 0)
       return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
-    const accessToken = createAccessToken(userId, result.rows[0].role);
+
+    // Rolling session: renew 30-day access token and 90-day refresh token
+    const accessToken = createAccessToken(userId, result.rows[0].role, 30 * 86400);
+    const newRefreshToken = createRefreshToken(userId, 90 * 86400);
+
     return NextResponse.json({
       access_token: accessToken,
-      refresh_token: accessToken,
+      refresh_token: newRefreshToken,
       token_type: "bearer",
     });
   } catch (error) {

@@ -17,13 +17,30 @@ function sign(value: string): string {
   return createHmac("sha256", secret()).update(value).digest("base64url");
 }
 
-export function createAccessToken(userId: number, role: string): string {
+export function createAccessToken(
+  userId: number,
+  role: string,
+  expiresInSeconds: number = 30 * 86400 // 30 days persistent session
+): string {
   const header = encode({ alg: "HS256", typ: "JWT" });
   const payload = encode({
     sub: String(userId),
     role,
     type: "access",
-    exp: Math.floor(Date.now() / 1000) + 1800,
+    exp: Math.floor(Date.now() / 1000) + expiresInSeconds,
+  });
+  return `${header}.${payload}.${sign(`${header}.${payload}`)}`;
+}
+
+export function createRefreshToken(
+  userId: number,
+  expiresInSeconds: number = 90 * 86400 // 90 days rolling refresh window
+): string {
+  const header = encode({ alg: "HS256", typ: "JWT" });
+  const payload = encode({
+    sub: String(userId),
+    type: "refresh",
+    exp: Math.floor(Date.now() / 1000) + expiresInSeconds,
   });
   return `${header}.${payload}.${sign(`${header}.${payload}`)}`;
 }

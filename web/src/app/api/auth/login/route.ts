@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
-import { createAccessToken, hashPassword, verifyPassword } from "@/lib/legacy-auth";
+import { createAccessToken, createRefreshToken, hashPassword, verifyPassword } from "@/lib/legacy-auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -93,10 +93,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const accessToken = createAccessToken(user.id, user.role);
+    const accessToken = createAccessToken(user.id, user.role, 30 * 86400); // 30 days
+    const refreshToken = createRefreshToken(user.id, 90 * 86400); // 90 days rolling refresh window
+
     return NextResponse.json({
       access_token: accessToken,
-      refresh_token: accessToken,
+      refresh_token: refreshToken,
       token_type: "bearer",
     });
   } catch (error) {

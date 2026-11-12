@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getCitizenToken, clearCitizenToken, setCitizenToken } from '@/core'
+import { getCitizenToken, getCitizenRefreshToken, clearCitizenToken, setCitizenToken, setCitizenRefreshToken } from '@/core'
 import { authRepository } from '../repositories'
 import { useAuthStore } from '../store'
 
@@ -13,44 +13,58 @@ export function useAuth() {
 
   const checkSession = async () => {
     const token = getCitizenToken()
-    if (!token) {
+    const refreshToken = getCitizenRefreshToken()
+
+    if (!token && !refreshToken) {
       clear()
       setIsLoading(false)
       return
     }
 
-    const res = await authRepository.getMe()
-    if (res.ok) {
-      setUser(res.data)
-    } else {
-      const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('scheme_citizen_refresh') : null
-      if (refreshToken) {
-        try {
-          const refRes = await fetch('/api/auth/refresh', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ refresh_token: refreshToken }),
-          })
-          if (refRes.ok) {
-            const data = await refRes.json()
-            if (data.access_token) {
-              setCitizenToken(data.access_token)
-              if (data.refresh_token) {
-                localStorage.setItem('scheme_citizen_refresh', data.refresh_token)
-              }
-              const meRes = await authRepository.getMe()
-              if (meRes.ok) {
-                setUser(meRes.data)
-                setIsLoading(false)
-                return
-              }
+    // 1. Try existing access token first
+    if (token) {
+      const res = await authRepository.getMe()
+      if (res.ok) {
+        setUser(res.data)
+        setIsLoading(false)
+        return
+      }
+    }
+
+    // 2. Access token expired - perform seamless rolling refresh
+    if (refreshToken) {
+      try {
+        const refRes = await fetch('/api/auth/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        })
+        if (refRes.ok) {
+          const data = await refRes.json()
+          if (data.access_token) {
+            setCitizenToken(data.access_token)
+            if (data.refresh_token) {
+              setCitizenRefreshToken(data.refresh_token)
+            }
+            const meRes = await authRepository.getMe()
+            if (meRes.ok) {
+              setUser(meRes.data)
+              setIsLoading(false)
+              return
             }
           }
-        } catch {}
+        }
+      } catch (err) {
+        // Transient network glitch: do not aggressively log out the citizen
+        console.warn('⚠️ [useAuth] Session refresh network glitch, preserving credentials:', err)
+        setIsLoading(false)
+        return
       }
-      clearCitizenToken()
-      clear()
     }
+
+    // Only clear if refresh token was explicitly rejected
+    clearCitizenToken()
+    clear()
     setIsLoading(false)
   }
 

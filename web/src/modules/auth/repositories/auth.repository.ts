@@ -3,7 +3,7 @@ import {
   signOut as firebaseSignOut,
 } from 'firebase/auth'
 import { firebaseAuth, googleAuthProvider } from '@/lib/firebase'
-import { getAuthHeaders, request, type Result, type AppError, setCitizenToken, clearCitizenToken, saveCitizenUser } from '@/core'
+import { getAuthHeaders, request, type Result, type AppError, setCitizenToken, setCitizenRefreshToken, clearCitizenToken, saveCitizenUser } from '@/core'
 
 export interface AuthTokenResponse {
   access_token: string
@@ -73,6 +73,9 @@ export const authRepository = {
 
     if (loginRes.ok && loginRes.data?.access_token) {
       setCitizenToken(loginRes.data.access_token)
+      if (loginRes.data.refresh_token) {
+        setCitizenRefreshToken(loginRes.data.refresh_token)
+      }
     }
 
     const meRes = await this.getMe()

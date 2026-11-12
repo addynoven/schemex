@@ -5,6 +5,7 @@ const REPORT_KEY = 'scheme_eligibility_report'
 const ADMIN_TOKEN_KEY = 'scheme_admin_jwt'
 const ADMIN_USER_KEY = 'scheme_admin_user'
 const CITIZEN_TOKEN_KEY = 'scheme_citizen_jwt'
+const CITIZEN_REFRESH_TOKEN_KEY = 'scheme_citizen_refresh'
 const CITIZEN_USER_KEY = 'scheme_citizen_user'
 
 let inMemoryReport: EligibilityReport | null = null
@@ -136,7 +137,7 @@ export function getAdminUser(): any | null {
   }
 }
 
-// Citizen Auth Session
+// Citizen Auth Session (30-day persistent rolling sessions)
 export function saveCitizenToken(token: string) {
   setItem(CITIZEN_TOKEN_KEY, token)
   if (typeof document !== 'undefined') {
@@ -155,14 +156,35 @@ export function getCitizenToken(): string | null {
   return null
 }
 
+export function saveCitizenRefreshToken(token: string) {
+  setItem(CITIZEN_REFRESH_TOKEN_KEY, token)
+  if (typeof document !== 'undefined') {
+    document.cookie = `scheme_citizen_refresh=${encodeURIComponent(token)}; path=/; max-age=7776000; SameSite=Lax`
+  }
+}
+export const setCitizenRefreshToken = saveCitizenRefreshToken
+
+export function getCitizenRefreshToken(): string | null {
+  const local = getItem(CITIZEN_REFRESH_TOKEN_KEY)
+  if (local) return local
+  if (typeof document !== 'undefined') {
+    const match = document.cookie.match(/(^| )scheme_citizen_refresh=([^;]+)/)
+    if (match) return decodeURIComponent(match[2])
+  }
+  return null
+}
+
 export function removeCitizenToken() {
   removeItem(CITIZEN_TOKEN_KEY)
+  removeItem(CITIZEN_REFRESH_TOKEN_KEY)
   removeItem(CITIZEN_USER_KEY)
   if (typeof document !== 'undefined') {
     document.cookie = 'scheme_citizen_jwt=; path=/; max-age=0; SameSite=Lax'
+    document.cookie = 'scheme_citizen_refresh=; path=/; max-age=0; SameSite=Lax'
   }
 }
 export const clearCitizenToken = removeCitizenToken
+export const clearCitizenRefreshToken = removeCitizenToken
 
 export function saveCitizenUser(user: any) {
   setItem(CITIZEN_USER_KEY, JSON.stringify(user))

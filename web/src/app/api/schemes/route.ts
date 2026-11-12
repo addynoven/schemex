@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { cacheGet, cacheSet, buildQueryHashKey } from "@/lib/redis";
 
 function parseEqParam(val: string | null): string | null {
   if (!val) return null;
@@ -19,6 +20,20 @@ export async function GET(request: NextRequest) {
     const sortBy = searchParams.get("sort_by");
     const limit = Math.min(Number(searchParams.get("limit")) || 25, 100);
     const offset = Number(searchParams.get("offset")) || 0;
+
+    // 1. Check Redis cache first (sub-millisecond search & pagination)
+    const cacheKey = buildQueryHashKey("cache:schemes:browse", {
+      search,
+      category,
+      state,
+      sortBy,
+      limit,
+      offset,
+    });
+    const cached = await cacheGet<any>(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached);
+    }
 
     let selectClause = `
       SELECT id, slug, name, name as title, ministry, state, category, description, application_url
@@ -88,14 +103,19 @@ export async function GET(request: NextRequest) {
     const fullSql = `${selectClause} ${sql} ${orderClause} LIMIT $${limitIndex} OFFSET $${offsetIndex}`;
     const res = await query(fullSql, params);
 
-    return NextResponse.json({
+    const payload = {
       items: res.rows,
       schemes: res.rows,
       total,
       limit,
       skip: offset,
       offset,
-    });
+    };
+
+    // Cache search/browse results in Redis for 1 hour (3600s)
+    await cacheSet(cacheKey, payload, 3600);
+
+    return NextResponse.json(payload);
   } catch (error: any) {
     console.error("Failed to query schemes:", error);
     return NextResponse.json(

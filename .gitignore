@@ -62,3 +62,4 @@ web/.vercel/
 web/.pnpm-store
 web/.pnpm-store.bak
 .taste-skill/
+graphify-out/

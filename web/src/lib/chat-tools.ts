@@ -2,6 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 import { query } from "@/lib/db";
 import { evaluateSchemeEligibility } from "@/lib/eligibility-engine";
+import { cacheGet, cacheSet, buildQueryHashKey } from "@/lib/redis";
 
 // =============================================================================
 // Standardized Tool Result Types
@@ -59,6 +60,18 @@ export async function executeSearchSchemes(
   state?: string,
   category?: string
 ): Promise<ToolResult<any[]>> {
+  const cacheKey = buildQueryHashKey("cache:schemes:search", {
+    q: searchTerm,
+    state,
+    category,
+  });
+
+  // 1. Try Redis cache first (sub-millisecond)
+  const cached = await cacheGet<any[]>(cacheKey);
+  if (cached) {
+    return { status: "success", data: cached };
+  }
+
   try {
     if (process.env.DATABASE_URL) {
       const conditions: string[] = [];
@@ -83,6 +96,8 @@ export async function executeSearchSchemes(
       const sql = `SELECT id, name, slug, ministry, state, category, description FROM schemes ${whereClause} ORDER BY id ASC LIMIT 3`;
 
       const res = await query(sql, params);
+      // Cache successful database result for 12 hours (43200s)
+      await cacheSet(cacheKey, res.rows, 43200);
       return { status: "success", data: res.rows };
     }
   } catch (err: any) {
@@ -118,9 +133,17 @@ export async function executeSearchSchemes(
 }
 
 export async function executeGetSchemeDocuments(slugs: string[]): Promise<ToolResult<any[]>> {
+  const normalizedSlugs = (slugs || []).map((s) => s.toLowerCase().trim()).filter(Boolean);
+  const cacheKey = `cache:schemes:docs:${normalizedSlugs.sort().join(",")}`;
+
+  // 1. Try Redis cache first
+  const cached = await cacheGet<any[]>(cacheKey);
+  if (cached) {
+    return { status: "success", data: cached };
+  }
+
   try {
-    if (process.env.DATABASE_URL && slugs && slugs.length > 0) {
-      const normalizedSlugs = slugs.map((s) => s.toLowerCase().trim());
+    if (process.env.DATABASE_URL && normalizedSlugs.length > 0) {
       const res = await query(
         `SELECT s.slug, s.name, rd.document_name, rd.is_mandatory, rd.description
          FROM required_documents rd
@@ -146,7 +169,10 @@ export async function executeGetSchemeDocuments(slugs: string[]): Promise<ToolRe
             description: row.description,
           });
         }
-        return { status: "success", data: Object.values(grouped) };
+        const data = Object.values(grouped);
+        // Cache for 24 hours (86400s)
+        await cacheSet(cacheKey, data, 86400);
+        return { status: "success", data };
       }
       return { status: "success", data: [] };
     }
@@ -188,6 +214,22 @@ export async function executeCheckEligibility(params: {
   gender?: string;
   is_bpl?: boolean;
 }): Promise<ToolResult<any>> {
+  const cacheKey = buildQueryHashKey("cache:eligibility", {
+    slug: params.slug,
+    age: params.age,
+    state: params.state,
+    income: params.income,
+    occupation: params.occupation,
+    gender: params.gender,
+    is_bpl: params.is_bpl,
+  });
+
+  // 1. Try Redis cache first
+  const cached = await cacheGet<any>(cacheKey);
+  if (cached) {
+    return { status: "success", data: cached };
+  }
+
   try {
     const result = await evaluateSchemeEligibility(params.slug, {
       age: params.age,
@@ -197,6 +239,8 @@ export async function executeCheckEligibility(params: {
       gender: params.gender,
       is_bpl: params.is_bpl,
     });
+    // Cache deterministic evaluation for 6 hours (21600s)
+    await cacheSet(cacheKey, result, 21600);
     return { status: "success", data: result };
   } catch (err: any) {
     console.error("❌ [executeCheckEligibility] Evaluation failed:", err?.message || err);

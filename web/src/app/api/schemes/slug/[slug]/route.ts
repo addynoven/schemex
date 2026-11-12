@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { cacheGet, cacheSet } from "@/lib/redis";
 
 export async function GET(
   request: NextRequest,
@@ -9,7 +10,14 @@ export async function GET(
     const rawSlug = (await context.params).slug;
     const slug = decodeURIComponent(rawSlug).toLowerCase().trim();
 
-    // 1. Fetch main scheme record from PostgreSQL
+    // 1. Try Redis cache first (eliminates 4 PostgreSQL table joins)
+    const cacheKey = `scheme:detail:${slug}`;
+    const cached = await cacheGet<any>(cacheKey);
+    if (cached) {
+      return NextResponse.json(cached);
+    }
+
+    // 2. Fetch main scheme record from PostgreSQL
     const result = await query(
       "SELECT * FROM schemes WHERE slug = $1 OR LOWER(slug) = $2 OR LOWER(name) = $2 LIMIT 1",
       [rawSlug, slug]
@@ -92,12 +100,17 @@ export async function GET(
       ];
     }
 
-    return NextResponse.json({
+    const payload = {
       ...scheme,
       benefits,
       eligibility_rules,
       required_documents,
-    });
+    };
+
+    // Cache the enriched scheme details in Redis for 24 hours (86400s)
+    await cacheSet(cacheKey, payload, 86400);
+
+    return NextResponse.json(payload);
   } catch (error) {
     console.error("Failed to load scheme details:", error);
     return NextResponse.json(

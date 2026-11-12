@@ -557,7 +557,12 @@ export async function listChatSessions(): Promise<ChatSession[]> {
   const res = await fetch(`${API_BASE}/chat/sessions`, {
     headers: getCitizenAuthHeaders(),
   });
-  if (!res.ok) throw new Error("Failed to list chat sessions");
+  if (!res.ok) {
+    if (res.status === 401) return [];
+    const error: any = new Error("Failed to list chat sessions");
+    error.status = res.status;
+    throw error;
+  }
   return res.json();
 }
 

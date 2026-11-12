@@ -50,9 +50,9 @@ export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => 
             <Link
               key={inlineKey}
               to={cleanUrl as any}
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 my-0.5 rounded-lg bg-[#DCFCE7] hover:bg-[#BBF7D0] border border-[#BBF7D0] text-[#166534] font-bold text-xs transition-all shadow-2xs group"
+              className="inline-flex items-center gap-1.5 px-2 py-0.5 my-0.5 rounded-lg bg-[#DCFCE7] dark:bg-emerald-950/80 hover:bg-[#BBF7D0] dark:hover:bg-emerald-900 border border-[#BBF7D0] dark:border-emerald-600 text-[#166534] dark:text-emerald-300 font-bold text-xs transition-all shadow-2xs group"
             >
-              <BookOpen className="h-3 w-3 text-[#0E6245] shrink-0 group-hover:scale-110 transition-transform" />
+              <BookOpen className="h-3 w-3 text-[#0E6245] dark:text-emerald-400 shrink-0 group-hover:scale-110 transition-transform" />
               <span>{label}</span>
               <ChevronRight className="h-2.5 w-2.5 opacity-60 group-hover:translate-x-0.5 transition-transform" />
             </Link>
@@ -64,16 +64,16 @@ export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => 
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 px-2 py-0.5 my-0.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-[#0E6245] font-semibold text-xs transition-all shadow-2xs group"
+              className="inline-flex items-center gap-1 px-2 py-0.5 my-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-200 dark:border-emerald-700 text-[#0E6245] dark:text-emerald-300 font-semibold text-xs transition-all shadow-2xs group"
             >
               <span>{label}</span>
-              <ExternalLink className="h-2.5 w-2.5 text-[#0E6245] shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <ExternalLink className="h-2.5 w-2.5 text-[#0E6245] dark:text-emerald-400 shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </a>
           )
         }
       } else if (match[0].startsWith('**')) {
         parts.push(
-          <strong key={inlineKey} className="font-bold text-slate-900">
+          <strong key={inlineKey} className="font-bold text-slate-900 dark:text-white">
             {match[4]}
           </strong>
         )
@@ -81,14 +81,14 @@ export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => 
         parts.push(
           <code
             key={inlineKey}
-            className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-800 font-mono text-xs"
+            className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-[#0B120E] border border-slate-200 dark:border-emerald-700/60 text-slate-800 dark:text-emerald-300 font-mono text-xs"
           >
             {match[5]}
           </code>
         )
       } else if (match[0].startsWith('*')) {
         parts.push(
-          <em key={inlineKey} className="italic text-slate-700">
+          <em key={inlineKey} className="italic text-slate-700 dark:text-slate-300">
             {match[6]}
           </em>
         )
@@ -175,7 +175,7 @@ export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => 
   }
 
   return (
-    <div className="space-y-2.5 text-sm leading-relaxed text-slate-800 font-normal">
+    <div className="space-y-2.5 text-sm leading-relaxed text-slate-800 dark:text-slate-100 font-normal">
       {blocks.map((block, blockIndex) => {
         const blockKey = `blk-${blockIndex}-${block.idx}`
 
@@ -183,31 +183,31 @@ export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => 
           return (
             <div
               key={blockKey}
-              className="overflow-x-auto my-3 rounded-2xl border border-slate-200 bg-white shadow-2xs"
+              className="overflow-x-auto my-3 rounded-2xl border border-slate-200 dark:border-emerald-900/60 bg-white dark:bg-[#0E1712] shadow-2xs"
             >
               <table className="w-full text-xs text-left border-collapse">
-                <thead className="bg-slate-100/90 text-slate-900 border-b border-slate-200 font-bold">
+                <thead className="bg-slate-100/90 dark:bg-[#16231B] text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-emerald-900/60 font-bold">
                   <tr>
                     {block.headers.map((cell, cIdx) => (
                       <th
                         key={`th-${cIdx}`}
-                        className="px-3.5 py-2.5 border-r border-slate-200/80 last:border-r-0 uppercase tracking-wider text-[11px] text-slate-700"
+                        className="px-3.5 py-2.5 border-r border-slate-200/80 dark:border-emerald-900/40 last:border-r-0 uppercase tracking-wider text-[11px] text-slate-700 dark:text-emerald-300"
                       >
                         {renderCellContent(cell)}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-emerald-950/60">
                   {block.rows.map((rowCells, rIdx) => (
                     <tr
                       key={`tr-${rIdx}`}
-                      className="hover:bg-slate-50/80 transition-colors odd:bg-white even:bg-slate-50/40"
+                      className="hover:bg-slate-50/80 dark:hover:bg-emerald-950/40 transition-colors odd:bg-white dark:odd:bg-[#0E1712] even:bg-slate-50/40 dark:even:bg-[#121E17]"
                     >
                       {rowCells.map((cell, cIdx) => (
                         <td
                           key={`td-${rIdx}-${cIdx}`}
-                          className="px-3.5 py-2.5 border-r border-slate-100 last:border-r-0 text-slate-800 leading-relaxed align-top"
+                          className="px-3.5 py-2.5 border-r border-slate-100 dark:border-emerald-900/40 last:border-r-0 text-slate-800 dark:text-slate-200 leading-relaxed align-top"
                         >
                           {renderCellContent(cell)}
                         </td>
@@ -228,22 +228,22 @@ export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => 
 
         // Horizontal Divider
         if (trimmed === '---' || trimmed === '***' || trimmed === '___') {
-          return <hr key={blockKey} className="border-slate-200 my-3" />
+          return <hr key={blockKey} className="border-slate-200 dark:border-emerald-950 my-3" />
         }
 
         // Headings: H1, H2, H3, H4
         if (trimmed.startsWith('# ')) {
           return (
-            <h2 key={blockKey} className="text-base sm:text-lg font-black text-slate-900 mt-4 mb-2 flex items-center gap-2 tracking-tight">
-              <Sparkles className="h-4 w-4 text-[#0E6245] shrink-0" />
+            <h2 key={blockKey} className="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-4 mb-2 flex items-center gap-2 tracking-tight">
+              <Sparkles className="h-4 w-4 text-[#0E6245] dark:text-emerald-400 shrink-0" />
               <span>{renderCellContent(trimmed.replace('# ', ''))}</span>
             </h2>
           )
         }
         if (trimmed.startsWith('## ')) {
           return (
-            <h3 key={blockKey} className="text-sm sm:text-base font-extrabold text-slate-900 mt-3.5 mb-1.5 flex items-center gap-2 tracking-tight">
-              <Sparkles className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+            <h3 key={blockKey} className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white mt-3.5 mb-1.5 flex items-center gap-2 tracking-tight">
+              <Sparkles className="h-3.5 w-3.5 text-amber-500 dark:text-amber-400 shrink-0" />
               <span>{renderCellContent(trimmed.replace('## ', ''))}</span>
             </h3>
           )
@@ -252,7 +252,7 @@ export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => 
           return (
             <h4
               key={blockKey}
-              className="text-xs sm:text-sm font-bold text-slate-900 mt-3 mb-1.5 flex items-center gap-2 pb-1 border-b border-slate-100"
+              className="text-xs sm:text-sm font-bold text-slate-900 dark:text-emerald-300 mt-3 mb-1.5 flex items-center gap-2 pb-1 border-b border-slate-100 dark:border-emerald-950/80"
             >
               <span>{renderCellContent(trimmed.replace('### ', ''))}</span>
             </h4>
@@ -264,7 +264,7 @@ export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => 
           return (
             <blockquote
               key={blockKey}
-              className="border-l-3 border-[#0E6245] bg-emerald-50/60 pl-3 py-2 my-2 rounded-r-xl text-xs sm:text-sm text-slate-800 italic"
+              className="border-l-3 border-[#0E6245] dark:border-emerald-400 bg-emerald-50/60 dark:bg-emerald-950/40 pl-3 py-2 my-2 rounded-r-xl text-xs sm:text-sm text-slate-800 dark:text-slate-200 italic"
             >
               {renderCellContent(trimmed.replace('> ', ''))}
             </blockquote>
@@ -283,10 +283,10 @@ export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => 
               className="flex items-start gap-2.5 my-1"
               style={{ marginLeft: `${Math.max(0, indent * 12)}px` }}
             >
-              <span className="flex items-center justify-center h-5 w-5 rounded-full bg-[#DCFCE7] border border-[#BBF7D0] text-[#166534] text-[11px] font-black shrink-0 mt-0.5">
+              <span className="flex items-center justify-center h-5 w-5 rounded-full bg-[#DCFCE7] dark:bg-emerald-950 border border-[#BBF7D0] dark:border-emerald-600 text-[#166534] dark:text-emerald-300 text-[11px] font-black shrink-0 mt-0.5">
                 {num}
               </span>
-              <div className="flex-1 leading-relaxed text-slate-800">{renderCellContent(rest)}</div>
+              <div className="flex-1 leading-relaxed text-slate-800 dark:text-slate-200">{renderCellContent(rest)}</div>
             </div>
           )
         }
@@ -302,15 +302,15 @@ export const MarkdownMessage: React.FC<MarkdownMessageProps> = ({ content }) => 
               className="flex items-start gap-2.5 my-1"
               style={{ marginLeft: `${Math.max(4, indent * 12)}px` }}
             >
-              <span className="text-[#0E6245] font-black shrink-0 text-base leading-none mt-0.5">•</span>
-              <div className="flex-1 leading-relaxed text-slate-800">{renderCellContent(rest)}</div>
+              <span className="text-[#0E6245] dark:text-emerald-400 font-black shrink-0 text-base leading-none mt-0.5">•</span>
+              <div className="flex-1 leading-relaxed text-slate-800 dark:text-slate-200">{renderCellContent(rest)}</div>
             </div>
           )
         }
 
         // Regular Paragraph
         return (
-          <div key={blockKey} className="leading-relaxed text-slate-800">
+          <div key={blockKey} className="leading-relaxed text-slate-800 dark:text-slate-200">
             {renderCellContent(trimmed)}
           </div>
         )

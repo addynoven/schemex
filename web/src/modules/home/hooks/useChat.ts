@@ -35,18 +35,11 @@ export function useChat(initialSessionIdentifier?: number | string) {
       const data = await homeRepository.listSessions()
       setSessions(data || [])
     } catch (err: any) {
-      // If user is not signed in yet (401), treat as empty list without triggering a DevError modal
-      if (err?.message?.includes("401") || err?.status === 401) {
-        setSessions([])
-        return
+      // Unauthenticated or transient network state - fail gracefully to empty list
+      setSessions([])
+      if (!err?.message?.includes("401") && err?.status !== 401) {
+        console.warn('⚠️ [useChat] Could not load chat sessions:', err?.message || err)
       }
-      console.warn('⚠️ [useChat] Failed to load chat sessions:', err?.message || err)
-      captureDevError({
-        title: 'Chat Sessions Load Failed',
-        message: err?.message || 'Unable to retrieve user chat sessions from backend API',
-        origin: 'Frontend Client',
-        endpoint: '/api/chat/sessions',
-      })
     }
   }, [setSessions])
 

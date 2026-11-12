@@ -70,7 +70,16 @@ const SEED_FALLBACK_DOCS: Record<string, any[]> = {
 // Deterministic Database Execution Functions
 // =============================================================================
 
-export async function executeSearchSchemes(searchTerm?: string, state?: string, category?: string) {
+export interface ToolDatabaseError {
+  error: "DATABASE_UNAVAILABLE";
+  message: string;
+}
+
+export async function executeSearchSchemes(
+  searchTerm?: string,
+  state?: string,
+  category?: string
+): Promise<any[] | ToolDatabaseError> {
   try {
     if (process.env.DATABASE_URL) {
       const conditions: string[] = [];
@@ -97,8 +106,14 @@ export async function executeSearchSchemes(searchTerm?: string, state?: string, 
       const res = await query(sql, params);
       return res.rows;
     }
-  } catch (err) {
-    console.warn("executeSearchSchemes DB lookup error:", err);
+  } catch (err: any) {
+    console.error("❌ [executeSearchSchemes] Database query failed:", err?.message || err);
+    if (process.env.NODE_ENV !== "test") {
+      return {
+        error: "DATABASE_UNAVAILABLE",
+        message: "Database connection failed while searching schemes.",
+      };
+    }
   }
 
   // Fallback to verified seed catalog ONLY in test environment when DB is unreachable
@@ -122,7 +137,7 @@ export async function executeSearchSchemes(searchTerm?: string, state?: string, 
   return [];
 }
 
-export async function executeGetSchemeDocuments(slugs: string[]) {
+export async function executeGetSchemeDocuments(slugs: string[]): Promise<any[] | ToolDatabaseError> {
   try {
     if (process.env.DATABASE_URL && slugs && slugs.length > 0) {
       const normalizedSlugs = slugs.map((s) => s.toLowerCase().trim());
@@ -155,8 +170,14 @@ export async function executeGetSchemeDocuments(slugs: string[]) {
       }
       return [];
     }
-  } catch (err) {
-    console.warn("executeGetSchemeDocuments DB lookup error:", err);
+  } catch (err: any) {
+    console.error("❌ [executeGetSchemeDocuments] Database query failed:", err?.message || err);
+    if (process.env.NODE_ENV !== "test") {
+      return {
+        error: "DATABASE_UNAVAILABLE",
+        message: "Database connection failed while fetching scheme documents.",
+      };
+    }
   }
 
   // Fallback to seed fixture documents ONLY in test environment for known seed schemes
@@ -317,12 +338,22 @@ async function offlineDatabaseOrchestrator(content: string): Promise<string> {
 
   // Search real database via deterministic tool
   const searchKeyword = tokens.find((t) => !["document", "documents", "certificate", "proof", "eligible", "eligibility"].includes(t)) || tokens[0];
-  const schemes = await executeSearchSchemes(searchKeyword);
+  const schemesRes = await executeSearchSchemes(searchKeyword);
+
+  if ("error" in schemesRes && schemesRes.error === "DATABASE_UNAVAILABLE") {
+    return `### Service Temporarily Degraded\n\nOur citizen welfare database is currently experiencing intermittent connectivity issues. We are unable to complete a real-time schemes lookup at this second.\n\n👉 **What you can do**:\n• Please retry your query in a few moments.\n• Visit our direct [Instant Eligibility Evaluator](/check) or [Citizen Vault](/vault).\n• Contact support if this condition persists.`;
+  }
+
+  const schemes = schemesRes as any[];
 
   if (schemes.length > 0) {
     const isDocQuery = tokens.some((t) => ["document", "documents", "certificate", "proof", "chahiye"].includes(t));
     if (isDocQuery) {
-      const docRecords = await executeGetSchemeDocuments(schemes.map((s) => s.slug));
+      const docRes = await executeGetSchemeDocuments(schemes.map((s) => s.slug));
+      if ("error" in docRes && docRes.error === "DATABASE_UNAVAILABLE") {
+        return `### Service Temporarily Degraded\n\nUnable to fetch statutory document requirements due to an active database connection issue. Please retry in a few moments.`;
+      }
+      const docRecords = docRes as any[];
       const targetScheme = schemes[0];
       const targetDocs = docRecords.find((d) => d.scheme_slug === targetScheme.slug)?.documents || [];
       

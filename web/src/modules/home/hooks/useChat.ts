@@ -34,14 +34,24 @@ export function useChat(initialSessionIdentifier?: number | string) {
     try {
       const data = await homeRepository.listSessions()
       setSessions(data || [])
-    } catch {}
+    } catch (err: any) {
+      console.warn('⚠️ [useChat] Failed to load chat sessions:', err?.message || err)
+      captureDevError({
+        title: 'Chat Sessions Load Failed',
+        message: err?.message || 'Unable to retrieve user chat sessions from backend API',
+        origin: 'Frontend Client',
+        endpoint: '/api/chat_sessions',
+      })
+    }
   }, [setSessions])
 
   const loadUser = useCallback(async () => {
     try {
       const user = await homeRepository.getMe()
       if (user?.profile?.full_name) setUserName(user.profile.full_name)
-    } catch {}
+    } catch (err: any) {
+      console.warn('⚠️ [useChat] Failed to load current citizen profile:', err?.message || err)
+    }
   }, [])
 
   const router = useRouter()
